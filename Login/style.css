@@ -1,0 +1,157 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(
+        red 50%,
+        black 50%,
+        black 52%,
+        white 52%
+    );
+}
+
+@font-face {
+    font-family: 'Pokemon';
+    src: url('../Login/Pokemon Solid.ttf') format('truetype');
+}
+
+.form-container {
+    background-color: white;
+    width: 70%;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 10px solid black;
+    height: 90%;
+    display: flex;
+    align-items: center;
+}
+
+.form-container .login-container {
+    width: 500px;
+    margin: 0 auto;
+}
+
+.form-container .login-container > h2 {
+    font-family: 'Pokemon', sans-serif;
+    text-align: center;
+    font-size: 4rem;
+    color: #ffcb05;
+    text-shadow: 5px 5px 0 #3b4cca;
+}
+
+.form-container .login-container > p,
+.form-container .login-container > span {
+    text-align: center;
+    color: #555;
+}
+
+.form-container .login-container label {
+    display: block;
+    font-weight: bold;
+    padding: 5px 0;
+}
+
+.form-container .login-container input[type="text"],
+.form-container .login-container input[type="password"] {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: solid 1px #ccc;
+    border-radius: 5px;
+}
+
+.form-container .login-container input[type="text"]:focus,
+.form-container .login-container input[type="password"]:focus {
+    outline: solid 1px #0099ff;
+}
+
+.form-container .login-container .options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-container a {
+    color: #0099ff;
+    text-decoration: none;
+}
+
+.form-container a:hover {
+    text-decoration: underline;
+}
+
+.form-container .login-container .providers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    margin-top: 10px;
+}
+.btn {
+    border: none;
+    padding: 15px 0;
+    width: 100%;
+    font-weight: bolder;
+    display: block;
+    border-radius: 5px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.btn-login {
+    background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
+    color: white;
+    font-family: 'Pokemon', sans-serif;
+    font-size: 1rem;
+    border: 2px solid black;
+    border-radius: 30px;
+    box-shadow: 0 5px 0 #000;
+    text-shadow: 2px 2px #000;
+    transition: all 0.2s;
+}
+
+.btn-login:hover {
+    background: linear-gradient(to bottom, #ff5555 0%, #cc0000 100%);
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 #000;
+}
+
+.btn-google {
+    background-color: white;
+    color: black;
+    border: solid 1px #ccc;
+}
+
+.btn-google {
+    background-color: white;
+    color: black;
+    border: solid 1px #ccc;
+}
+.btn-google:hover {
+    background-color: #f0f0f0;
+}
+
+.btn-facebook {
+    background-color: rgb(0, 87, 250);
+    color: white;
+}
+
+.btn-facebook:hover {
+    background-color: rgb(0, 56, 161);
+    color: white;
+}
+
+.btn-twitter {
+    background-color: rgb(96, 151, 252);
+    color: white;
+}
+
+.btn-twitter:hover {
+    background-color: rgb(70, 109, 180);
+    color: white;
+}
