@@ -16,7 +16,7 @@ body {
 
 @font-face {
     font-family: 'Pokemon';
-    src: url('../Login/Pokemon Solid.ttf') format('truetype');
+    src: url('../fonts/Pokemon Solid.ttf') format('truetype');
 }
 
 .form-container {
