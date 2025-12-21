@@ -1,23 +1,21 @@
 import sqlite3
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'pokedex.db')
-SQL_PATH = os.path.join(BASE_DIR, 'schema.sql')
+from config import Config
 
-class Config:
+class Connection:
    def __init__(self):
       self.connection = sqlite3.connect(
-         DB_PATH,
+         Config.DB_PATH,
          check_same_thread=False
          )
       self.connection.row_factory = sqlite3.Row
       self._taulak_hasieratu()
 
    def _taulak_hasieratu(self):
-       if os.path.exists(SQL_PATH):
+       if os.path.exists('schema.sql'):
            try:
-               with open(SQL_PATH, 'r', encoding='utf-8') as f:
+               with open('schema.sql', 'r', encoding='utf-8') as f:
                    self.connection.executescript(f.read())
            except sqlite3.Error as e:
                print(f"Error inicializando tablas: {e}")
