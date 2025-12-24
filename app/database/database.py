@@ -13,9 +13,11 @@ class Connection:
       self._taulak_hasieratu()
 
    def _taulak_hasieratu(self):
-       if os.path.exists('schema.sql'):
+       base_dir = os.path.dirname(os.path.abspath(__file__))
+       schema_path = os.path.join(base_dir, 'schema.sql')
+       if os.path.exists(schema_path):
            try:
-               with open('schema.sql', 'r', encoding='utf-8') as f:
+               with open(schema_path, 'r', encoding='utf-8') as f:
                    self.connection.executescript(f.read())
            except sqlite3.Error as e:
                print(f"Error inicializando tablas: {e}")

@@ -20,35 +20,31 @@
 
         <div class="changelog-list">
 
+            {% for noti in notificaciones %}
+            
             <div class="changelog-item">
                 <span class="sprite">
-                    <img src="../static/img/rojo.gif" alt="Sprite">
+                    <img src="{{ url_for('static', filename='../static/img/rojo.gif') }}" alt="Sprite">
                 </span>
-                <span class="changelog-text">Juan: Añadido sistema de login</span>
+                
+                <span class="changelog-text">
+                    <strong>{{ noti['JarraituIzena'] }}:</strong> 
+                    
+                    {{ noti['deskripzioa'] }}
+                    
+                    <br>
+                    <small style="color: grey; font-size: 0.8em;">
+                        {{ noti['DataOrdua'] }}
+                    </small>
+                </span>
             </div>
 
-            <div class="changelog-item">
-                <span class="sprite">
-                    <img src="../static/img/rojo.gif" alt="Sprite">
-                </span>
-                <span class="changelog-text">Ignacio: Mejoras de rendimiento</span>
-            </div>
-
-            <div class="changelog-item">
-                <span class="sprite">
-                    <img src="../static/img/rojo.gif" alt="Sprite">
-                </span>
-                <span class="changelog-text">XXX: Corrección de bugs</span>
-            </div>
-
-            <div class="changelog-item">
-                <span class="sprite">
-                    <img src="../static/img/rojo.gif" alt="Sprite">
-                </span>
-                <span class="changelog-text">XXX: Cambios visuales</span>
-            </div>
+            {% endfor %}
 
         </div>
+        
         <button class="btn btn-login">BILATU</button>
+
+        
     </body>
 </html>

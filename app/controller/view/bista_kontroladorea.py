@@ -1,13 +1,13 @@
 from flask import Blueprint, render_template, session
-from app.controller import eredu_kontroladorea
-class BistaKontroladorea:
+from app.controller.model import eredu_kontroladorea
+bista_bp = Blueprint('bista_orokorra', __name__)
    #metodos
-   def __init__(self):
+def __init__(self):
       pass
 
-   @bista_bp.route('/changelog')
-   def changelog():
-    ErabiltzaileIzena = "Ash"
+@bista_bp.route('/changelog')
+def changelog():
+    ErabiltzaileIzena = session.get('erabiltzaile_izena')
 
     lista_notificaciones = eredu_kontroladorea.notifikazioenInformazioaLortu(ErabiltzaileIzena)
 
