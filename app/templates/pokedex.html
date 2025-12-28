@@ -37,9 +37,9 @@
 
             <div class="pokemon-grid">
                 {% for pokemon in pokemons %}
-                    <a href="/pokemon/{{ pokemon.pokeId }}" class="pokemon-card">
-                        <img src="{{ pokemon.irudia }}" 
-                             alt="{{ pokemon.izena }}" 
+                    <a href="/pokedex/pokemon/{{ pokemon['id'] }}" class="pokemon-card">
+                        <img src="{{ pokemon['argazkia'] }}" 
+                             alt="{{ pokemon['izena'] }}" 
                              loading="lazy">
                         <span>{{ pokemon.izena }}</span>
                     </a>

@@ -10,6 +10,8 @@ class EreduKontroladorea:
          self.pokemonak_kargatu()
       if not self.motak_konprobatu():
          self.motak_kargatu()
+      if not self.abileziak_konprobatu():
+         self.abileziak_kargatu()
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
 
@@ -32,13 +34,19 @@ class EreduKontroladorea:
          sql3 += f" {operador} M.pokemonMotaIzena IN ({signos_motak})"
          parametroak.extend(JSON2['motak'])
 
-      return self.db.select(sql3, parametroak)
+      errenkadak = self.db.select(sql3, parametroak)
 
-   def pokemonak_konprobatu(self):
-      return len(self.db.select("SELECT * FROM PokemonPokedex"))>1
-   
-   def motak_konprobatu(self):
-      return len(self.db.select("SELECT * FROM MotaPokemon"))>1 and len(self.db.select("SELECT * FROM DaMotaPokemon"))>1 and len(self.db.select("SELECT * FROM Multiplikatzailea"))
+      json1 = []
+
+      for pokemon in errenkadak:
+         datuak = {
+            'izena': pokemon['izena'],
+            'argazkia': pokemon['irudia'],
+            'id': pokemon['pokeId']
+         }
+         json1.append(datuak)
+      
+      return json1
 
    def pokemonak_kargatu(self):
       sql2 = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
@@ -59,13 +67,30 @@ class EreduKontroladorea:
                                 uneko_pokemon.height, 
                                 uneko_pokemon.weight, 
                                 generoa, 
-                                self.__lortu_pokedex_deskripzioa(espeziea), 
+                                self.__lortu_deskripzioa(espeziea), 
                                 irudia, 
                                 erromatarrak.get(espeziea.generation.name.split('-')[1], 0)]
             self.db.insert(sql2, base_parametroak)
          except Exception as e:
             print(f"Error {e}")
 
+   def bistaratu_pokemon(self, id):
+      sql = "SELECT P.izena, P.pokeId, P.irudia, P.deskripzioa, P.pisua, P.altuera FROM PokemonPokedex P WHERE P.pokeId = ?"
+      errenkada = self.db.select(sql, [id])[0]
+      
+      if errenkada:
+         json3 = {
+            'izena': errenkada['izena'],
+            'argazkia': errenkada['irudia'],
+            'deskr': errenkada['deskripzioa'],
+            'id': errenkada['pokeId'],
+            'altuera': errenkada['altuera'],
+            'pisua': errenkada['pisua']
+         }
+         abileziak = self.db.select("SELECT izena FROM IzanDezake WHERE pokemonPokedexID = ?", [errenkada['pokeId']])
+         izenak = [abi['izena'] for abi in abileziak]
+         json3['abileziak'] = izenak
+         return json3 
    
    def motak_kargatu(self):
       sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena) VALUES (?)"
@@ -102,12 +127,36 @@ class EreduKontroladorea:
             self.db.insert(sql3, parametroak)
          #esta parte habra que ver como acortarla un poco
 
-   def mugimenduak_kargatu(self):
-      pass
-          
+   def abileziak_kargatu(self):
+      sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
+      sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena) VALUES (?, ?)"
+      for abileziak in pb.APIResourceList('ability'):
+         abilezia = pb.ability(abileziak['name'])
+         abilezi_izena = abilezia.name
+         for izena in abilezia.names:
+            if izena.language.name == "es":
+               abilezi_izena = izena.name
+         deskripzioa = self.__lortu_deskripzioa(abilezia)
+         self.db.insert(sql1, [abilezi_izena, deskripzioa])
+         for pokemon in abilezia.pokemon:
+            poke_id = pb.pokemon(pokemon.pokemon.name).id
+            self.db.insert(sql2, [poke_id, abilezi_izena])
 
-   def __lortu_pokedex_deskripzioa(self, espeziea):
-      for sarrera in espeziea.flavor_text_entries:
+   def __lortu_deskripzioa(self, objektua):
+      for sarrera in objektua.flavor_text_entries:
          if sarrera.language.name == 'es':
             return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
       return 'Ez dago deskripziorik gaztelaniaz'
+   
+   def pokemonak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM PokemonPokedex"))>1
+   
+   def motak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM MotaPokemon"))>1 and len(self.db.select("SELECT * FROM DaMotaPokemon"))>1 and len(self.db.select("SELECT * FROM Multiplikatzailea"))
+   
+   def abileziak_konprobatu(self):
+      hay_defs = len(self.db.select("SELECT izena FROM Abilezia LIMIT 1")) > 0
+
+      hay_relaciones = len(self.db.select("SELECT pokemonPokedexID FROM IzanDezake LIMIT 1")) > 0
+
+      return hay_defs and hay_relaciones

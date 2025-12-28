@@ -280,3 +280,114 @@ body {
     cursor: pointer;
     font-weight: bold;
 }
+
+/* =========================================
+   9. VISTA DE DETALLE (Pokemon individual)
+   ========================================= */
+
+/* Fondo gris igual que el del buscador */
+.detail-layout {
+    width: 100%;
+    height: 100%;
+    background-color: #999;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Grid para dividir izquierda (foto) y derecha (datos) */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 45% 50%; /* Izquierda un poco más estrecha */
+    gap: 5%;
+    height: 100%;
+    padding-top: 10px;
+}
+
+.left-col, .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* --- IMAGEN --- */
+.image-container {
+    background-color: white; /* El recuadro blanco detrás de la foto en tu dibujo */
+    border: 2px solid transparent; /* O sin borde, según prefieras */
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px; /* Altura fija para la foto */
+}
+
+.image-container img {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+}
+
+/* --- CAJA DEL NOMBRE (Verde) --- */
+.name-box {
+    background-color: #98fb98; /* Verde claro (PaleGreen) */
+    border: 2px solid black;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    width: fit-content; /* Se ajusta al tamaño del texto */
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+}
+
+/* --- ESTILOS GENERALES DE LAS CAJAS DE INFO --- */
+.info-box {
+    border: 2px solid black;
+    padding: 15px;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    flex-grow: 1; /* Para que ocupen espacio vertical disponible */
+    overflow-y: auto;
+}
+
+.info-box h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-family: Arial, sans-serif; /* Según tu imagen es Arial, no Pokemon font */
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    color: #000;
+}
+
+.info-box p {
+    font-family: 'Courier New', Courier, monospace; /* Fuente tipo máquina de escribir */
+    font-size: 1rem;
+    line-height: 1.5;
+    border-bottom: 2px dotted #999; /* La línea de puntos para escribir */
+    padding-bottom: 5px;
+}
+
+/* --- CAJA DE DESCRIPCIÓN (Amarilla) --- */
+.description-box {
+    background-color: #fffacd; /* LemonChiffon (Amarillo claro) */
+    min-height: 150px;
+}
+
+/* --- CAJAS BLANCAS (Habilidades y Estadísticas) --- */
+.white-box {
+    background-color: white;
+    min-height: 100px;
+}
+
+/* Lista de estadísticas */
+.stats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.stats-list li {
+    padding: 5px 0;
+    border-bottom: 1px dotted #ccc;
+    font-size: 1.1rem;
+}

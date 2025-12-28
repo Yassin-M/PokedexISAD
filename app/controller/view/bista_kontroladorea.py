@@ -23,5 +23,9 @@ def pokedex_blueprint(db):
             iragazkiak['motak'] = motak
       pokemon_zerrenda = service.pokedex_kargatu(iragazkiak)
       return render_template('pokedex.html', pokemons=pokemon_zerrenda)
+   @pokedex_bp.route('/pokedex/pokemon/<int:id>', methods=['GET'])
+   def pokemon(id):
+      datuak = service.bistaratu_pokemon(id)
 
+      return render_template('pokemon.html', pokemon=datuak)
    return pokedex_bp
