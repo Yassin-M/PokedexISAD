@@ -34,8 +34,8 @@ body {
     border: 10px solid black;
     display: flex;
     align-items: center;
-    position: relative;
     justify-content: center;
+    position: relative;
 }
 
 .form-container .login-container {
@@ -136,7 +136,6 @@ body {
     color: black;
     border: solid 1px #ccc;
 }
-
 .btn-google:hover {
     background-color: #f0f0f0;
 }
@@ -145,20 +144,16 @@ body {
     background-color: rgb(0, 87, 250);
     color: white;
 }
-
 .btn-facebook:hover {
     background-color: rgb(0, 56, 161);
-    color: white;
 }
 
 .btn-twitter {
     background-color: rgb(96, 151, 252);
     color: white;
 }
-
 .btn-twitter:hover {
     background-color: rgb(70, 109, 180);
-    color: white;
 }
 
 .pokedex-layout {
@@ -298,8 +293,8 @@ body {
 }
 
 .pokemon-card img {
-    width: 120px;
-    height: 120px;
+    width: 90px;
+    height: 90px;
     object-fit: contain;
     image-rendering: pixelated;
     z-index: 1;
