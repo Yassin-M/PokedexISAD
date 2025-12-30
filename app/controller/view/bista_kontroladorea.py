@@ -10,9 +10,6 @@ def changelog():
     ErabiltzaileIzena = 'Ash'
 
     bilatutakoIzena = request.args.get('bilatutako_erabiltzaile_izena')
-    print(f"1. USUARIO LOGUEADO: {ErabiltzaileIzena}")
-    print(f"2. TEXTO BUSCADO (RAW): '{bilatutakoIzena}'")
-    print("--------------------------------------------------")
 
     lista_notificaciones = eredu_kontroladorea.notifikazioenInformazioaLortu(ErabiltzaileIzena, bilatutakoIzena)
 
