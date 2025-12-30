@@ -12,6 +12,8 @@ class EreduKontroladorea:
          self.motak_kargatu()
       if not self.abileziak_konprobatu():
          self.abileziak_kargatu()
+      if not self.mugimenduak_konprobatu():
+         self.mugimenduak_kargatu()
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
 
@@ -141,19 +143,41 @@ class EreduKontroladorea:
          for pokemon in abilezia.pokemon:
             poke_id = pb.pokemon(pokemon.pokemon.name).id
             self.db.insert(sql2, [poke_id, abilezi_izena])
-
+   
+   def mugimenduak_kargatu(self):
+      sql1 = "INSERT INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
+      sql2 = "INSERT INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
+      for izena in pb.APIResourceList('move'):
+         mugimendua = pb.move(izena['name'])
+         mugimendu_izena = self.__lortu_izena(mugimendua)
+         mugimendu_efektua = self.__lortu_deskripzioa(mugimendua)
+         parametroak = [mugimendu_izena.capitalize(), mugimendua.power, mugimendua.accuracy, mugimendua.pp, mugimendu_efektua, mugimendua.type.name]
+         self.db.insert(sql1, parametroak)
+         for pokemon in mugimendua.learned_by_pokemon:
+            pokemon_id = pb.pokemon(pokemon.name).id
+            self.db.insert(sql2, [pokemon_id, mugimendu_izena])
+         
    def __lortu_deskripzioa(self, objektua):
       for sarrera in objektua.flavor_text_entries:
          if sarrera.language.name == 'es':
             return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
       return 'Ez dago deskripziorik gaztelaniaz'
    
+   def __lortu_izena(self, objektua):
+      for sarrera in objektua.names:
+         if sarrera.language.name == 'es':
+            return sarrera.name.replace('\n', ' ').replace('\f', ' ')
+      return objektua.name
+
    def pokemonak_konprobatu(self):
       return len(self.db.select("SELECT * FROM PokemonPokedex"))>1
    
    def motak_konprobatu(self):
       return len(self.db.select("SELECT * FROM MotaPokemon"))>1 and len(self.db.select("SELECT * FROM DaMotaPokemon"))>1 and len(self.db.select("SELECT * FROM Multiplikatzailea"))
    
+   def mugimenduak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM Mugimendua"))>0
+
    def abileziak_konprobatu(self):
       hay_defs = len(self.db.select("SELECT izena FROM Abilezia LIMIT 1")) > 0
 

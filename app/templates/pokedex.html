@@ -7,7 +7,7 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <link rel="stylesheet" href="../static/css/pokedex.css"> 
+    <link rel="stylesheet" href="../static/css/style.css"> 
 </head>
 <body>
 
@@ -96,22 +96,25 @@
     </div>
 
     <script>
-        const filterBtn = document.getElementById('filter-toggle');
-        const filterMenu = document.getElementById('filter-menu');
+            document.addEventListener('DOMContentLoaded', () => {
+                const filterBtn = document.getElementById('filter-toggle');
+                const filterMenu = document.getElementById('filter-menu');
 
-        // Abrir y cerrar el menú principal al hacer click
-        filterBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            filterMenu.classList.toggle('active');
-        });
+                if (filterBtn && filterMenu) {
+                    // Abrir y cerrar
+                    filterBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Evita que el click cierre el menú inmediatamente
+                        filterMenu.classList.toggle('active');
+                    });
 
-        // Cerrar el menú si se hace click en cualquier otra parte de la pantalla
-        document.addEventListener('click', (e) => {
-            if (!filterMenu.contains(e.target) && e.target !== filterBtn) {
-                filterMenu.classList.remove('active');
-            }
-        });
-    </script>
-
+                    // Cerrar al hacer click fuera
+                    document.addEventListener('click', (e) => {
+                        if (!filterMenu.contains(e.target) && e.target !== filterBtn) {
+                            filterMenu.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        </script>
 </body>
 </html>
