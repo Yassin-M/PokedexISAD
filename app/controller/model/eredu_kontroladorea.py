@@ -131,7 +131,7 @@ class EreduKontroladorea:
 
    def abileziak_kargatu(self):
       sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
-      sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena) VALUES (?, ?)"
+      sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena) VALUES (?, ?, ?)"
       for abileziak in pb.APIResourceList('ability'):
          abilezia = pb.ability(abileziak['name'])
          abilezi_izena = abilezia.name
@@ -142,7 +142,7 @@ class EreduKontroladorea:
          self.db.insert(sql1, [abilezi_izena, deskripzioa])
          for pokemon in abilezia.pokemon:
             poke_id = pb.pokemon(pokemon.pokemon.name).id
-            self.db.insert(sql2, [poke_id, abilezi_izena])
+            self.db.insert(sql2, [poke_id, abilezi_izena, pokemon.is_hidden])
    
    def mugimenduak_kargatu(self):
       sql1 = "INSERT INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
