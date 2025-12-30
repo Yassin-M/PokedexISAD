@@ -4,6 +4,15 @@ from app.database import db
 def __init__(self):
    pass
 
-def notifikazioenInformazioaLortu(erabiltzaile_izena):
-   query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ? ORDER BY N.DataOrdua DESC;"
-   return db.select(query, (erabiltzaile_izena,))
+def notifikazioenInformazioaLortu(erabiltzaile_izena, bilatutako_izena):
+   query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ?"
+
+   if bilatutako_izena != None and bilatutako_izena != '':
+      query += "AND J.JarraituIzena LIKE ?"
+
+   query += "ORDER BY N.DataOrdua DESC;"
+
+   if bilatutako_izena != None and bilatutako_izena != '':
+      return db.select(query, (erabiltzaile_izena, bilatutako_izena))
+   else:
+      return db.select(query, (erabiltzaile_izena,))

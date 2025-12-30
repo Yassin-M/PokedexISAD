@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, request, session
 from app.controller.model import eredu_kontroladorea
 bista_bp = Blueprint('bista_orokorra', __name__)
    #metodos
@@ -7,8 +7,13 @@ def __init__(self):
 
 @bista_bp.route('/changelog')
 def changelog():
-    ErabiltzaileIzena = session.get('erabiltzaile_izena')
+    ErabiltzaileIzena = 'Ash'
 
-    lista_notificaciones = eredu_kontroladorea.notifikazioenInformazioaLortu(ErabiltzaileIzena)
+    bilatutakoIzena = request.args.get('bilatutako_erabiltzaile_izena')
+    print(f"1. USUARIO LOGUEADO: {ErabiltzaileIzena}")
+    print(f"2. TEXTO BUSCADO (RAW): '{bilatutakoIzena}'")
+    print("--------------------------------------------------")
+
+    lista_notificaciones = eredu_kontroladorea.notifikazioenInformazioaLortu(ErabiltzaileIzena, bilatutakoIzena)
 
     return render_template('changelog.html', notificaciones=lista_notificaciones)
