@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itemdex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pokedex.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="form-container">
+    <div class="pokedex-layout">
+        <!-- CABECERA -->
+        <div class="header-bar">
+            <a href="javascript:history.back()" class="nav-icon">
+                <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+            </a>
+            <div class="search-container">
+                <label class="search-label">Buscar:</label>
+                <input type="text" name="izena" class="search-input" placeholder="Nombre del item..."
+                       value="{{ request.form.izena if request.form.izena else '' }}">
+            </div>
+            <a href="/" class="nav-icon">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
+        <!-- GRID DE ITEMS -->
+        <div class="pokemon-grid">
+            {% for item in items %}
+            <a href="{{ url_for('itemdex.item', id=item.itemID) }}" class="pokemon-card">
+                <img src="{{ item.argazkia }}" alt="{{ item.izena }}" loading="lazy">
+                <span>{{ item.izena }}</span>
+            </a>
+            {% endfor %}
+
+            {% if not items %}
+            <div class="no-results">
+                <p>No se encontraron items.</p>
+                <i class="fa-regular fa-face-sad-tear"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- FILTROS FLOTANTES -->
+        <div class="filter-container">
+            <button type="button" class="filter-btn" id="filter-toggle">
+                <i class="fa-solid fa-filter"></i>
+            </button>
+            <div class="filter-menu" id="filter-menu">
+                <div class="filter-item">
+                    Tipo
+                    <div class="filter-submenu">
+                        {% for mota in ["Potion","Berry","Ball","TM"] %}
+                        <label>
+                            <input type="checkbox" name="motak" value="{{ mota }}"
+                                   {% if mota in request.form.getlist('motak') %}checked{% endif %}>
+                            {{ mota }}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="filter-item">
+                    Orden
+                    <div class="filter-submenu">
+                        <label><input type="radio" name="orden" value="asc"
+                                      {% if request.form.orden == 'asc' or not request.form.orden %}checked{% endif %}> A → Z</label>
+                        <label><input type="radio" name="orden" value="desc"
+                                      {% if request.form.orden == 'desc' %}checked{% endif %}> Z → A</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="apply-filters">APLICAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const filterBtn = document.getElementById('filter-toggle');
+const filterMenu = document.getElementById('filter-menu');
+
+filterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    filterMenu.classList.toggle('active');
+});
+
+document.addEventListener('click', (e) => {
+    if (!filterMenu.contains(e.target) && e.target !== filterBtn) {
+        filterMenu.classList.remove('active');
+    }
+});
+</script>
+</body>
+</html>

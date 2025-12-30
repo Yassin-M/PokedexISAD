@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item.izena }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pokedex.css') }}">
+</head>
+<body>
+<div class="form-container">
+    <div class="detail-layout">
+        <a href="{{ url_for('itemdex.itemdex') }}" class="nav-icon">&#8592; Volver</a>
+        <div class="detail-grid">
+            <!-- Columna izquierda: imagen -->
+            <div class="left-col">
+                <div class="image-container">
+                    <img src="{{ item.argazkia }}" alt="{{ item.izena }}">
+                </div>
+                <div class="name-box">{{ item.izena }}</div>
+            </div>
+
+            <!-- Columna derecha: información -->
+            <div class="right-col">
+                <div class="info-box description-box">
+                    <h3>Descripción</h3>
+                    <p>{{ item.deskripzioa }}</p>
+                </div>
+                <div class="info-box white-box">
+                    <h3>Tipo de Item</h3>
+                    <p>{{ item.MotaIzena }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
