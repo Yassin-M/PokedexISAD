@@ -178,6 +178,11 @@ body {
     max-height: 300px;
     overflow-y: auto;
     margin-bottom: 20px;
+    max-height: 350px; 
+    background-color: #f8f9fa;
+    border: 2px inset #ccc;
+    border-radius: 5px;
+    margin-bottom: 15px;
 }
 
 .changelog-item {
