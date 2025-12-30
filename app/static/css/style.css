@@ -204,3 +204,26 @@ body {
     image-rendering: pixelated;
     display: block;
 }
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 0 15px;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px; 
+    width: 100%;
+    max-width: 600px; 
+}
+.search-input {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none; 
+    transition: border-color 0.3s ease;
+}
