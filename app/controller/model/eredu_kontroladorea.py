@@ -4,9 +4,8 @@ class EreduKontroladorea:
         self.db = db
 
     def taldeak_kargatu(self, erabiltzailea):
-        cursor = self.db.connection.cursor()
-        query = "SELECT izena FROM Taldea WHERE erabiltzaileIzena = ?"
-        cursor.execute(query, (erabiltzailea,))
-        talde_zerrenda = [row["izena"] for row in cursor.fetchall()]
-        cursor.close()
-        return talde_zerrenda
+      sql1 = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
+      taldeak = self.db.select(sql1, (erabiltzailea,))
+
+      json4 = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
+      return json4
