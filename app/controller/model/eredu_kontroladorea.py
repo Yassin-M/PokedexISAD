@@ -9,3 +9,12 @@ class EreduKontroladorea:
 
       json4 = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
       return json4
+    
+    def sortu_talde_hutsa(self, erabiltzailea):
+      sql2 = " INSERT INTO taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
+      taldeIzena = "Talde 4"
+      self.db.insert(sql2, (taldeIzena, erabiltzailea))
+      return taldeIzena
+    
+    def get_taldea():
+       sql2 = " SELECT "
