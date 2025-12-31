@@ -55,6 +55,15 @@ body {
     padding: 5px 0;
 }
 
+.changelog-mode .login-container {
+    width: 80%; 
+    max-width: 900px;
+}
+
+.changelog-mode .changelog-list {
+    height: 50vh;
+}
+
 .form-container .login-container input[type="text"],
 .form-container .login-container input[type="password"] {
     display: block;
@@ -132,7 +141,7 @@ body {
     background: #ddd;
     border: 2px solid black;
     border-radius: 5px;
-    font-size: 1.2rem;
+    font-size: 3.0rem;
     cursor: pointer;
 }
 
