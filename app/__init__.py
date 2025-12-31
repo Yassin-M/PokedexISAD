@@ -7,6 +7,8 @@ from flask import Flask
 # los controladores
 from app.database.database import Connection
 from app.controller.view.bista_kontroladorea import pokedex_blueprint
+from app.controller.view.bista_kontroladorea import chatbot_blueprint
+
 
 
 def create_app():
@@ -16,5 +18,7 @@ def create_app():
    db = Connection()
 
    app.register_blueprint(pokedex_blueprint(db))
+   app.register_blueprint(chatbot_blueprint(db))
 
    return app
+

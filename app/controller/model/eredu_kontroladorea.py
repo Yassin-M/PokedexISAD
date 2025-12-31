@@ -184,3 +184,27 @@ class EreduKontroladorea:
       hay_relaciones = len(self.db.select("SELECT pokemonPokedexID FROM IzanDezake LIMIT 1")) > 0
 
       return hay_defs and hay_relaciones
+
+   def getMugimenduIkasgarriak(self, pokemon):
+      sql = """
+            SELECT m.izena, m.potentzia, m.zehaztazuna
+            FROM Mugimendua m
+                    JOIN IkasDezake i ON m.izena = i.mugiIzena
+            WHERE i.pokedexId = ? \
+            """
+      errenkadak = self.db.select(sql, [pokemon['id']])
+
+      mugimenduak = []
+      for row in errenkadak:
+         mugimenduak.append({
+            "mugimenduIzena": row["izena"],
+            "potentzia": row["potentzia"],
+            "zehaztasuna": row["zehaztazuna"]
+         })
+
+      return {
+         "izena": pokemon["izena"],
+         "irudia": pokemon["argazkia"],
+         "mugimenduak": mugimenduak
+      }
+

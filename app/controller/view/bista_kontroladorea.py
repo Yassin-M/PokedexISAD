@@ -1,8 +1,6 @@
 from flask import Blueprint, render_template, request
 from app.controller.model.eredu_kontroladorea import EreduKontroladorea
 
-
-
 def pokedex_blueprint(db):
    pokedex_bp = Blueprint('pokedex', __name__, template_folder="../../templates")
    service = EreduKontroladorea(db)
@@ -29,3 +27,35 @@ def pokedex_blueprint(db):
 
       return render_template('pokemon.html', pokemon=datuak)
    return pokedex_bp
+
+def chatbot_blueprint(db):
+    chatbot_bp = Blueprint('chatbot', __name__, template_folder="../../templates")
+    service = EreduKontroladorea(db)
+
+    @chatbot_bp.route('/chatbot')
+    def chatbot_menu():
+        return render_template('chatbot.html')
+
+    @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
+    def mugimenduak(id):
+        pokemon = service.bistaratu_pokemon(id)
+        pokemon["mugimenduak"] = service.getMugimenduIkasgarriak(pokemon)["mugimenduak"]
+        return render_template('mugimenduak.html', pokemon=pokemon)
+
+    @chatbot_bp.route('/chatbot/onenak/<int:id>')
+    def onenak(id):
+        pokemon = service.bistaratu_pokemon(id)
+        return render_template('onenak.html', pokemon=pokemon)
+
+    @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
+    def eboluzioa(id):
+        pokemon = service.bistaratu_pokemon(id)
+        return render_template('eboluzioa.html', pokemon=pokemon)
+
+    @chatbot_bp.route('/chatbot/indarrak/<int:id>')
+    def indarrak(id):
+        pokemon = service.bistaratu_pokemon(id)
+        return render_template('indarrak.html', pokemon=pokemon)
+
+    return chatbot_bp
+

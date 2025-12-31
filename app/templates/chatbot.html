@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="chatbot-body">
+    <!-- ChatBot nabigazio barra -->
+    <div class="chatbot-nav">
+        <button onclick="window.history.back()" class="chatbot-nav-btn chatbot-btn-back">
+            ⇦ Itzuli
+        </button>
+        <button onclick="window.location.href='/'" class="chatbot-nav-btn chatbot-btn-home">
+            🏠 Etxea
+        </button>
+    </div>
+
+    <!-- ChatBot eduki nagusia -->
+    <div class="chatbot-container">
+        <!-- Izenburu eremua -->
+        <header class="chatbot-header">
+            <h1 class="chatbot-title">ChatBot</h1>
+            <p class="chatbot-subtitle">Zer egin nahi duzu gaur?</p>
+        </header>
+
+        <!-- 2x2 funtzio sareta -->
+        <div class="chatbot-grid">
+            <!-- Mugimendu ikaskarria -->
+            <a href="/pokedex?mode=mugimenduak" class="chatbot-card">
+                <div class="chatbot-icon">⚔️</div>
+                <h3 class="chatbot-card-title">MUGIMENDUAK</h3>
+                <p class="chatbot-card-desc">Ikusi Pokemon baten ikas ditzakeen mugimendu guztiak</p>
+            </a>
+
+            <!-- Taldeko Pokemon onenak -->
+            <a href="/pokedex?mode=onenak" class="chatbot-card">
+                <div class="chatbot-icon">🏆</div>
+                <h3 class="chatbot-card-title">ONENAK</h3>
+                <p class="chatbot-card-desc">Ikusi zure taldeko Pokemon hoberenak</p>
+            </a>
+
+            <!-- Eboluzio katea -->
+            <a href="/pokedex?mode=eboluzioa" class="chatbot-card">
+                <div class="chatbot-icon">📈</div>
+                <h3 class="chatbot-card-title">EBOLUZIOA</h3>
+                <p class="chatbot-card-desc">Ikusi Pokemon baten eboluzio kate osoa</p>
+            </a>
+
+            <!-- Pokemon baten indarrak eta ahuleziak -->
+            <a href="/pokedex?mode=indarrak" class="chatbot-card">
+                <div class="chatbot-icon">⚡</div>
+                <h3 class="chatbot-card-title">INDARRAK</h3>
+                <p class="chatbot-card-desc">Aztertu Pokemon baten indarrak eta ahuleziak</p>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Elkarreragin efektuak
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.chatbot-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Egiaztatu zein orrialde dauden eskuragarri
+            const pages = ['mugimenduak', 'onenak', 'eboluzioa', 'indarrak'];
+            pages.forEach(page => {
+                fetch(`/${page}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            const link = document.querySelector(`[href="/${page}"]`);
+                            if (link) {
+                                link.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    alert(`${page.toUpperCase()} orria garatzen ari da!`);
+                                });
+                            }
+                        }
+                    })
+                    .catch(() => {
+                        // Ez ikusi erroreak
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

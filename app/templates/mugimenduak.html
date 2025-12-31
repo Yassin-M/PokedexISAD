@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pokemon.izena }} - Mugimenduak</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="detail-layout">
+
+            <!-- HEADER -->
+            <div class="header-bar">
+                <a href="javascript:history.back()" class="nav-icon">
+                    <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+                </a>
+                <a href="/" class="nav-icon">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
+            <div class="detail-grid">
+
+                <!-- LEFT COLUMN -->
+                <div class="left-col">
+                    <div class="image-container">
+                        <img src="{{ pokemon.argazkia }}" alt="{{ pokemon.izena }}">
+                    </div>
+
+                    <div class="name-box">
+                        {{ pokemon.izena|upper }}
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="right-col">
+
+                    <div class="info-box white-box">
+                        <h3>MUGIMENDUAK:</h3>
+
+                        {% if pokemon.mugimenduak %}
+                            {% for mugimendu in pokemon.mugimenduak %}
+                                <p>
+                                    <strong>{{ mugimendu.mugimenduIzena }}</strong> -
+                                    Potentzia: {{ mugimendu.potentzia }} ,
+                                    Zehaztasuna: {{ mugimendu.zehaztasuna }}
+                                </p>
+                            {% endfor %}
+                        {% else %}
+                            <p>Pokemon honek ez du ikas ditzakeen mugimendurik.</p>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

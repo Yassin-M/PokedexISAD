@@ -36,13 +36,23 @@
             </div>
 
             <div class="pokemon-grid">
+                {% set mode = request.args.get('mode', 'info') %}
+
                 {% for pokemon in pokemons %}
-                    <a href="/pokedex/pokemon/{{ pokemon['id'] }}" class="pokemon-card">
-                        <img src="{{ pokemon['argazkia'] }}" 
-                             alt="{{ pokemon['izena'] }}" 
-                             loading="lazy">
-                        <span>{{ pokemon.izena }}</span>
-                    </a>
+                    {% if mode == 'mugimenduak' %}
+                        <a href="/chatbot/mugimenduak/{{ pokemon.id }}" class="pokemon-card">
+                    {% elif mode == 'onenak' %}
+                        <a href="/chatbott/onenak/{{ pokemon.id }}" class="pokemon-card">
+                    {% elif mode == 'indarrak' %}
+                        <a href="/chatbot/indarrak/{{ pokemon.id }}" class="pokemon-card">
+                    {% elif mode == 'eboluzioa' %}
+                        <a href="/chatbot/eboluzioa/{{ pokemon.id }}" class="pokemon-card">
+                    {% else %}
+                        <a href="/pokedex/pokemon/{{ pokemon.id }}" class="pokemon-card">
+                    {% endif %}
+                            <img src="{{ pokemon.argazkia }}" alt="{{ pokemon.izena }}" loading="lazy">
+                            <span>{{ pokemon.izena }}</span>
+                        </a>
                 {% endfor %}
 
                 {% if not pokemons %}
