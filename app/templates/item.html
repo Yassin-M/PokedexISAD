@@ -4,16 +4,36 @@
     <meta charset="UTF-8">
     <title>{{ item.izena }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pokedex.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 <div class="form-container">
     <div class="detail-layout">
-        <a href="{{ url_for('itemdex.itemdex') }}" class="nav-icon">&#8592; Volver</a>
+        <!-- CABECERA CON ICONOS DE NAVEGACIÓN -->
+        <div class="detail-header">
+            <!-- Icono de volver (mismo que en itemdex) -->
+            <a href="javascript:history.back()" class="nav-icon">
+                <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+            </a>
+
+            <!-- Título centrado -->
+            <div class="detail-title">DETALLES</div>
+
+            <!-- Icono de home (mismo que en itemdex) -->
+            <a href="/" class="nav-icon">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
         <div class="detail-grid">
             <!-- Columna izquierda: imagen -->
             <div class="left-col">
                 <div class="image-container">
-                    <img src="{{ item.argazkia }}" alt="{{ item.izena }}">
+                    {% if item.argazkia and item.argazkia != '?' %}
+                        <img src="{{ item.argazkia }}" alt="{{ item.izena }}">
+                    {% else %}
+                        <div class="no-image">?</div>
+                    {% endif %}
                 </div>
                 <div class="name-box">{{ item.izena }}</div>
             </div>
