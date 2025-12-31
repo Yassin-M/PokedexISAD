@@ -137,13 +137,6 @@ body {
     margin-bottom: 20px;
 }
 
-.icon-btn {
-    background: #ddd;
-    border: 2px solid black;
-    border-radius: 5px;
-    font-size: 3.0rem;
-    cursor: pointer;
-}
 
 .changelog-list {
     background-color: #f8f9fa;
@@ -169,7 +162,6 @@ body {
     animation: behetikSartu 0.5s ease-out forwards;
 
 }
-
 
 .changelog-item:nth-child(1) { animation-delay: 0.1s; }
 .changelog-item:nth-child(2) { animation-delay: 0.2s; }
@@ -221,9 +213,40 @@ body {
 .form-container .login-container .top-bar > h2 {
     font-family: 'Pokemon', sans-serif;
     text-align: center;
-    font-size: 2rem;
+    font-size: 3.0rem;
     color: #ffcb05;
     text-shadow: 5px 5px 0 #3b4cca;
+}
+
+.icon-btn, a.icon-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: #ddd;
+    border: 2px solid black;
+    border-radius: 8px;
+    cursor: pointer;
+    color: black;
+    text-decoration: none; 
+    font-size: 1.2rem; 
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.icon-btn:active, a.icon-btn:active {
+    transform: scale(0.95);
+}
+
+.icon-btn:hover, a.icon-btn:hover {
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    border-color: #cc0000; 
+}
+
+
+.icon-btn:hover i, a.icon-btn:hover i {
+    color: #cc0000; 
 }
 
 @keyframes behetikSartu {

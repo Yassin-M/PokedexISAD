@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Changelog</title>
         <link rel="stylesheet" href="../static/css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <title>Changelog</title>
     </head>
     <body>
@@ -13,9 +14,13 @@
     <div class="login-container">
 
         <div class="top-bar">
-            <button class="icon-btn" onclick="history.back()">↩</button>
+            <button class="icon-btn" onclick="history.back()">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
             <h2>CHANGELOG</h2>
-            <a href="/" class="icon-btn">🏠</a>
+            <a href="/" class="icon-btn">
+                <i class="fa-solid fa-house"></i>
+            </a>
         </div>
 
         <div class="changelog-list">
@@ -50,7 +55,7 @@
             <input type="text" 
                name="bilatutako_erabiltzaile_izena" 
                class="search-input" 
-               placeholder="Bilatu erabiltzailea..."
+               placeholder="Bilatu erabilztaile bat..."
                value="{{ request.args.get('bilatu den erabiltzailea', '') }}"> 
             <button type="submit" class="btn btn-login">Bilatu</button>
             </form>
