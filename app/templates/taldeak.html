@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talde Kudeaketa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    </head>
+<body>
+
+    <div class="form-container">
+        <div class="nav-bar">
+            <i class="fas fa-reply nav-icon" onclick="alert('Volver atrás')"></i>
+            
+            <i class="fas fa-home nav-icon" onclick="alert('Ir a inicio')"></i>
+        </div>
+
+        <div class="list-container" id="taldes-list">
+            
+            <div class="row">
+                <button class="action-btn add">+</button>
+                <input type="text" class="talde-input new" value="TALDE BERRIA" readonly>
+
+                {% for talde in taldeak %}
+                <button class="action-btn">EDIT</button>
+                <input type="text" class="talde-input" value="{{ talde.nombre }}" readonly>
+            </div>
+
+            </div>
+    </div>
+
+    <script>
+       const mockDatabase = [
+            { id: 1, nombre: "TALDE 1" },
+            { id: 2, nombre: "TALDE 2" },
+            { id: 3, nombre: "ROCKET TEAM" }, // Ejemplo extra
+        ];
+
+        const container = document.getElementById('taldes-list');
+
+        // Función para renderizar los datos
+        function renderTaldes() {
+            mockDatabase.forEach(talde => {
+                // Crear contenedor de fila
+                const row = document.createElement('div');
+                row.className = 'row';
+
+                // Crear botón EDIT
+                const btn = document.createElement('button');
+                btn.className = 'action-btn';
+                btn.innerText = 'EDIT';
+                btn.onclick = () => console.log(`Editando talde ID: ${talde.id}`);
+
+                // Crear input con el nombre
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'talde-input';
+                input.value = talde.nombre;
+
+                // Añadir al DOM
+                row.appendChild(btn);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        // Ejecutar al cargar
+        document.addEventListener('DOMContentLoaded', renderTaldes);
+
+    </script>
+</body>
+</html>

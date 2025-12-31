@@ -1,3 +1,4 @@
+
 body {
     font-family: Arial, Helvetica, sans-serif;
     padding: 0;
@@ -6,14 +7,17 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    /* Fondo estilo Pokéball */
     background: linear-gradient(
-        red 50%,
-        black 50%,
-        black 52%,
-        white 52%
+        180deg,
+        #ff0000 50%,
+        #000000 50%,
+        #000000 52%,
+        #ffffff 52%
     );
 }
 
+/* Fallback si no tienes la fuente local */
 @font-face {
     font-family: 'Pokemon';
     src: url('../fonts/Pokemon Solid.ttf') format('truetype');
@@ -21,137 +25,177 @@ body {
 
 .form-container {
     background-color: white;
-    width: 70%;
+    width: 80%;
+    max-width: 600px; /* Limitamos el ancho para que se vea bien */
     border-radius: 15px;
     overflow: hidden;
     border: 10px solid black;
-    height: 90%;
+    height: 80%; /* Altura ajustada */
     display: flex;
-    align-items: center;
-}
-
-.form-container .login-container {
-    width: 500px;
-    margin: 0 auto;
-}
-
-.form-container .login-container > h2 {
-    font-family: 'Pokemon', sans-serif;
-    text-align: center;
-    font-size: 4rem;
-    color: #ffcb05;
-    text-shadow: 5px 5px 0 #3b4cca;
-}
-
-.form-container .login-container > p,
-.form-container .login-container > span {
-    text-align: center;
-    color: #555;
-}
-
-.form-container .login-container label {
-    display: block;
-    font-weight: bold;
-    padding: 5px 0;
-}
-
-.form-container .login-container input[type="text"],
-.form-container .login-container input[type="password"] {
-    display: block;
-    width: 100%;
+    flex-direction: column; /* Cambiado a columna para la estructura de la app */
+    padding: 20px;
     box-sizing: border-box;
-    padding: 10px;
-    border: solid 1px #ccc;
-    border-radius: 5px;
+    position: relative;
 }
 
-.form-container .login-container input[type="text"]:focus,
-.form-container .login-container input[type="password"]:focus {
-    outline: solid 1px #0099ff;
-}
+/* --- NUEVOS ESTILOS PARA LA INTERFAZ DE LA IMAGEN --- */
 
-.form-container .login-container .options {
+/* Barra de navegación superior (Flecha y Casa) */
+.nav-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    margin-bottom: 30px;
 }
 
-.form-container a {
-    color: #0099ff;
-    text-decoration: none;
+.nav-icon {
+    font-size: 2.5rem;
+    color: #333;
+    cursor: pointer;
+    transition: transform 0.2s;
+    /* Borde blanco para resaltar sobre el fondo gris si fuera necesario */
+    -webkit-text-stroke: 1px black; 
+    color: white;
 }
 
-.form-container a:hover {
-    text-decoration: underline;
+.nav-icon:hover {
+    transform: scale(1.1);
+    color: #ffcb05; /* Amarillo Pokémon */
 }
 
-.form-container .login-container .providers {
+/* Contenedor de la lista */
+.list-container {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    text-align: center;
-    margin-top: 10px;
-}
-.btn {
-    border: none;
-    padding: 15px 0;
-    width: 100%;
-    font-weight: bolder;
-    display: block;
-    border-radius: 5px;
-    text-transform: uppercase;
-    cursor: pointer;
+    gap: 15px;
+    overflow-y: auto; /* Scroll si hay muchos taldes */
+    padding-right: 5px;
 }
 
-.btn-login {
+/* Fila individual (Botón + Input) */
+.row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Inputs estilizados */
+.talde-input {
+flex-grow: 1;
+    padding: 20px;
+    border: 3px solid black;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: 'Pokemon', Arial, sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    }   
+
+/* Estilo específico para el input de "Crear nuevo" */
+.talde-input.new {
+    background-color: #f0f0f0;
+    color: #555;
+}
+
+/* Botones de acción (+ y EDIT) basados en tu .btn-login */
+.action-btn {
+    width: 110px;
+    height: 70px;
+    
     background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
     color: white;
     font-family: 'Pokemon', sans-serif;
-    font-size: 1rem;
-    border: 2px solid black;
-    border-radius: 30px;
-    box-shadow: 0 5px 0 #000;
-    text-shadow: 2px 2px #000;
-    transition: all 0.2s;
+    
+    /* ANTES: font-size: 1rem; */
+    font-size: 1.4rem; /* <--- Texto EDIT más grande */
+    
+    border: 3px solid black;
+    border-radius: 10px; /* Un poco más de borde redondeado */
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.btn-login:hover {
+.action-btn:hover {
     background: linear-gradient(to bottom, #ff5555 0%, #cc0000 100%);
     transform: translateY(2px);
-    box-shadow: 0 3px 0 #000;
+    box-shadow: 1px 1px 0 #000;
 }
 
-.btn-google {
+/* Variación para el botón de editar (quizás azul para distinguir, o rojo igual) */
+.action-btn.add {
+    font-size: 2rem; /* El símbolo + más grande */
+    line-height: 0;
+}
+.action-btn.edit {
+    background: linear-gradient(to bottom, #0000ff 0%, #0000cc 100%);
+}
+
+/* Contenedor principal para dividir botones de Pokémon */
+.main-content {
+    display: flex;
+    gap: 40px;
+    flex: 1;
+    align-items: flex-start;
+}
+
+/* Columna de botones EZABATU / GORDE */
+.sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 200px; /* Ancho para los botones laterales */
+}
+
+.large-text {
+    font-size: 1.5rem !important;
+    height: 60px !important;
+    width: 100% !important;
+}
+
+/* Cuadrícula de Pokémon */
+.pokemon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+    gap: 20px;
+    flex: 1;
+}
+
+/* Cada cuadro de Pokémon */
+.pokemon-card {
     background-color: white;
-    color: black;
-    border: solid 1px #ccc;
+    border: 4px solid black;
+    aspect-ratio: 1 / 1; /* Cuadrados perfectos */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    overflow: hidden;
 }
 
-.btn-google {
-    background-color: white;
-    color: black;
-    border: solid 1px #ccc;
-}
-.btn-google:hover {
-    background-color: #f0f0f0;
+.pokemon-card img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
-.btn-facebook {
-    background-color: rgb(0, 87, 250);
-    color: white;
+/* Botón "+" de la cuadrícula */
+.add-pokemon-btn {
+    background: #e0e0e0;
+    border: none;
+    font-size: 4rem;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
 }
 
-.btn-facebook:hover {
-    background-color: rgb(0, 56, 161);
-    color: white;
-}
-
-.btn-twitter {
-    background-color: rgb(96, 151, 252);
-    color: white;
-}
-
-.btn-twitter:hover {
-    background-color: rgb(70, 109, 180);
-    color: white;
+.add-pokemon-btn:hover {
+    background-color: #d0d0d0;
 }
