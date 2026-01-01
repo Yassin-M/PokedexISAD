@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pokemon.izena }} - Indarrak</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="form-container">
+    <div class="detail-layout">
+
+        <!-- HEADER -->
+        <div class="header-bar">
+            <a href="javascript:history.back()" class="nav-icon">
+                <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+            </a>
+            <a href="/" class="nav-icon">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
+        <div class="detail-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="left-col">
+                <div class="image-container">
+                    <img src="{{ pokemon.irudia }}" alt="{{ pokemon.izena }}">
+                </div>
+
+                <div class="name-box">
+                    {{ pokemon.izena|upper }}
+                </div>
+
+                <div class="types-box">
+                    <h4>Motak:</h4>
+                    {% if pokemon.mota_irudia %}
+                        <img src="{{ pokemon.mota_irudia }}" alt="Pokemon mota" class="type-img">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="right-col">
+
+                <div class="info-box white-box">
+                    <h3>INDARRAK:</h3>
+                    {% if pokemon.indarrak %}
+                        {% for ind in pokemon.indarrak %}
+                            <div class="strength-item">
+                                <img src="{{ ind.irudia }}" alt="{{ ind.izena }}" class="type-img">
+                                <span>{{ ind.izena }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Ez daude indarrak.</p>
+                    {% endif %}
+                </div>
+
+                <div class="info-box white-box">
+                    <h3>AHULEZIAK:</h3>
+                    {% if pokemon.ahuleziak %}
+                        {% for ah in pokemon.ahuleziak %}
+                            <div class="weakness-item">
+                                <img src="{{ ah.irudia }}" alt="{{ ah.izena }}" class="type-img">
+                                <span>{{ ah.izena }}</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Ez daude ahuleziak.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

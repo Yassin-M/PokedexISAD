@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, render_template, request
 from app.controller.model.eredu_kontroladorea import EreduKontroladorea
 
@@ -34,13 +35,13 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
+        service.eboluzioak()
         return render_template('chatbot.html')
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
     def mugimenduak(id):
-        pokemon = service.bistaratu_pokemon(id)
-        pokemon["mugimenduak"] = service.getMugimenduIkasgarriak(pokemon)["mugimenduak"]
-        return render_template('mugimenduak.html', pokemon=pokemon)
+        mugimenduak = service.getMugimenduIkasgarriak(id)
+        return render_template('mugimenduak.html', pokemon=mugimenduak)
 
     @chatbot_bp.route('/chatbot/onenak/<int:id>')
     def onenak(id):
@@ -49,13 +50,14 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
     def eboluzioa(id):
-        pokemon = service.bistaratu_pokemon(id)
+        pokemon = service.getEboluzioa(id)
         return render_template('eboluzioa.html', pokemon=pokemon)
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
     def indarrak(id):
-        pokemon = service.bistaratu_pokemon(id)
-        return render_template('indarrak.html', pokemon=pokemon)
+        indarrak_json = service.getIndarrak(id)
+        pokemon = json.loads(indarrak_json)
+        return render_template("indarrak.html", pokemon=pokemon)
 
     return chatbot_bp
 
