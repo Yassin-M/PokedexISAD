@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS MugimenduIzanTalde (
 CREATE TABLE IF NOT EXISTS IzanDezake (
     pokemonPokedexID INT,
     izena VARCHAR(25),
-    ezkutua VARCHAR(25),
+    ezkutua BOOLEAN,
     PRIMARY KEY (pokemonPokedexID, izena),
     FOREIGN KEY (pokemonPokedexID) REFERENCES PokemonPokedex(pokeId),
     FOREIGN KEY (izena) REFERENCES Abilezia(izena)

@@ -1,234 +1,414 @@
 import pokebase as pb
 
 class EreduKontroladorea:
+   #metodos
+   def __init__(self, db):
+      self.db = db
 
-    def __init__(self, db):
-        self.db = db
+   def pokedex_kargatu(self, JSON2):
+      if not self.pokemonak_konprobatu():
+         self.pokemonak_kargatu()
+      if not self.motak_konprobatu():
+         self.motak_kargatu()
+      if not self.abileziak_konprobatu():
+         self.abileziak_kargatu()
+      if not self.mugimenduak_konprobatu():
+         self.mugimenduak_kargatu()
+      sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
+      parametroak = []
 
-    # =====================================================
-    # ITEMDEX
-    # =====================================================
-    def itemdex_kargatu(self, JSON2):
-        if not self.itemak_konprobatu():
-            self.itemak_kargatu()
+      if JSON2['motak']:
+         sql3 += " JOIN DaMotaPokemon DM ON P.pokeId = DM.pokemonID JOIN MotaPokemon M ON DM.motaIzena = M.pokemonMotaIzena"
 
-        sql = """
+      if JSON2['izena']:
+         sql3 += " WHERE P.izena LIKE ?"
+         parametroak.append(f"%{JSON2['izena']}%")
+
+      if JSON2['generazioak']:
+         signos = ','.join(['?'] * len(JSON2['generazioak']))
+         operator = "AND" if "WHERE" in sql3 else "WHERE"
+         sql3 += f" {operator} P.generazioa IN ({signos})"
+         parametroak.extend(JSON2['generazioak'])
+
+      if JSON2['motak']:
+         signos_motak = ','.join(['?'] * len(JSON2['motak']))
+         operador = "AND" if "WHERE" in sql3 else "WHERE"
+         sql3 += f" {operador} M.pokemonMotaIzena IN ({signos_motak})"
+         parametroak.extend(JSON2['motak'])
+
+      errenkadak = self.db.select(sql3, parametroak)
+
+      json1 = []
+
+      for pokemon in errenkadak:
+         datuak = {
+            'izena': pokemon['izena'],
+            'argazkia': pokemon['irudia'],
+            'id': pokemon['pokeId']
+         }
+         json1.append(datuak)
+
+      return json1
+
+   def pokemonak_kargatu(self):
+      sql2 = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      i = 0
+      erromatarrak = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9} # para conseguir el numero de la generacion (la api lo devuelve como "generation-xx")
+      for pokemon in pb.APIResourceList('pokemon'):
+         try:
+            uneko_pokemon = pb.pokemon(pokemon['name'])
+            izen_erreala = uneko_pokemon.species.name
+            espeziea = pb.pokemon_species(izen_erreala)
+            generoa_rate = espeziea.gender_rate
+            generoa = 'Neutroa' if generoa_rate == -1 else 'Ar' if generoa_rate == 0 else 'Eme' if generoa_rate == 8 else 'Ar/Eme'
+            irudia = uneko_pokemon.sprites.other.official_artwork.front_default
+            if not irudia:
+               irudia = uneko_pokemon.sprites.front_default
+            base_parametroak = [uneko_pokemon.id,
+                                uneko_pokemon.name.capitalize(),
+                                uneko_pokemon.height,
+                                uneko_pokemon.weight,
+                                generoa,
+                                self.__lortu_deskripzioa(espeziea),
+                                irudia,
+                                erromatarrak.get(espeziea.generation.name.split('-')[1], 0)]
+            self.db.insert(sql2, base_parametroak)
+         except Exception as e:
+            print(f"Error {e}")
+
+   def bistaratu_pokemon(self, id):
+      sql = "SELECT P.izena, P.pokeId, P.irudia, P.deskripzioa, P.pisua, P.altuera FROM PokemonPokedex P WHERE P.pokeId = ?"
+      errenkada = self.db.select(sql, [id])[0]
+
+      if errenkada:
+         json3 = {
+            'izena': errenkada['izena'],
+            'argazkia': errenkada['irudia'],
+            'deskr': errenkada['deskripzioa'],
+            'id': errenkada['pokeId'],
+            'altuera': errenkada['altuera'],
+            'pisua': errenkada['pisua']
+         }
+         abileziak = self.db.select("SELECT izena FROM IzanDezake WHERE pokemonPokedexID = ?", [errenkada['pokeId']])
+         izenak = [abi['izena'] for abi in abileziak]
+         json3['abileziak'] = izenak
+         return json3
+
+   def motak_kargatu(self):
+      sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena) VALUES (?)"
+      sql2 = "INSERT INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
+      for mota in pb.APIResourceList('type'):
+         try:
+            if mota['name'] in ['unknown', 'shadow']:
+                  continue
+            self.db.insert(sql1, [mota['name']])
+            tipo = pb.type_(mota['name'])
+            for pokemon in tipo.pokemon:
+               try:
+                  pokemon_id = pb.pokemon(pokemon.pokemon.name).id
+                  self.db.insert(sql2, [mota['name'], pokemon_id])
+               except Exception as e:
+                  print(f"Error {e}")
+         except Exception as e:
+            print(f"Error {e}")
+
+      sql3 = "INSERT INTO Multiplikatzailea(pokemonMotaJaso, pokemonMotaEraso, multiplikatzailea) VALUES (?, ?, ?)"
+      for mota in pb.APIResourceList('type'):
+         tipo = pb.type_(mota['name'])
+         dobles = tipo.damage_relations.double_damage_to
+         mitades = tipo.damage_relations.half_damage_to
+         zeros = tipo.damage_relations.no_damage_to
+         for doble in dobles:
+            parametroak = [doble.name, mota['name'], 2.0]
+            self.db.insert(sql3, parametroak)
+         for mitad in mitades:
+            parametroak = [mitad.name, mota['name'], 0.5]
+            self.db.insert(sql3, parametroak)
+         for zero in zeros:
+            parametroak = [zero.name, mota['name'], 0.0]
+            self.db.insert(sql3, parametroak)
+         #esta parte habra que ver como acortarla un poco
+
+   def abileziak_kargatu(self):
+      sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
+      sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena) VALUES (?, ?, ?)"
+      for abileziak in pb.APIResourceList('ability'):
+         abilezia = pb.ability(abileziak['name'])
+         abilezi_izena = abilezia.name
+         for izena in abilezia.names:
+            if izena.language.name == "es":
+               abilezi_izena = izena.name
+         deskripzioa = self.__lortu_deskripzioa(abilezia)
+         self.db.insert(sql1, [abilezi_izena, deskripzioa])
+         for pokemon in abilezia.pokemon:
+            poke_id = pb.pokemon(pokemon.pokemon.name).id
+            self.db.insert(sql2, [poke_id, abilezi_izena, pokemon.is_hidden])
+
+   def mugimenduak_kargatu(self):
+      sql1 = "INSERT INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
+      sql2 = "INSERT INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
+      for izena in pb.APIResourceList('move'):
+         mugimendua = pb.move(izena['name'])
+         mugimendu_izena = self.__lortu_izena(mugimendua)
+         mugimendu_efektua = self.__lortu_deskripzioa(mugimendua)
+         parametroak = [mugimendu_izena.capitalize(), mugimendua.power, mugimendua.accuracy, mugimendua.pp, mugimendu_efektua, mugimendua.type.name]
+         self.db.insert(sql1, parametroak)
+         for pokemon in mugimendua.learned_by_pokemon:
+            pokemon_id = pb.pokemon(pokemon.name).id
+            self.db.insert(sql2, [pokemon_id, mugimendu_izena])
+
+   def __lortu_deskripzioa(self, objektua):
+      for sarrera in objektua.flavor_text_entries:
+         if sarrera.language.name == 'es':
+            return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
+      return 'Ez dago deskripziorik gaztelaniaz'
+
+   def __lortu_izena(self, objektua):
+      for sarrera in objektua.names:
+         if sarrera.language.name == 'es':
+            return sarrera.name.replace('\n', ' ').replace('\f', ' ')
+      return objektua.name
+
+   def pokemonak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM PokemonPokedex"))>1
+
+   def motak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM MotaPokemon"))>1 and len(self.db.select("SELECT * FROM DaMotaPokemon"))>1 and len(self.db.select("SELECT * FROM Multiplikatzailea"))
+
+   def mugimenduak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM Mugimendua"))>0
+
+   def abileziak_konprobatu(self):
+      hay_defs = len(self.db.select("SELECT izena FROM Abilezia LIMIT 1")) > 0
+
+      hay_relaciones = len(self.db.select("SELECT pokemonPokedexID FROM IzanDezake LIMIT 1")) > 0
+
+      return hay_defs and hay_relaciones
+
+   # =====================================================
+   # ITEMDEX
+   # =====================================================
+   def itemdex_kargatu(self, JSON2):
+      if not self.itemak_konprobatu():
+         self.itemak_kargatu()
+
+      sql = """
             SELECT I.itemID as ID, I.izena, I.argazkia
             FROM Item I
             WHERE 1=1
-        """
-        params = []
+      """
+      params = []
 
-        # Filtro por nombre
-        if JSON2.get("izena"):
-            sql += " AND I.izena LIKE ?"
-            params.append(f"%{JSON2['izena']}%")
+      # Filtro por nombre
+      if JSON2.get("izena"):
+         sql += " AND I.izena LIKE ?"
+         params.append(f"%{JSON2['izena']}%")
 
-        # Filtro por tipos - Usando MotaIzena directa de Item
-        if JSON2.get("motak") and len(JSON2["motak"]) > 0:
-            signos = ",".join(["?"] * len(JSON2["motak"]))
-            sql += f" AND I.MotaIzena IN ({signos})"
-            params.extend(JSON2["motak"])
+      # Filtro por tipos - Usando MotaIzena directa de Item
+      if JSON2.get("motak") and len(JSON2["motak"]) > 0:
+         signos = ",".join(["?"] * len(JSON2["motak"]))
+         sql += f" AND I.MotaIzena IN ({signos})"
+         params.extend(JSON2["motak"])
 
-        # Orden alfabético
-        orden = "DESC" if JSON2.get("alfabetikokiAlderantziz", False) else "ASC"
-        sql += f" ORDER BY I.izena {orden}"
+      # Orden alfabético
+      orden = "DESC" if JSON2.get("alfabetikokiAlderantziz", False) else "ASC"
+      sql += f" ORDER BY I.izena {orden}"
 
-        return self.db.select(sql, params)
+      return self.db.select(sql, params)
 
-    # =====================================================
-    # TIPOS DE ITEM (PARA FILTROS)
-    # =====================================================
-    def lortu_motak(self):
-        sql = "SELECT ItemMotaIzena FROM MotaItem ORDER BY ItemMotaIzena ASC"
-        return self.db.select(sql)
+   # =====================================================
+   # TIPOS DE ITEM (PARA FILTROS)
+   # =====================================================
+   def lortu_motak(self):
+      sql = "SELECT ItemMotaIzena FROM MotaItem ORDER BY ItemMotaIzena ASC"
+      return self.db.select(sql)
 
-    # =====================================================
-    # ITEM DETALLE - CORREGIDO para incluir MotaIzena
-    # =====================================================
-    def bistaratu_item(self, id):
-        sql = """
+   # =====================================================
+   # ITEM DETALLE - CORREGIDO para incluir MotaIzena
+   # =====================================================
+   def bistaratu_item(self, id):
+      sql = """
             SELECT itemID, izena, deskripzioa, argazkia, MotaIzena
             FROM Item
             WHERE itemID = ?
             LIMIT 1
-        """
-        resultado = self.db.select(sql, [id])
-        return resultado[0] if resultado else None
+      """
+      resultado = self.db.select(sql, [id])
+      return resultado[0] if resultado else None
 
-    # =====================================================
-    # COMPROBAR ITEMS
-    # =====================================================
-    def itemak_konprobatu(self):
-        resultado = self.db.select("SELECT * FROM Item LIMIT 1")
-        return len(resultado) > 0
+   # =====================================================
+   # COMPROBAR ITEMS
+   # =====================================================
+   def itemak_konprobatu(self):
+      resultado = self.db.select("SELECT * FROM Item LIMIT 1")
+      return len(resultado) > 0
 
-    # =====================================================
-    # CARGAR ITEMS DESDE POKEAPI
-    # =====================================================
-    def itemak_kargatu(self):
-        sql_mota = """
-                   INSERT \
-                   OR IGNORE INTO MotaItem (ItemMotaIzena)
-            VALUES (?) \
-                   """
+   # =====================================================
+   # CARGAR ITEMS DESDE POKEAPI
+   # =====================================================
+   def itemak_kargatu(self):
+      sql_mota = """
+                 INSERT \
+                 OR IGNORE INTO MotaItem (ItemMotaIzena)
+          VALUES (?) \
+                 """
 
-        sql_item = """
-                   INSERT \
-                   OR IGNORE INTO Item
-            (itemID, izena, deskripzioa, argazkia, MotaIzena)
-            VALUES (?, ?, ?, ?, ?) \
-                   """
+      sql_item = """
+                 INSERT \
+                 OR IGNORE INTO Item
+          (itemID, izena, deskripzioa, argazkia, MotaIzena)
+          VALUES (?, ?, ?, ?, ?) \
+                 """
 
-        # Diccionario de traducciones COMPLETO
-        traducciones = {
-            # ==================== TIPOS QUE SÍ APARECEN ====================
-            # Poké Balls
-            "standard-balls": "Poké Balls estándar",
-            "special-balls": "Poké Balls especiales",
-            "apricorn-balls": "Poké Balls de Bayas",
+      # Diccionario de traducciones COMPLETO
+      traducciones = {
+         # ==================== TIPOS QUE SÍ APARECEN ====================
+         # Poké Balls
+         "standard-balls": "Poké Balls estándar",
+         "special-balls": "Poké Balls especiales",
+         "apricorn-balls": "Poké Balls de Bayas",
 
-            # Medicina y curación
-            "healing": "Curación",
-            "status-cures": "Cura estados",
-            "pp-recovery": "Recupera PP",
-            "revival": "Revivir",
-            "vitamins": "Vitaminas",
-            "stat-boosts": "Mejora estadísticas",
-            "medicine": "Medicina",
-            "picky-healing": "Curación exigente",
-            "baking-only": "Solo para hornear",
-            "type-protection": "Protección tipo",
-            "in-a-pinch": "En apuros",
+         # Medicina y curación
+         "healing": "Curación",
+         "status-cures": "Cura estados",
+         "pp-recovery": "Recupera PP",
+         "revival": "Revivir",
+         "vitamins": "Vitaminas",
+         "stat-boosts": "Mejora estadísticas",
+         "medicine": "Medicina",
+         "picky-healing": "Curación exigente",
+         "baking-only": "Solo para hornear",
+         "type-protection": "Protección tipo",
+         "in-a-pinch": "En apuros",
 
-            # Objetos equipables
-            "held-items": "Objetos equipables",
-            "bad-held-items": "Objetos equipables malos",
-            "choice": "Elección",
-            "type-enhancement": "Mejora de tipo",
+         # Objetos equipables
+         "held-items": "Objetos equipables",
+         "bad-held-items": "Objetos equipables malos",
+         "choice": "Elección",
+         "type-enhancement": "Mejora de tipo",
 
-            # Entrenamiento
-            "training": "Entrenamiento",
-            "effort-training": "Entrenamiento esfuerzo",
-            "effort-drop": "Aumento esfuerzo",
+         # Entrenamiento
+         "training": "Entrenamiento",
+         "effort-training": "Entrenamiento esfuerzo",
+         "effort-drop": "Aumento esfuerzo",
 
-            # Máquinas
-            "all-machines": "Todas las máquinas",
-            "machines": "Máquinas",
-            "machine": "Máquina",
+         # Máquinas
+         "all-machines": "Todas las máquinas",
+         "machines": "Máquinas",
+         "machine": "Máquina",
 
-            # Específicos
-            "species-specific": "Específico por especie",
-            "dex-completion": "Completar Pokédex",
-            "collectibles": "Coleccionables",
-            "collectible": "Coleccionable",
-            "event-items": "Objetos de evento",
-            "gameplay": "Jugabilidad",
-            "plates": "Placas",
+         # Específicos
+         "species-specific": "Específico por especie",
+         "dex-completion": "Completar Pokédex",
+         "collectibles": "Coleccionables",
+         "collectible": "Coleccionable",
+         "event-items": "Objetos de evento",
+         "gameplay": "Jugabilidad",
+         "plates": "Placas",
 
-            # Jugabilidad
-            "apricorn-box": "Caja de Bayas",
-            "data-cards": "Tarjetas datos",
-            "jewels": "Joyas",
-            "miracle-shooter": "Lanzador milagro",
+         # Jugabilidad
+         "apricorn-box": "Caja de Bayas",
+         "data-cards": "Tarjetas datos",
+         "jewels": "Joyas",
+         "miracle-shooter": "Lanzador milagro",
 
-            # Varios
-            "pokeballs": "Poké Balls",
-            "berries": "Bayas",
-            "mail": "Cartas",
-            "all-mail": "Todas las cartas",
-            "battle": "Combate",
-            "key": "Clave",
-            "evolution": "Evolución",
-            "spelunking": "Espeleología",
-            "mulch": "Abono",
-            "flutes": "Flautas",
-            "unused": "No usado",
-            "plot-advancement": "Avance de trama",
-            "loot": "Botín",
-            "other": "Otros",
+         # Varios
+         "pokeballs": "Poké Balls",
+         "berries": "Bayas",
+         "mail": "Cartas",
+         "all-mail": "Todas las cartas",
+         "battle": "Combate",
+         "key": "Clave",
+         "evolution": "Evolución",
+         "spelunking": "Espeleología",
+         "mulch": "Abono",
+         "flutes": "Flautas",
+         "unused": "No usado",
+         "plot-advancement": "Avance de trama",
+         "loot": "Botín",
+         "other": "Otros",
 
-            # Nuevos tipos (vistos en consola)
-            "dynamax-crystals": "Cristales Dinamax",
-            "curry-ingredients": "Ingredientes curry",
-            "nature-mints": "Menta naturaleza",
-            "sandwich-ingredients": "Ingredientes sándwich",
-            "tm-materials": "Materiales MT",
-            "tera-shard": "Fragmento Tera",
-            "species-candies": "Caramelos especie",
-            "catching-bonus": "Bonus captura",
+         # Nuevos tipos (vistos en consola)
+         "dynamax-crystals": "Cristales Dinamax",
+         "curry-ingredients": "Ingredientes curry",
+         "nature-mints": "Menta naturaleza",
+         "sandwich-ingredients": "Ingredientes sándwich",
+         "tm-materials": "Materiales MT",
+         "tera-shard": "Fragmento Tera",
+         "species-candies": "Caramelos especie",
+         "catching-bonus": "Bonus captura",
 
-            # ==================== FALLBACK ====================
-            # Si no está en el diccionario, se capitaliza
-        }
+         # ==================== FALLBACK ====================
+         # Si no está en el diccionario, se capitaliza
+      }
 
-        for item in pb.APIResourceList("item"):
-            try:
-                api_item = pb.item(item["name"])
+      for item in pb.APIResourceList("item"):
+         try:
+            api_item = pb.item(item["name"])
 
-                # NOMBRE EN ESPAÑOL
-                izena = None
-                for n in api_item.names:
-                    if n.language.name == "es":
-                        izena = n.name
-                        break
+            # NOMBRE EN ESPAÑOL
+            izena = None
+            for n in api_item.names:
+               if n.language.name == "es":
+                  izena = n.name
+                  break
 
-                if not izena:
-                    izena = api_item.name.replace("-", " ").title()
+            if not izena:
+               izena = api_item.name.replace("-", " ").title()
 
-                # DESCRIPCIÓN EN ESPAÑOL
-                deskr = None
-                for entry in api_item.flavor_text_entries:
-                    if entry.language.name == "es":
-                        deskr = entry.text.replace("\n", " ").replace("\f", " ")
-                        break
+            # DESCRIPCIÓN EN ESPAÑOL
+            deskr = None
+            for entry in api_item.flavor_text_entries:
+               if entry.language.name == "es":
+                  deskr = entry.text.replace("\n", " ").replace("\f", " ")
+                  break
 
-                if not deskr:
-                    deskr = "Descripción no disponible en español"
+            if not deskr:
+               deskr = "Descripción no disponible en español"
 
-                item_id = api_item.id
-                argazkia = api_item.sprites.default
+            item_id = api_item.id
+            argazkia = api_item.sprites.default
 
-                # TIPO DEL ITEM EN ESPAÑOL - MEJORADO
-                mota_api = api_item.category.name
+            # TIPO DEL ITEM EN ESPAÑOL - MEJORADO
+            mota_api = api_item.category.name
 
-                # 1. Primero buscar en las traducciones de la API
-                mota = mota_api  # Por defecto
-                for name in api_item.category.names:
-                    if name.language.name == "es":
-                        mota = name.name
-                        break
+            # 1. Primero buscar en las traducciones de la API
+            mota = mota_api  # Por defecto
+            for name in api_item.category.names:
+               if name.language.name == "es":
+                  mota = name.name
+                  break
 
-                # 2. Si no encontró o la traducción es muy similar al inglés, usar nuestro diccionario
-                if mota == mota_api or mota.lower() == mota_api.lower():
-                    # Limpiar y buscar en nuestro diccionario
-                    mota_limpia = mota_api.lower().strip()
-                    if mota_limpia in traducciones:
-                        mota = traducciones[mota_limpia]
-                    else:
-                        # Si no está en el diccionario, capitalizar apropiadamente
-                        mota = mota_api.replace("-", " ").title()
+            # 2. Si no encontró o la traducción es muy similar al inglés, usar nuestro diccionario
+            if mota == mota_api or mota.lower() == mota_api.lower():
+               # Limpiar y buscar en nuestro diccionario
+               mota_limpia = mota_api.lower().strip()
+               if mota_limpia in traducciones:
+                  mota = traducciones[mota_limpia]
+               else:
+                  # Si no está en el diccionario, capitalizar apropiadamente
+                  mota = mota_api.replace("-", " ").title()
 
-                # 3. Asegurar que no sea None o vacío
-                if not mota or mota.strip() == "":
-                    mota = "Otros"
+            # 3. Asegurar que no sea None o vacío
+            if not mota or mota.strip() == "":
+               mota = "Otros"
 
-                # INSERTS
-                self.db.insert(sql_mota, [mota])
-                self.db.insert(sql_item, [
-                    item_id,
-                    izena,
-                    deskr,
-                    argazkia,
-                    mota
-                ])
+            # INSERTS
+            self.db.insert(sql_mota, [mota])
+            self.db.insert(sql_item, [
+               item_id,
+               izena,
+               deskr,
+               argazkia,
+               mota
+            ])
 
-            except Exception as e:
-                print(f"Error cargando item {item['name']}: {e}")
-                continue
+         except Exception as e:
+            print(f"Error cargando item {item['name']}: {e}")
+            continue
 
-        print("=== CARGA DE ITEMS COMPLETADA ===")
-        print("Tipos únicos cargados:")
-        tipos = self.db.select("SELECT DISTINCT ItemMotaIzena FROM MotaItem ORDER BY ItemMotaIzena")
-        for tipo in tipos:
-            print(f"  - {tipo[0]}")
+      print("=== CARGA DE ITEMS COMPLETADA ===")
+      print("Tipos únicos cargados:")
+      tipos = self.db.select("SELECT DISTINCT ItemMotaIzena FROM MotaItem ORDER BY ItemMotaIzena")
+      for tipo in tipos:
+         print(f"  - {tipo[0]}")

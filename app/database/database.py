@@ -13,7 +13,7 @@ class Connection:
         self.connection.row_factory = sqlite3.Row
         self._taulak_hasieratu()
 
-    def _taulak_hasieratu(self):
+    def _taulak_hasieratu(self):  # <-- 4 espacios aquí
         base_dir = os.path.dirname(os.path.abspath(__file__))
         schema_path = os.path.join(base_dir, 'schema.sql')
         if os.path.exists(schema_path):
