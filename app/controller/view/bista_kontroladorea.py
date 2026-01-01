@@ -21,7 +21,7 @@ def itemdex_blueprint(db):
                 request.form.get("orden") == "desc"
             )
 
-        items = service.itemdex_kargatu(iragazkiak)
+        items = list(service.itemdex_kargatu(iragazkiak))
         motak = service.lortu_motak()  # obtenemos los tipos desde la DB
         return render_template("itemdex.html", items=items, motak=motak, service=service)
 

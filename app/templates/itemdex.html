@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Itemdex</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pokedex.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/itemdex.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
 <div class="form-container">
-    <div class="pokedex-layout">
+    <div class="itemdex-layout">
         <form method="POST">
             <!-- CABECERA -->
             <div class="header-bar">
@@ -23,7 +23,7 @@
                     <input type="text"
                            name="izena"
                            class="search-input"
-                           placeholder="Buscar..."> <!-- Placeholder nativo -->
+                           placeholder="Buscar...">
                 </div>
 
                 <a href="/" class="nav-icon">
@@ -33,9 +33,9 @@
 
             <!-- GRID DE ITEMS -->
             <div class="grid-container">
-                <div class="pokemon-grid">
+                <div class="item-grid">
                     {% for item in items %}
-                    <a href="{{ url_for('itemdex.item', id=item.itemID) }}" class="pokemon-card">
+                    <a href="{{ url_for('itemdex.item', id=item.ID) }}" class="item-card">
                         {% if item.argazkia %}
                             <img src="{{ item.argazkia }}" alt="{{ item.izena }}" loading="lazy">
                         {% else %}
@@ -60,7 +60,6 @@
                 </button>
 
                 <div class="filter-menu" id="filter-menu">
-                    <!-- TIPO - CAMBIADO: usa clase filter-item-tipo -->
                     <div class="filter-item-tipo">
                         TIPO
                         <div class="filter-submenu">
@@ -75,7 +74,6 @@
                         </div>
                     </div>
 
-                    <!-- ORDEN ALFABÉTICO - CAMBIADO: usa clase filter-item-orden -->
                     <div class="filter-item-orden">
                         <button type="button" id="orden-btn" class="orden-btn">
                             {% if request.form.orden == 'desc' %}
@@ -114,7 +112,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// TOGGLE A > Z / Z > A
 ordenBtn.addEventListener('click', () => {
     if (ordenInput.value === 'asc') {
         ordenInput.value = 'desc';
