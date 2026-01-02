@@ -6,6 +6,7 @@
     <title>{{ pokemon.izena }} - Indarrak</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/indarrak.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -35,13 +36,20 @@
                     {{ pokemon.izena|upper }}
                 </div>
 
-                <div class="types-box">
-                    <h4>Motak:</h4>
-                    {% if pokemon.pokemon_motak %}
-                        {% for mota in pokemon.pokemon_motak %}
-                            <img src="{{ mota.irudia }}" alt="{{ mota.izena }}" class="type-img">
-                        {% endfor %}
-                    {% endif %}
+                <div class="info-box white-box">
+                    <h3>MOTAK:</h3>
+                    <div class="types-container">
+                        {% if pokemon.pokemon_motak %}
+                            {% for mota in pokemon.pokemon_motak %}
+                                <div class="type-item">
+                                    <img src="{{ mota.irudia }}" alt="{{ mota.izena }}" class="type-img">
+                                    <span>{{ mota.izena }}</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>Ez daude motak.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -51,12 +59,17 @@
                 <div class="info-box white-box">
                     <h3>INDARRAK:</h3>
                     {% if pokemon.indarrak %}
-                        {% for ind in pokemon.indarrak %}
-                            <div class="strength-item">
-                                <img src="{{ ind.irudia }}" alt="{{ ind.izena }}" class="type-img">
-                                <span>{{ ind.izena }}</span>
-                            </div>
-                        {% endfor %}
+                        <!-- 添加滚动容器 -->
+                        <div class="evolution-list-container">
+                            {% for ind in pokemon.indarrak %}
+                                <div class="evolution-item">
+                                    <img src="{{ ind.irudia }}" alt="{{ ind.izena }}" class="evolution-img">
+                                    <div class="evolution-info">
+                                        <span class="evolution-name">{{ ind.izena }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% else %}
                         <p>Ez daude indarrak.</p>
                     {% endif %}
@@ -65,12 +78,17 @@
                 <div class="info-box white-box">
                     <h3>AHULEZIAK:</h3>
                     {% if pokemon.ahuleziak %}
-                        {% for ah in pokemon.ahuleziak %}
-                            <div class="weakness-item">
-                                <img src="{{ ah.irudia }}" alt="{{ ah.izena }}" class="type-img">
-                                <span>{{ ah.izena }}</span>
-                            </div>
-                        {% endfor %}
+                        <!-- 添加滚动容器 -->
+                        <div class="evolution-list-container">
+                            {% for ah in pokemon.ahuleziak %}
+                                <div class="evolution-item">
+                                    <img src="{{ ah.irudia }}" alt="{{ ah.izena }}" class="evolution-img">
+                                    <div class="evolution-info">
+                                        <span class="evolution-name">{{ ah.izena }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% else %}
                         <p>Ez daude ahuleziak.</p>
                     {% endif %}

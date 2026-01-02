@@ -19,7 +19,7 @@ class EreduKontroladorea:
          self.mugimenduak_kargatu()
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
-
+      self.motak_irudiak_eguneratu_simple();
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -138,6 +138,39 @@ class EreduKontroladorea:
             parametroak = [zero.name, mota['name'], 0.0]
             self.db.insert(sql3, parametroak)
          #esta parte habra que ver como acortarla un poco
+
+   def motak_irudiak_eguneratu_simple(self):
+      """简单更新所有属性的图片路径"""
+
+      mota_irudiak = [
+         ('normal', '/static/icons/normal.svg'),
+         ('fire', '/static/icons/fire.svg'),
+         ('water', '/static/icons/water.svg'),
+         ('electric', '/static/icons/electric.svg'),
+         ('grass', '/static/icons/grass.svg'),
+         ('ice', '/static/icons/ice.svg'),
+         ('fighting', '/static/icons/fighting.svg'),
+         ('poison', '/static/icons/poison.svg'),
+         ('ground', '/static/icons/ground.svg'),
+         ('flying', '/static/icons/flying.svg'),
+         ('psychic', '/static/icons/psychic.svg'),
+         ('bug', '/static/icons/bug.svg'),
+         ('rock', '/static/icons/rock.svg'),
+         ('ghost', '/static/icons/ghost.svg'),
+         ('dark', '/static/icons/dark.svg'),
+         ('dragon', '/static/icons/dragon.svg'),
+         ('steel', '/static/icons/steel.svg'),
+         ('fairy', '/static/icons/fairy.svg')
+      ]
+
+      sql = "UPDATE MotaPokemon SET irudia = ? WHERE pokemonMotaIzena = ?"
+
+      for mota_izena, irudia in mota_irudiak:
+         try:
+            self.db.insert(sql, [irudia, mota_izena])
+            print(f"更新: {mota_izena}")
+         except Exception as e:
+            print(f"更新 {mota_izena} 时出错: {e}")
 
    def abileziak_kargatu(self):
       sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
@@ -277,7 +310,7 @@ class EreduKontroladorea:
       return pokemon_info
 
    def getIndarrak(self, pokeId):
-      # 首先获取Pokemon自身的所有属性
+      # Lehenik eta behin Pokemon-aren berezko mota guztiak lortu
       sql_pokemon_motak = """
                           SELECT t.pokemonMotaIzena AS izena, \
                                  t.irudia           AS irudia
@@ -291,7 +324,7 @@ class EreduKontroladorea:
       if not pokemon_motak:
          return None
 
-      # 获取Pokemon基本信息
+      # Pokemon-aren oinarrizko informazioa lortu
       sql_pokemon_info = """
                          SELECT izena, irudia
                          FROM PokemonPokedex
@@ -306,17 +339,17 @@ class EreduKontroladorea:
       pokemon_info = {
          "izena": pokemon_row[0]["izena"],
          "irudia": pokemon_row[0]["irudia"],
-         "pokemon_motak": pokemon_motak  # 添加Pokemon自身的属性
+         "pokemon_motak": pokemon_motak  # Pokemon-aren berezko motak gehitu
       }
 
-      # 收集Pokemon所有属性的强弱点
-      indarrak_set = set()  # 使用set避免重复
+      # Pokemon-aren mota guztien indarrak eta ahuleziak bildu
+      indarrak_set = set()  # Set erabili bikoizketak saihesteko
       ahuleziak_set = set()
 
       for pokemon_mota in pokemon_motak:
          mota_izena = pokemon_mota["izena"]
 
-         # 查询这个属性攻击其他属性时的效果
+         # Mota honek beste motak erasotzerakoan duen efektua kontsultatu
          sql_multiplikatzailea = """
                                  SELECT m.pokemonMotaEraso, \
                                         m.multiplikatzailea, \
@@ -335,13 +368,13 @@ class EreduKontroladorea:
             }
 
             if efektua["multiplikatzailea"] > 1:
-               # 如果攻击效果>1，是这个Pokemon的强点（对什么属性有优势）
+               # Eraso-efektua >1 bada, hau Pokemon-aren indarra da (zein motarekiko abantaila duen)
                indarrak_set.add((efektu_item["izena"], efektu_item["irudia"]))
             elif efektua["multiplikatzailea"] < 1:
-               # 如果攻击效果<1，是这个Pokemon的弱点（对什么属性劣势）
+               # Eraso-efektua <1 bada, hau Pokemon-aren ahulezia da (zein motarekiko desabantaila duen)
                ahuleziak_set.add((efektu_item["izena"], efektu_item["irudia"]))
 
-      # 转换set到list
+      # Set-a listara bihurtu
       pokemon_info["indarrak"] = [{"izena": izena, "irudia": irudia}
                                   for izena, irudia in indarrak_set]
       pokemon_info["ahuleziak"] = [{"izena": izena, "irudia": irudia}
@@ -350,11 +383,7 @@ class EreduKontroladorea:
       return pokemon_info
 
    def getEboluzioa(self, poke_id):
-      """
-      Jasotzen du pokemon baten aurreko eta hurrengo evoluzioak.
-      pokemon_id : bilatu nahi den pokemona
-      Bueltatzen du dict bat: izena, irudia, aurrekoak, hurrengoak
-      """
+
       aurrekoak, hurrengoak = [], []
 
       def bilatu_evoluzioak(start_id, aurreko=True):
