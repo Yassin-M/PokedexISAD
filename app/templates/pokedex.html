@@ -13,7 +13,10 @@
 
     <div class="form-container">
         <form action="/pokedex/bilatu" method="POST" class="pokedex-layout">
-            
+
+            <!-- mode gorde -->
+            <input type="hidden" name="mode" value="{{ mode }}">
+
             <div class="header-bar">
                 <a href="javascript:history.back()" class="nav-icon">
                     <i class="fa-solid fa-reply fa-flip-horizontal"></i>
@@ -36,8 +39,6 @@
             </div>
 
             <div class="pokemon-grid">
-                {% set mode = request.args.get('mode', 'info') %}
-
                 {% for pokemon in pokemons %}
                     {% if mode == 'mugimenduak' %}
                         <a href="/chatbot/mugimenduak/{{ pokemon.id }}" class="pokemon-card">

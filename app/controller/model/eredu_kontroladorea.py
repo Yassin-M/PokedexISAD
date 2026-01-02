@@ -1,5 +1,7 @@
 import pokebase as pb
 import json
+import os
+
 
 class EreduKontroladorea:
    #metodos
@@ -102,7 +104,7 @@ class EreduKontroladorea:
    def motak_kargatu(self):
       sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
       sql2 = "INSERT INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
-      icon_path = "static/icons"
+      icon_path = os.path.join(os.getcwd(), "app", "static", "icons")
       for mota in pb.APIResourceList('type'):
          try:
             if mota['name'] in ['unknown', 'shadow']:
@@ -167,30 +169,46 @@ class EreduKontroladorea:
 
    def eboluzioak_kargatu(self):
       """
-      Eboluzio-kate guztiak kargatzeko
+      Eboluzio-kate guztiak kargatzeko（优化版，无进度显示）
       """
       sql = "INSERT OR IGNORE INTO Eboluzioa (pokemonPokedexID, eboluzioaPokeId) VALUES (?, ?)"
 
-      eboluzio_kateak = pb.APIResourceList('evolution-chain')
+      # 辅助函数：从 URL 中提取 Pokémon ID
+      def get_id_from_url(url):
+         if not url:
+            return None
+         return int(url.rstrip('/').split('/')[-1])
 
-      for kate_info in eboluzio_kateak:
-         kate_id = int(kate_info.url.strip('/').split('/')[-1])
-         katea = pb.evolution_chain(kate_id)
+      # 递归处理节点
+      def prozesatu_nodoa(nodoa, aurreko_id):
+         if isinstance(nodoa, dict):
+            species_url = nodoa.get("species", {}).get("url")
+            evolves_to_list = nodoa.get("evolves_to", [])
+         else:
+            species_url = getattr(nodoa.species, 'url', None) if hasattr(nodoa, 'species') else None
+            evolves_to_list = getattr(nodoa, 'evolves_to', [])
 
-         self.__prozesatu_eboluzio_katea(katea.chain, None, sql)
+         if not species_url:
+            return
 
-   def __prozesatu_eboluzio_katea(self, nodoa, aurreko_id, sql):
-      """
-      Eboluzio-katearen nodo bat prozesatzeko
-      """
-      uneko_pokemona = pb.pokemon(nodoa.species.name)
-      uneko_id = uneko_pokemona.id
+         uneko_id = get_id_from_url(species_url)
 
-      if aurreko_id is not None:
-         self.db.insert(sql, [aurreko_id, uneko_id])
+         if aurreko_id is not None:
+            self.db.insert(sql, [aurreko_id, uneko_id])
 
-      for eboluzioa in nodoa.evolves_to:
-         self.__prozesatu_eboluzio_katea(eboluzioa, uneko_id, sql)
+         for eboluzioa in evolves_to_list:
+            prozesatu_nodoa(eboluzioa, uneko_id)
+
+      # 遍历 evolution chain ID
+      for i in range(1, 560):
+         try:
+            katea = pb.evolution_chain(i)
+            if hasattr(katea, 'chain'):
+               prozesatu_nodoa(katea.chain, None)
+            elif isinstance(katea, dict) and 'chain' in katea:
+               prozesatu_nodoa(katea['chain'], None)
+         except:
+            continue
 
    def eboluzioak_konprobatu(self):
       return len(self.db.select("SELECT * FROM Eboluzioa LIMIT 1")) > 0
@@ -306,76 +324,71 @@ class EreduKontroladorea:
 
       return json.dumps(pokemon_info, ensure_ascii=False)
 
-   def getEboluzioa(self, pokemon_id):
-      # 初始化列表
-      aurrekoak = []
-      hurrengoak = []
+   def getEboluzioa(self, poke_id):
+      """
+      Jasotzen du pokemon baten aurreko eta hurrengo evoluzioak.
+      pokemon_id : bilatu nahi den pokemona
+      Bueltatzen du dict bat: izena, irudia, aurrekoak, hurrengoak
+      """
+      aurrekoak, hurrengoak = [], []
 
-      visited = set()  # 已访问宝可梦ID，防止重复
-      to_visit_aurreko = [pokemon_id]  # 待访问前置进化队列
-      to_visit_hurrengo = [pokemon_id]  # 待访问后续进化队列
+      def bilatu_evoluzioak(start_id, aurreko=True):
+         """
+         Iteratiboki jasotzen ditu evoluzioak.
+         start_id : Pokemonaren ID hasierakoa
+         aurreko : True → aurreko evoluzioak, False → hurrengo evoluzioak
+         """
+         emaitza = []  # Bilatutako evoluzioak gordetzeko lista
+         bisitatuak = set()  # Errepikapenak saihesteko ID multzoa
+         itzuli = [start_id]  # Bisitatu beharreko ID zerrenda
 
-      # 迭代获取所有前置进化
-      while to_visit_aurreko:
-         current_id = to_visit_aurreko.pop(0)
-         if current_id in visited:
-            continue
-         visited.add(current_id)
+         while itzuli:
+            unekoa = itzuli.pop(0)  # Uneko pokemona
+            if unekoa in bisitatuak:
+               continue
+            bisitatuak.add(unekoa)  # Markatu bisitatu bezala
 
-         sql = """
-               SELECT P.pokeId, P.izena, P.irudia
-               FROM Eboluzioa E
-                       JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
-               WHERE E.eboluzioaPokeId = ? \
-               """
-         rows = self.db.select(sql, [current_id])
-         for row in rows:
-            aurrekoak.append({
-               "id": row["pokeId"],
-               "izena": row["izena"],
-               "irudia": row["irudia"]
-            })
-            if row["pokeId"] not in visited:
-               to_visit_aurreko.append(row["pokeId"])
+            # SQL, aurreko edo hurrengo evoluzioak lortzeko
+            if aurreko:
+               sql = """
+                     SELECT P.pokeId, P.izena, P.irudia
+                     FROM Eboluzioa E
+                             JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
+                     WHERE E.eboluzioaPokeId = ? \
+                     """
+            else:
+               sql = """
+                     SELECT P.pokeId, P.izena, P.irudia
+                     FROM Eboluzioa E
+                             JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
+                     WHERE E.pokemonPokedexID = ? \
+                     """
 
-      visited.clear()  # 重置已访问，用于后续进化
-      # 迭代获取所有后续进化
-      while to_visit_hurrengo:
-         current_id = to_visit_hurrengo.pop(0)
-         if current_id in visited:
-            continue
-         visited.add(current_id)
+            # Emaitzak gehitu eta hurrengo bisitak prestatu
+            for unekoa_info in self.db.select(sql, [unekoa]):
+               emaitza.append(unekoa_info)
+               if unekoa_info["pokeId"] not in bisitatuak:
+                  itzuli.append(unekoa_info["pokeId"])
 
-         sql = """
-               SELECT P.pokeId, P.izena, P.irudia
-               FROM Eboluzioa E
-                       JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
-               WHERE E.pokemonPokedexID = ? \
-               """
-         rows = self.db.select(sql, [current_id])
-         for row in rows:
-            hurrengoak.append({
-               "id": row["pokeId"],
-               "izena": row["izena"],
-               "irudia": row["irudia"]
-            })
-            if row["pokeId"] not in visited:
-               to_visit_hurrengo.append(row["pokeId"])
+         return emaitza
 
-      # 获取当前宝可梦信息
-      sql_current = "SELECT izena, irudia FROM PokemonPokedex WHERE pokeId = ?"
-      current_row = self.db.select(sql_current, [pokemon_id])
-      if not current_row:
+      # Aurreko eta hurrengo evoluzioak lortu
+      aurrekoak = bilatu_evoluzioak(poke_id, aurreko=True)
+      hurrengoak = bilatu_evoluzioak(poke_id, aurreko=False)
+
+      # Oraingo pokemona lortu
+      unekoa = self.db.select("SELECT izena, irudia FROM PokemonPokedex WHERE pokeId = ?", [poke_id])
+      if not unekoa:
          return None
 
-      pokemon_info = {
-         "izena": current_row[0]["izena"],
-         "irudia": current_row[0]["irudia"],
+      # Bueltatu pokemona info osoa
+      return {
+         "izena": unekoa[0]["izena"],
+         "irudia": unekoa[0]["irudia"],
          "aurrekoak": aurrekoak,
          "hurrengoak": hurrengoak
       }
 
-      return pokemon_info
 
 
 

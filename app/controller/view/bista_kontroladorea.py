@@ -10,7 +10,10 @@ def pokedex_blueprint(db):
    @pokedex_bp.route('/pokedex/bilatu', methods=['GET', 'POST'])
    def pokedex():
       iragazkiak = {'izena': None, 'generazioak': [], 'motak': []}
+      mode = request.args.get('mode', 'info')
+
       if request.method == 'POST':
+         mode = request.form.get('mode', mode)
          izena = request.form.get('izena')
          if izena:
             iragazkiak['izena'] = izena
@@ -21,7 +24,8 @@ def pokedex_blueprint(db):
          if motak:
             iragazkiak['motak'] = motak
       pokemon_zerrenda = service.pokedex_kargatu(iragazkiak)
-      return render_template('pokedex.html', pokemons=pokemon_zerrenda)
+      return render_template('pokedex.html', pokemons=pokemon_zerrenda, mode=mode)
+
    @pokedex_bp.route('/pokedex/pokemon/<int:id>', methods=['GET'])
    def pokemon(id):
       datuak = service.bistaratu_pokemon(id)
@@ -39,24 +43,24 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
     def mugimenduak(id):
-        mugimenduak = service.getMugimenduIkasgarriak(id)
-        return render_template('mugimenduak.html', pokemon=mugimenduak)
+        pokemonMugimenduak = service.getMugimenduIkasgarriak(id)
+        return render_template('mugimenduak.html', pokemon=pokemonMugimenduak)
 
     @chatbot_bp.route('/chatbot/onenak/<int:id>')
     def onenak(id):
-        pokemon = service.bistaratu_pokemon(id)
-        return render_template('onenak.html', pokemon=pokemon)
+        pokemonOnenak = service.bistaratu_pokemon(id)
+        return render_template('onenak.html', pokemon=pokemonOnenak)
 
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
     def eboluzioa(id):
-        pokemon = service.getEboluzioa(id)
-        return render_template('eboluzioa.html', pokemon=pokemon)
+        pokemonEboluzioa = service.getEboluzioa(id)
+        return render_template('eboluzioa.html', pokemon=pokemonEboluzioa)
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
     def indarrak(id):
         indarrak_json = service.getIndarrak(id)
-        pokemon = json.loads(indarrak_json)
-        return render_template("indarrak.html", pokemon=pokemon)
+        pokemonIndarrak = json.loads(indarrak_json)
+        return render_template("indarrak.html", pokemon=pokemonIndarrak)
 
     return chatbot_bp
 

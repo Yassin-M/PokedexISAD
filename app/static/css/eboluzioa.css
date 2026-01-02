@@ -1,0 +1,75 @@
+/* static/css/evolution.css */
+
+/* Eboluzio orrialderako estilo bereziak */
+
+.evolution-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.evolution-item:hover {
+    background-color: rgba(240, 240, 240, 0.9);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Irudiak handiago - mahaigaineko tamaina handia erabiltzen */
+.evolution-img {
+    width: 75px;  /* Irudiaren tamaina handia */
+    height: 75px; /* Irudiaren tamaina handia */
+    margin-right: 15px;
+    border-radius: 10px;
+    object-fit: contain;
+    background-color: #f8f9fa;
+    padding: 4px;
+    border: 2px solid #e9ecef;
+}
+
+.evolution-info {
+    flex: 1;
+}
+
+.evolution-name {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #333;
+}
+
+/* Eboluzio zerrenda desplazagarrirako edukiontzia */
+.evolution-list-container {
+    max-height: 250px; /* Altura egokia */
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+/* Desplazamendu-barra edertzea */
+.evolution-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.evolution-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.evolution-list-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.evolution-list-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Firefox desplazamendu-barra */
+.evolution-list-container {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
