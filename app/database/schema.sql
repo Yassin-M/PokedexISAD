@@ -163,3 +163,16 @@ CREATE TABLE IF NOT EXISTS PokemonTaldean (
     FOREIGN KEY (taldeIzena) REFERENCES Taldea(taldeIzena),
     FOREIGN KEY (pokeId) REFERENCES PokemonPokedex(pokeId)
 );
+
+-- 1. Borrar Notificaciones de estos 4
+DELETE FROM Notifikatu 
+WHERE ErabiltzaileIzena IN ('Ash', 'Misty', 'Brock', 'Gary');
+
+-- 2. Borrar Relaciones de seguir
+DELETE FROM JarraitzenDu 
+WHERE JarraitzaileIzena IN ('Ash', 'Misty', 'Brock', 'Gary')
+   OR JarraituIzena IN ('Ash', 'Misty', 'Brock', 'Gary');
+
+-- 3. Borrar Usuarios
+DELETE FROM Erabiltzailea 
+WHERE Izena IN ('Ash', 'Misty', 'Brock', 'Gary');

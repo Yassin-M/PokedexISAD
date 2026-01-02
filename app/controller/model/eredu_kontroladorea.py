@@ -13,6 +13,16 @@ def notifikazioenInformazioaLortu(erabiltzaile_izena, bilatutako_izena):
    query += "ORDER BY N.DataOrdua DESC;"
 
    if bilatutako_izena != None and bilatutako_izena != '':
-      return db.select(query, (erabiltzaile_izena, bilatutako_izena))
+      notifikazioZerrenda = db.select(query, (erabiltzaile_izena, bilatutako_izena))
    else:
-      return db.select(query, (erabiltzaile_izena,))
+      notifikazioZerrenda = db.select(query, (erabiltzaile_izena,))
+   
+   notifikazioJSON = []
+   for notifikazio in notifikazioZerrenda:
+      notifikazioJSON.append({
+         'JarraituIzena': notifikazio[0],
+         'DataOrdua': notifikazio[1],
+         'deskripzioa': notifikazio[2]
+      })
+
+   return notifikazioJSON
