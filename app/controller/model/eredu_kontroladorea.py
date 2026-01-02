@@ -277,52 +277,77 @@ class EreduKontroladorea:
       return pokemon_info
 
    def getIndarrak(self, pokeId):
-      sql = """
-            SELECT p.izena   AS pokemon_izena,
-                   p.irudia  AS pokemon_irudia,
-                   t.irudia  AS pokemon_mota_irudia,
-                   m.pokemonMotaEraso,
-                   m.multiplikatzailea,
-                   tm.irudia AS erasoko_mota_irudia
-            FROM PokemonPokedex p
-                    LEFT JOIN DaMotaPokemon d ON p.pokeId = d.pokemonID
-                    LEFT JOIN MotaPokemon t ON d.MotaIzena = t.pokemonMotaIzena
-                    LEFT JOIN Multiplikatzailea m ON d.MotaIzena = m.PokemonMotaJaso
-                    LEFT JOIN MotaPokemon tm ON tm.pokemonMotaIzena = m.PokemonMotaEraso
-            WHERE p.pokeId = ? \
-            """
-      errenkadak = self.db.select(sql, [pokeId])
+      # 首先获取Pokemon自身的所有属性
+      sql_pokemon_motak = """
+                          SELECT t.pokemonMotaIzena AS izena, \
+                                 t.irudia           AS irudia
+                          FROM DaMotaPokemon d
+                                  JOIN MotaPokemon t ON d.MotaIzena = t.pokemonMotaIzena
+                          WHERE d.pokemonID = ? \
+                          """
 
-      if not errenkadak:
+      pokemon_motak = self.db.select(sql_pokemon_motak, [pokeId])
+
+      if not pokemon_motak:
          return None
 
-      # Pokemon-en oinarrizko informazioa
+      # 获取Pokemon基本信息
+      sql_pokemon_info = """
+                         SELECT izena, irudia
+                         FROM PokemonPokedex
+                         WHERE pokeId = ? \
+                         """
+
+      pokemon_row = self.db.select(sql_pokemon_info, [pokeId])
+
+      if not pokemon_row:
+         return None
+
       pokemon_info = {
-         "izena": errenkadak[0]["pokemon_izena"],
-         "irudia": errenkadak[0]["pokemon_irudia"],
-         "mota_irudia": errenkadak[0]["pokemon_mota_irudia"]
+         "izena": pokemon_row[0]["izena"],
+         "irudia": pokemon_row[0]["irudia"],
+         "pokemon_motak": pokemon_motak  # 添加Pokemon自身的属性
       }
 
-      indarrak = []
-      ahuleziak = []
+      # 收集Pokemon所有属性的强弱点
+      indarrak_set = set()  # 使用set避免重复
+      ahuleziak_set = set()
 
-      for unekoa in errenkadak:
-         if unekoa["multiplikatzailea"] is not None:
-            if unekoa["multiplikatzailea"] > 1:
-               indarrak.append({
-                  "izena": unekoa["pokemonMotaEraso"],
-                  "irudia": unekoa["erasoko_mota_irudia"]
-               })
-            elif unekoa["multiplikatzailea"] < 1:
-               ahuleziak.append({
-                  "izena": unekoa["pokemonMotaEraso"],
-                  "irudia": unekoa["erasoko_mota_irudia"]
-               })
+      for pokemon_mota in pokemon_motak:
+         mota_izena = pokemon_mota["izena"]
 
-      pokemon_info["indarrak"] = indarrak
-      pokemon_info["ahuleziak"] = ahuleziak
+         # 查询这个属性攻击其他属性时的效果
+         sql_multiplikatzailea = """
+                                 SELECT m.pokemonMotaEraso, \
+                                        m.multiplikatzailea, \
+                                        t.irudia AS erasoko_mota_irudia
+                                 FROM Multiplikatzailea m
+                                         JOIN MotaPokemon t ON m.pokemonMotaEraso = t.pokemonMotaIzena
+                                 WHERE m.pokemonMotaJaso = ? \
+                                 """
 
-      return json.dumps(pokemon_info, ensure_ascii=False)
+         efektuak = self.db.select(sql_multiplikatzailea, [mota_izena])
+
+         for efektua in efektuak:
+            efektu_item = {
+               "izena": efektua["pokemonMotaEraso"],
+               "irudia": efektua["erasoko_mota_irudia"]
+            }
+
+            if efektua["multiplikatzailea"] > 1:
+               # 如果攻击效果>1，是这个Pokemon的强点（对什么属性有优势）
+               indarrak_set.add((efektu_item["izena"], efektu_item["irudia"]))
+            elif efektua["multiplikatzailea"] < 1:
+               # 如果攻击效果<1，是这个Pokemon的弱点（对什么属性劣势）
+               ahuleziak_set.add((efektu_item["izena"], efektu_item["irudia"]))
+
+      # 转换set到list
+      pokemon_info["indarrak"] = [{"izena": izena, "irudia": irudia}
+                                  for izena, irudia in indarrak_set]
+      pokemon_info["ahuleziak"] = [{"izena": izena, "irudia": irudia}
+                                   for izena, irudia in ahuleziak_set]
+
+      return pokemon_info
 
    def getEboluzioa(self, poke_id):
       """

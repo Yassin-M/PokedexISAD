@@ -58,8 +58,7 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
     def indarrak(id):
-        indarrak_json = service.getIndarrak(id)
-        pokemonIndarrak = json.loads(indarrak_json)
+        pokemonIndarrak = service.getIndarrak(id)
         return render_template("indarrak.html", pokemon=pokemonIndarrak)
 
     return chatbot_bp

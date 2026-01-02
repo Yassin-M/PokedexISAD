@@ -37,8 +37,10 @@
 
                 <div class="types-box">
                     <h4>Motak:</h4>
-                    {% if pokemon.mota_irudia %}
-                        <img src="{{ pokemon.mota_irudia }}" alt="Pokemon mota" class="type-img">
+                    {% if pokemon.pokemon_motak %}
+                        {% for mota in pokemon.pokemon_motak %}
+                            <img src="{{ mota.irudia }}" alt="{{ mota.izena }}" class="type-img">
+                        {% endfor %}
                     {% endif %}
                 </div>
             </div>
