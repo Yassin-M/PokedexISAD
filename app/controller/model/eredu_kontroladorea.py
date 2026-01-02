@@ -105,7 +105,7 @@ class EreduKontroladorea:
             tipo = pb.type_(mota['name'])
             for pokemon in tipo.pokemon:
                try:
-                  pokemon_id = pb.pokemon(pokemon.pokemon.name).id
+                  pokemon_id = int(pokemon.pokemon.url.split('/')[-2])
                   self.db.insert(sql2, [mota['name'], pokemon_id])
                except Exception as e:
                   print(f"Error {e}")
@@ -131,7 +131,7 @@ class EreduKontroladorea:
 
    def abileziak_kargatu(self):
       sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
-      sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena) VALUES (?, ?)"
+      sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
       for abileziak in pb.APIResourceList('ability'):
          abilezia = pb.ability(abileziak['name'])
          abilezi_izena = abilezia.name
@@ -141,8 +141,8 @@ class EreduKontroladorea:
          deskripzioa = self.__lortu_deskripzioa(abilezia)
          self.db.insert(sql1, [abilezi_izena, deskripzioa])
          for pokemon in abilezia.pokemon:
-            poke_id = pb.pokemon(pokemon.pokemon.name).id
-            self.db.insert(sql2, [poke_id, abilezi_izena])
+            poke_id = int(pokemon.pokemon.url.split('/')[-2])
+            self.db.insert(sql2, [poke_id, abilezi_izena, pokemon.is_hidden])
    
    def mugimenduak_kargatu(self):
       sql1 = "INSERT INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
@@ -154,7 +154,7 @@ class EreduKontroladorea:
          parametroak = [mugimendu_izena.capitalize(), mugimendua.power, mugimendua.accuracy, mugimendua.pp, mugimendu_efektua, mugimendua.type.name]
          self.db.insert(sql1, parametroak)
          for pokemon in mugimendua.learned_by_pokemon:
-            pokemon_id = pb.pokemon(pokemon.name).id
+            pokemon_id = int(pokemon.url.split('/')[-2])
             self.db.insert(sql2, [pokemon_id, mugimendu_izena])
          
    def __lortu_deskripzioa(self, objektua):
