@@ -15,6 +15,9 @@ class EreduKontroladorea:
          self.abileziak_kargatu()
       if not self.mugimenduak_konprobatu():
          self.mugimenduak_kargatu()
+      if not self.eboluzioak_konprobatu():
+         self.eboluzioak_kargatu()
+
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -162,133 +165,35 @@ class EreduKontroladorea:
             pokemon_id = pb.pokemon(pokemon.name).id
             self.db.insert(sql2, [pokemon_id, mugimendu_izena])
 
-
-   def eboluzioak(self):
-      """检查并加载进化数据"""
-      if not self.eboluzioak_konprobatu():
-         self.eboluzioak_kargatu()
-
    def eboluzioak_kargatu(self):
       """
-      直接遍历进化链 ID，从 URL 解析 ID，避免重复和多余的 API 请求。
+      Eboluzio-kate guztiak kargatzeko
       """
-      insert_sql = """
-                   INSERT \
-                   OR IGNORE INTO Eboluzioa (pokemonPokedexID, eboluzioaPokeId)
-           VALUES (?, ?) \
-                   """
+      sql = "INSERT OR IGNORE INTO Eboluzioa (pokemonPokedexID, eboluzioaPokeId) VALUES (?, ?)"
 
-      # 辅助函数：从 URL 字符串中提取 ID
-      def get_id_from_url(url):
-         if not url:
-            return None
-         # split 之后倒数第二个元素通常是 ID (因为末尾有个 /)
-         return int(url.rstrip('/').split('/')[-1])
+      eboluzio_kateak = pb.APIResourceList('evolution-chain')
 
-      # 递归处理函数
-      def process_chain_node(node):
-         """递归处理进化链节点"""
-         # 调试：打印当前节点
-         # print(f"Processing node: {node.get('species', {}).get('name', 'unknown')}")
+      for kate_info in eboluzio_kateak:
+         kate_id = int(kate_info.url.strip('/').split('/')[-1])
+         katea = pb.evolution_chain(kate_id)
 
-         # 1. 获取当前节点（进化前）的 ID
-         if isinstance(node, dict):
-            current_species_url = node.get("species", {}).get("url")
-         else:
-            # 如果是对象
-            current_species_url = getattr(node.species, 'url', None) if hasattr(node, 'species') else None
+         self.__prozesatu_eboluzio_katea(katea.chain, None, sql)
 
-         if not current_species_url:
-            return
+   def __prozesatu_eboluzio_katea(self, nodoa, aurreko_id, sql):
+      """
+      Eboluzio-katearen nodo bat prozesatzeko
+      """
+      uneko_pokemona = pb.pokemon(nodoa.species.name)
+      uneko_id = uneko_pokemona.id
 
-         current_id = get_id_from_url(current_species_url)
+      if aurreko_id is not None:
+         self.db.insert(sql, [aurreko_id, uneko_id])
 
-         # 2. 获取 evolves_to 列表
-         if isinstance(node, dict):
-            evolves_to_list = node.get("evolves_to", [])
-         else:
-            evolves_to_list = getattr(node, 'evolves_to', [])
-
-         # 3. 遍历进化的分支
-         for evolution in evolves_to_list:
-            if isinstance(evolution, dict):
-               next_species_url = evolution.get("species", {}).get("url")
-            else:
-               next_species_url = getattr(evolution.species, 'url', None) if hasattr(evolution, 'species') else None
-
-            if not next_species_url:
-               continue
-
-            next_id = get_id_from_url(next_species_url)
-
-            # 4. 插入数据库 (当前 -> 下一阶)
-            if current_id and next_id:
-               print(f"插入: {current_id} -> {next_id}")  # 调试输出
-               self.db.insert(insert_sql, [current_id, next_id])
-
-            # 5. 递归处理下一阶 (例如处理 妙蛙草 -> 妙蛙花)
-            process_chain_node(evolution)
-
-      # 主循环：遍历所有进化链
-      print("开始加载进化链...")
-      success_count = 0
-      failed_count = 0
-      total_evolutions = 0
-
-      for i in range(1, 560):
-         try:
-            # 请求进化链数据
-            chain_response = pb.evolution_chain(i)
-
-            # 调试：打印返回数据类型
-            if i == 1:
-               print(f"chain_response 类型: {type(chain_response)}")
-               if hasattr(chain_response, '__dict__'):
-                  print(f"chain_response 属性: {chain_response.__dict__.keys()}")
-
-            # 兼容不同的返回格式
-            chain_data = None
-            if hasattr(chain_response, 'chain'):
-               # 如果是对象封装
-               chain_data = chain_response.chain
-            elif isinstance(chain_response, dict) and 'chain' in chain_response:
-               # 如果是字典
-               chain_data = chain_response['chain']
-            else:
-               # 尝试直接使用
-               chain_data = chain_response
-
-            if not chain_data:
-               failed_count += 1
-               continue
-
-            # 开始递归处理
-            process_chain_node(chain_data)
-            success_count += 1
-
-            # 每处理10条显示进度（改为10方便调试）
-            if success_count % 10 == 0:
-               print(f"已处理 {success_count} 条进化链...")
-
-         except Exception as e:
-            # 某些 ID 可能跳过了或者是空的
-            failed_count += 1
-            print(f"Chain {i} 失败: {e}")  # 显示错误信息
-            continue
-
-      # 统计总数
-      result = self.db.select("SELECT COUNT(*) FROM Eboluzioa")
-      if result:
-         total_evolutions = result[0][0]
-
-      print(f"进化链加载完成。成功: {success_count}, 失败: {failed_count}")
-      print(f"数据库中共有 {total_evolutions} 条进化记录")
-      self.db.commit()  # 确保提交所有更改
+      for eboluzioa in nodoa.evolves_to:
+         self.__prozesatu_eboluzio_katea(eboluzioa, uneko_id, sql)
 
    def eboluzioak_konprobatu(self):
-      """检查进化表是否已有数据"""
-      return len(self.db.select("SELECT * FROM Eboluzioa LIMIT 2")) > 0
-
+      return len(self.db.select("SELECT * FROM Eboluzioa LIMIT 1")) > 0
 
    def __lortu_deskripzioa(self, objektua):
       for sarrera in objektua.flavor_text_entries:
@@ -421,7 +326,7 @@ class EreduKontroladorea:
                SELECT P.pokeId, P.izena, P.irudia
                FROM Eboluzioa E
                        JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
-               WHERE E.eboluzioaPokeID = ? \
+               WHERE E.eboluzioaPokeId = ? \
                """
          rows = self.db.select(sql, [current_id])
          for row in rows:
@@ -444,7 +349,7 @@ class EreduKontroladorea:
          sql = """
                SELECT P.pokeId, P.izena, P.irudia
                FROM Eboluzioa E
-                       JOIN PokemonPokedex P ON E.eboluzioaPokeID = P.pokeId
+                       JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
                WHERE E.pokemonPokedexID = ? \
                """
          rows = self.db.select(sql, [current_id])
@@ -471,76 +376,6 @@ class EreduKontroladorea:
       }
 
       return pokemon_info
-
-   def eboluzioa_kargatu(self):
-      """
-      加载所有宝可梦进化数据到 Eboluzioa 表
-      """
-      sql = "INSERT OR IGNORE INTO Eboluzioa (pokemonPokedexID, eboluzioaPokeId) VALUES (?, ?)"
-
-      import time
-
-      try:
-         print("开始获取进化链列表...")
-         evolution_chains_list = pb.APIResourceList('evolution-chain', limit=1000)
-         print(f"成功获取 {len(evolution_chains_list)} 条进化链")
-
-         total_inserted = 0
-
-         for i, chain_resource in enumerate(evolution_chains_list):
-            try:
-               if i % 20 == 0:
-                  print(f"处理进度: {i}/{len(evolution_chains_list)}")
-
-               chain_url = chain_resource['url']
-               chain_id = chain_url.rstrip('/').split('/')[-1]
-               if not chain_id.isdigit():
-                  print(f"警告: 无法从 URL 提取有效 ID: {chain_url}")
-                  continue
-
-               # 延迟避免 API 限制
-               if i > 0:
-                  time.sleep(0.1)
-
-               evolution_chain_data = pb.evolution_chain(int(chain_id))
-
-               # 用栈迭代遍历进化链
-               stack = [(evolution_chain_data.chain, None)]
-               while stack:
-                  current_node, parent_id = stack.pop()
-
-                  species_name = current_node.species.name
-                  try:
-                     pokemon_info = pb.pokemon(species_name)
-                     current_id = pokemon_info.id
-
-                     if parent_id is not None:
-                        # 打印调试信息
-                        print(f"插入进化关系: {parent_id} -> {current_id}")
-                        self.db.insert(sql, [parent_id, current_id])
-                        total_inserted += 1
-
-                  except Exception as e:
-                     print(f"获取宝可梦 {species_name} 信息失败: {e}")
-                     continue
-
-                  # 将子节点加入栈中
-                  for child_node in current_node.evolves_to:
-                     stack.append((child_node, current_id))
-
-            except Exception as e:
-               print(f"进化链 {chain_id} 处理失败: {e}")
-               continue
-
-         print(f"进化数据加载完成！共插入 {total_inserted} 条进化关系")
-
-      except Exception as e:
-         print(f"加载进化链列表失败: {e}")
-         import traceback
-         traceback.print_exc()
-
-
-
 
 
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="pokedex" uuid="e92c5403-0abd-4512-b847-65e7468754c1">
+    <data-source source="LOCAL" name="pokedex" uuid="1b989f29-6922-45ea-a50a-9057d49f1f40">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>

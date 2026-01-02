@@ -35,7 +35,6 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
-        service.eboluzioak()
         return render_template('chatbot.html')
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
