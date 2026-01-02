@@ -140,8 +140,6 @@ class EreduKontroladorea:
          #esta parte habra que ver como acortarla un poco
 
    def motak_irudiak_eguneratu_simple(self):
-      """简单更新所有属性的图片路径"""
-
       mota_irudiak = [
          ('normal', '/static/icons/normal.svg'),
          ('fire', '/static/icons/fire.svg'),
@@ -168,9 +166,8 @@ class EreduKontroladorea:
       for mota_izena, irudia in mota_irudiak:
          try:
             self.db.insert(sql, [irudia, mota_izena])
-            print(f"更新: {mota_izena}")
          except Exception as e:
-            print(f"更新 {mota_izena} 时出错: {e}")
+            print(f"UPDATE {mota_izena} error: {e}")
 
    def abileziak_kargatu(self):
       sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
