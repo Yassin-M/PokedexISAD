@@ -42,7 +42,7 @@ def chatbot_blueprint(db):
         return render_template('chatbot.html')
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
-    def mugimenduak(id):
+    def getMugimenduIkasgarriak(id):
         pokemonMugimenduak = service.getMugimenduIkasgarriak(id)
         return render_template('mugimenduak.html', pokemon=pokemonMugimenduak)
 
@@ -52,12 +52,12 @@ def chatbot_blueprint(db):
         return render_template('onenak.html', pokemon=pokemonOnenak)
 
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
-    def eboluzioa(id):
+    def getEboluzioa(id):
         pokemonEboluzioa = service.getEboluzioa(id)
         return render_template('eboluzioa.html', pokemon=pokemonEboluzioa)
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
-    def indarrak(id):
+    def getIndarrak(id):
         pokemonIndarrak = service.getIndarrak(id)
         return render_template("indarrak.html", pokemon=pokemonIndarrak)
 

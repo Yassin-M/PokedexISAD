@@ -19,8 +19,6 @@ class EreduKontroladorea:
          self.mugimenduak_kargatu()
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
-      self.motak_irudiak_eguneratu_simple();
-      self.ikasdezake_mugimenduak_fix_all();
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []

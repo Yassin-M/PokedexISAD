@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ taldeIzena }} - Onenak</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/onenak.css') }}">
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="detail-layout">
+
+            <!-- HEADER -->
+            <div class="header-bar">
+                <a href="javascript:history.back()" class="nav-icon">
+                    <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+                </a>
+                <a href="/" class="nav-icon">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
+            <div class="detail-grid">
+
+                <!-- LEFT COLUMN - Trophy and Team Name -->
+                <div class="left-col">
+                    <div class="trophy-container">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <div class="team-name-box">
+                        {{ taldeIzena|upper }}
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN - Best Pokemon -->
+                <div class="right-col">
+                    <div class="info-box white-box">
+                        <h3>ONENAK (PUNTUAZIO MAXIMOA):</h3>
+
+                        {% if pokemon %}
+                            <div class="best-pokemon-container">
+                                <!-- Pokemon Image -->
+                                <div class="pokemon-image-container">
+                                    <img src="{{ pokemon.irudia }}" alt="{{ pokemon.izena }}" class="pokemon-image">
+                                </div>
+
+                                <!-- Pokemon Name -->
+                                <h2 class="pokemon-name">
+                                    {{ pokemon.izena }}
+                                </h2>
+
+                                <!-- Score Display -->
+                                <div class="score-container">
+                                    <div class="score-label">PUNTUAZIO TOTALA</div>
+                                    <div class="score-value">
+                                        {{ pokemon.puntuazioa }}
+                                    </div>
+                                    <div class="score-formula">
+                                        (HP + ATK + DEF + SPATK + SPDEF + SPE)
+                                    </div>
+                                </div>
+
+                                <!-- Stats Grid -->
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ pokemon.HP }}</div>
+                                        <div class="stat-label">HP</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ pokemon.ATK }}</div>
+                                        <div class="stat-label">ATK</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ pokemon.DEF }}</div>
+                                        <div class="stat-label">DEF</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ pokemon.SPATK }}</div>
+                                        <div class="stat-label">SPATK</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ pokemon.SPDEF }}</div>
+                                        <div class="stat-label">SPDEF</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value">{{ pokemon.SPE }}</div>
+                                        <div class="stat-label">SPE</div>
+                                    </div>
+                                </div>
+
+                                <!-- Calculation Explanation -->
+                                <div class="calculation-container">
+                                    <p>
+                                        <strong>Kalkulua:</strong>
+                                        {{ pokemon.HP }} + {{ pokemon.ATK }} + {{ pokemon.DEF }} +
+                                        {{ pokemon.SPATK }} + {{ pokemon.SPDEF }} + {{ pokemon.SPE }} =
+                                        <strong>{{ pokemon.puntuazioa }}</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fa-solid fa-exclamation-triangle"></i>
+                                <p>Talde honek ez du pokemonik.</p>
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
