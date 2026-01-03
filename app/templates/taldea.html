@@ -11,8 +11,12 @@
 
     <div class="form-container">
         <div class="nav-bar">
-            <i class="fas fa-reply nav-icon"></i>
-            <i class="fas fa-home nav-icon"></i>
+            <a href="{{ url_for('taldeak.taldeak_kargatu') }}">
+                <i class="fas fa-reply nav-icon" title="Atzera"></i>
+            </a>
+            <!--a href="{{ url_for('taldeak.sortu_taldea') }}"-->
+                <i class="fas fa-home nav-icon" title="Hasiera"></i>
+            <!--/a-->
         </div>
     
         <div class="main-content">
@@ -22,21 +26,18 @@
             </div>
     
             <div class="pokemon-grid">
-                <div class="pokemon-card">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/572.png" alt="Minccino">
-                </div>
-                <div class="pokemon-card">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png" alt="Bulbasaur">
-                </div>
-                <div class="pokemon-card">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pikachu">
-                </div>
-                <div class="pokemon-card">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/197.png" alt="Umbreon">
-                </div>
+                {% for pokemon in pokemons %}
+                    <a href="/pokedex/pokemon/{{ pokemon['id'] }}" class="pokemon-card">
+                        <img src="{{ pokemon['argazkia'] }}" 
+                             loading="lazy">
+                        <span>{{ pokemon.izena }}</span>
+                    </a>
+                {% endfor %}
                 
                 <div class="pokemon-card add-card">
-                    <button class="add-pokemon-btn">+</button>
+                    <form action="{{ url_for('pokedex.pokedex') }}" method="post">
+                        <button type="submit" class="add-pokemon-btn">+</button>
+                    </form>  
                 </div>
             </div>
         </div>

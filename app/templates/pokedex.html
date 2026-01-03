@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex - Bilatzailea</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../static/css/style.css"> 
+</head>
+<body>
+
+    <div class="form-container">
+        <form action="/pokedex/bilatu" method="POST" class="pokedex-layout">
+            
+            <div class="header-bar">
+                <a href="javascript:history.back()" class="nav-icon">
+                    <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+                </a>
+
+                <div class="search-container">
+                    <label class="search-label">BILATZAILEA:</label>
+                    <input type="text" 
+                           name="izena" 
+                           class="search-input" 
+                           placeholder="..." 
+                           value="{{ request.form.izena if request.form.izena else '' }}">
+                    
+                    <button type="submit" style="display: none;"></button>
+                </div>
+
+                <a href="/" class="nav-icon">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
+            <div class="pokemon-grid">
+                {% for pokemon in pokemons %}
+                    <a href="/pokedex/pokemon/{{ pokemon['id'] }}" class="pokemon-card">
+                        <img src="{{ pokemon['argazkia'] }}" 
+                             alt="{{ pokemon['izena'] }}" 
+                             loading="lazy">
+                        <span>{{ pokemon.izena }}</span>
+                    </a>
+                {% endfor %}
+
+                {% if not pokemons %}
+                    <div class="no-results">
+                        <p>Ez da pokemonik aurkitu.</p>
+                        <i class="fa-regular fa-face-sad-tear"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="filter-container">
+                <button type="button" class="filter-btn" id="filter-toggle">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
+
+                <div class="filter-menu" id="filter-menu">
+                    <div class="filter-item">
+                        <span>Motaren arabera</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                        <div class="filter-submenu">
+                            {% set tipos = ['normal', 'fire', 'water', 'grass', 'electric', 'ice', 'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'] %}
+                            {% for tipo in tipos %}
+                            <label>
+                                <input type="checkbox" name="motak" value="{{ tipo }}" 
+                                       {% if tipo in request.form.getlist('motak') %}checked{% endif %}> 
+                                {{ tipo|capitalize }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="filter-item">
+                        <span>Generazioaren arabera</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                        <div class="filter-submenu">
+                            {% for i in range(1, 10) %}
+                            <label>
+                                <input type="checkbox" name="generazioak" value="{{ i }}"
+                                       {% if i|string in request.form.getlist('generazioak') %}checked{% endif %}> 
+                                Gen {{ i }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="apply-filters">APLIKATU</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const filterBtn = document.getElementById('filter-toggle');
+                const filterMenu = document.getElementById('filter-menu');
+
+                if (filterBtn && filterMenu) {
+                    // Abrir y cerrar
+                    filterBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Evita que el click cierre el menú inmediatamente
+                        filterMenu.classList.toggle('active');
+                    });
+
+                    // Cerrar al hacer click fuera
+                    document.addEventListener('click', (e) => {
+                        if (!filterMenu.contains(e.target) && e.target !== filterBtn) {
+                            filterMenu.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        </script>
+</body>
+</html>
