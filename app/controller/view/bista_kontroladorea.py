@@ -1,4 +1,4 @@
-from flask import flash, Blueprint, render_template, request, redirect, url_for
+from flask import flash, Blueprint, render_template, request, redirect, session, url_for
 from app.controller.model.eredu_kontroladorea import EreduKontroladorea
 
 
@@ -29,11 +29,12 @@ def taldeak_blueprint(db):
          flash(str(e), "error") # Enviamos el mensaje de error al HTML
          return redirect(url_for('taldeak.taldeak_kargatu'))
    
-   @taldeak_bp.route('/kargatu_taldea', methods=['POST'])
+   @taldeak_bp.route('/editatu_taldea', methods=['POST'])
    def kargatu_taldea():
       talde_izena = request.form.get('talde_izena')
-      print(talde_izena)
       talde_datuak = service.get_taldea(talde_izena, 'juan')
+      
+      session['editatzen_ari_den_taldea'] = talde_izena
       
       return render_template('taldea.html', pokemons=talde_datuak, izena=talde_izena)
 
@@ -48,6 +49,8 @@ def pokedex_blueprint(db):
    @pokedex_bp.route('/pokedex', methods=['GET', 'POST'])
    @pokedex_bp.route('/pokedex/bilatu', methods=['GET', 'POST'])
    def pokedex():
+
+      session['akzioa'] = request.form.get('akzioa')
       iragazkiak = {'izena': None, 'generazioak': [], 'motak': []}
       if request.method == 'POST':
          izena = request.form.get('izena')
@@ -65,5 +68,8 @@ def pokedex_blueprint(db):
    def pokemon(id):
       datuak = service.bistaratu_pokemon(id)
 
-      return render_template('pokemon.html', pokemon=datuak)
+      taldea = session.get('editatzen_ari_den_taldea')
+      akzioa = session.get('akzioa')
+
+      return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
    return pokedex_bp

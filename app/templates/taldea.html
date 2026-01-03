@@ -36,6 +36,7 @@
                 
                 <div class="pokemon-card add-card">
                     <form action="{{ url_for('pokedex.pokedex') }}" method="post">
+                        <input type="hidden" name="akzioa" value="hauta_pokemon">
                         <button type="submit" class="add-pokemon-btn">+</button>
                     </form>  
                 </div>

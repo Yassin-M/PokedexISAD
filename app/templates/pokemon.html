@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pokemon.izena }} - Xehetasunak</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pokestyle.css') }}"> 
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="detail-layout">
+            
+            <div class="header-bar">
+                <a href="javascript:history.back()" class="nav-icon">
+                    <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+                </a>
+                <a href="/" class="nav-icon">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
+            <div class="detail-grid">
+                
+                <div class="left-col">
+                    <div class="image-container">
+                        <img src="{{ pokemon.argazkia }}" alt="{{ pokemon.izena }}">
+                    </div>
+
+                    <div class="name-box">
+                        {{ pokemon.izena|upper }}
+                    </div>
+
+                    <div class="info-box description-box">
+                        {% if akzioa == 'hauta_pokemon' %}
+                            <div class="selection-container" style="text-align: center; padding: 10px;">
+                                <form action="{{ url_for('taldeak.kargatu_taldea') }}" method="POST">
+                                    <input type="hidden" name="pokemon_id" value="{{ pokemon.id }}">
+                                    <input type="hidden" name="talde_izena" value="{{ talde_izena }}">
+                                    
+                                    <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
+                                        HAUTATU POKEMONA
+                                    </button>
+                                </form>
+                            </div>
+                        {% else %}
+                            <h3>POKEDEX SARRERA:</h3>
+                            <p>{{ pokemon.deskr }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <div class="info-box white-box">
+                        <h3>ABILEZIAK:</h3>
+                        {% for gaitasuna in pokemon.abileziak %}
+                        <p>
+                            {{ gaitasuna }}
+                        </p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="info-box white-box">
+                        <h3>ESTATISTIKA POSIBLEAK:</h3>
+                        <ul class="stats-list">
+                            <li><strong>Altuera:</strong> {{ pokemon.altuera/10 }} m</li>
+                            <li><strong>Pisua:</strong> {{ pokemon.pisua/10 }} kg</li>
+                            <li><strong>Id:</strong> #{{ pokemon.id }}</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
