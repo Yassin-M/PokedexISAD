@@ -131,7 +131,67 @@ class APIKontroladorea:
    
 
    def __lortu_deskripzioa(self, objektua):
-      for sarrera in objektua.flavor_text_entries:
-         if sarrera.language.name == 'es':
-            return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
-      return 'Ez dago deskripziorik gaztelaniaz'
+      """Busca descripción en español adaptándose a si es Item o Pokémon"""
+      if hasattr(objektua, 'flavor_text_entries'):
+         for sarrera in objektua.flavor_text_entries:
+            if sarrera.language.name == 'es':
+               # Pokémon usa .flavor_text, los Items usan .text
+               texto = getattr(sarrera, 'flavor_text', getattr(sarrera, 'text', ''))
+               return texto.replace('\n', ' ').replace('\f', ' ')
+      return 'Descripción no disponible en español'
+   
+   #itemdex
+
+   def item_izenak_eskatu(self):
+      return pb.APIResourceList("item")
+   
+   def itema_eskatu(self, izena_api):
+        """Procesa un item: traduce nombre, descripción y categoría."""
+        api_item = pb.item(izena_api)
+
+        # 1. Nombre en español
+        izena = None
+        for n in api_item.names:
+            if n.language.name == "es":
+                izena = n.name
+                break
+        if not izena:
+            izena = api_item.name.replace("-", " ").title()
+
+        # 2. Descripción en español
+        deskr = None
+        for entry in api_item.flavor_text_entries:
+            if entry.language.name == "es":
+                deskr = entry.text.replace("\n", " ").replace("\f", " ")
+                break
+        if not deskr:
+         deskr = "Descripción no disponible en español"
+
+        # 3. Categoría (Tipo) en español
+        mota_api = api_item.category.name
+        mota = mota_api
+
+        # Intento 1: Traducción oficial API
+        for name in api_item.category.names:
+            if name.language.name == "es":
+                mota = name.name
+                break
+
+        # Intento 2: Fallback con diccionario propio si la API falla o devuelve inglés
+        if mota == mota_api or mota.lower() == mota_api.lower():
+            mota_limpia = mota_api.lower().strip()
+            if mota_limpia in self.traducciones_tipos:
+                mota = self.traducciones_tipos[mota_limpia]
+            else:
+                mota = mota_api.replace("-", " ").title()
+
+        if not mota or mota.strip() == "":
+            mota = "Otros"
+
+        return {
+            "id": api_item.id,
+            "izena": izena,
+            "deskripzioa": deskr,
+            "argazkia": api_item.sprites.default,
+            "mota": mota
+        }

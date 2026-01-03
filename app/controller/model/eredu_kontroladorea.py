@@ -128,8 +128,8 @@ class EreduKontroladorea:
             self.db.insert(sql2, [poke_id, abilezia["izena"], pokemon.is_hidden])
 
    def mugimenduak_kargatu(self):
-      sql1 = "INSERT INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
-      sql2 = "INSERT INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
+      sql1 = "INSERT OR IGNORE INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
+      sql2 = "INSERT OR IGNORE INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
       mugimendu_izenak = self.api.mugimendu_izenak_eskatu()
       for izena in mugimendu_izenak:
          mugimendua = self.api.mugimendua_eskatu(izena['name'])
@@ -228,165 +228,25 @@ class EreduKontroladorea:
    # CARGAR ITEMS DESDE POKEAPI
    # =====================================================
    def itemak_kargatu(self):
-      sql_mota = """
-                 INSERT \
-                 OR IGNORE INTO MotaItem (ItemMotaIzena)
-          VALUES (?) \
-                 """
+      print("Cargando Items...")
+      sql_mota = "INSERT OR IGNORE INTO MotaItem (ItemMotaIzena) VALUES (?)"
+      sql_item = "INSERT OR IGNORE INTO Item (itemID, izena, deskripzioa, argazkia, MotaIzena) VALUES (?, ?, ?, ?, ?)"
 
-      sql_item = """
-                 INSERT \
-                 OR IGNORE INTO Item
-          (itemID, izena, deskripzioa, argazkia, MotaIzena)
-          VALUES (?, ?, ?, ?, ?) \
-                 """
-
-      # Diccionario de traducciones COMPLETO
-      traducciones = {
-         # ==================== TIPOS QUE SÍ APARECEN ====================
-         # Poké Balls
-         "standard-balls": "Poké Balls estándar",
-         "special-balls": "Poké Balls especiales",
-         "apricorn-balls": "Poké Balls de Bayas",
-
-         # Medicina y curación
-         "healing": "Curación",
-         "status-cures": "Cura estados",
-         "pp-recovery": "Recupera PP",
-         "revival": "Revivir",
-         "vitamins": "Vitaminas",
-         "stat-boosts": "Mejora estadísticas",
-         "medicine": "Medicina",
-         "picky-healing": "Curación exigente",
-         "baking-only": "Solo para hornear",
-         "type-protection": "Protección tipo",
-         "in-a-pinch": "En apuros",
-
-         # Objetos equipables
-         "held-items": "Objetos equipables",
-         "bad-held-items": "Objetos equipables malos",
-         "choice": "Elección",
-         "type-enhancement": "Mejora de tipo",
-
-         # Entrenamiento
-         "training": "Entrenamiento",
-         "effort-training": "Entrenamiento esfuerzo",
-         "effort-drop": "Aumento esfuerzo",
-
-         # Máquinas
-         "all-machines": "Todas las máquinas",
-         "machines": "Máquinas",
-         "machine": "Máquina",
-
-         # Específicos
-         "species-specific": "Específico por especie",
-         "dex-completion": "Completar Pokédex",
-         "collectibles": "Coleccionables",
-         "collectible": "Coleccionable",
-         "event-items": "Objetos de evento",
-         "gameplay": "Jugabilidad",
-         "plates": "Placas",
-
-         # Jugabilidad
-         "apricorn-box": "Caja de Bayas",
-         "data-cards": "Tarjetas datos",
-         "jewels": "Joyas",
-         "miracle-shooter": "Lanzador milagro",
-
-         # Varios
-         "pokeballs": "Poké Balls",
-         "berries": "Bayas",
-         "mail": "Cartas",
-         "all-mail": "Todas las cartas",
-         "battle": "Combate",
-         "key": "Clave",
-         "evolution": "Evolución",
-         "spelunking": "Espeleología",
-         "mulch": "Abono",
-         "flutes": "Flautas",
-         "unused": "No usado",
-         "plot-advancement": "Avance de trama",
-         "loot": "Botín",
-         "other": "Otros",
-
-         # Nuevos tipos (vistos en consola)
-         "dynamax-crystals": "Cristales Dinamax",
-         "curry-ingredients": "Ingredientes curry",
-         "nature-mints": "Menta naturaleza",
-         "sandwich-ingredients": "Ingredientes sándwich",
-         "tm-materials": "Materiales MT",
-         "tera-shard": "Fragmento Tera",
-         "species-candies": "Caramelos especie",
-         "catching-bonus": "Bonus captura",
-
-         # ==================== FALLBACK ====================
-         # Si no está en el diccionario, se capitaliza
-      }
-
-      for item in pb.APIResourceList("item"):
+      for item in self.api.item_izenak_eskatu():
          try:
-            api_item = pb.item(item["name"])
+               # Usamos el API Controller para procesar datos
+               datuak = self.api.itema_eskatu(item['name'])
 
-            # NOMBRE EN ESPAÑOL
-            izena = None
-            for n in api_item.names:
-               if n.language.name == "es":
-                  izena = n.name
-                  break
-
-            if not izena:
-               izena = api_item.name.replace("-", " ").title()
-
-            # DESCRIPCIÓN EN ESPAÑOL
-            deskr = None
-            for entry in api_item.flavor_text_entries:
-               if entry.language.name == "es":
-                  deskr = entry.text.replace("\n", " ").replace("\f", " ")
-                  break
-
-            if not deskr:
-               deskr = "Descripción no disponible en español"
-
-            item_id = api_item.id
-            argazkia = api_item.sprites.default
-
-            # TIPO DEL ITEM EN ESPAÑOL - MEJORADO
-            mota_api = api_item.category.name
-
-            # 1. Primero buscar en las traducciones de la API
-            mota = mota_api  # Por defecto
-            for name in api_item.category.names:
-               if name.language.name == "es":
-                  mota = name.name
-                  break
-
-            # 2. Si no encontró o la traducción es muy similar al inglés, usar nuestro diccionario
-            if mota == mota_api or mota.lower() == mota_api.lower():
-               # Limpiar y buscar en nuestro diccionario
-               mota_limpia = mota_api.lower().strip()
-               if mota_limpia in traducciones:
-                  mota = traducciones[mota_limpia]
-               else:
-                  # Si no está en el diccionario, capitalizar apropiadamente
-                  mota = mota_api.replace("-", " ").title()
-
-            # 3. Asegurar que no sea None o vacío
-            if not mota or mota.strip() == "":
-               mota = "Otros"
-
-            # INSERTS
-            self.db.insert(sql_mota, [mota])
-            self.db.insert(sql_item, [
-               item_id,
-               izena,
-               deskr,
-               argazkia,
-               mota
-            ])
-
+               self.db.insert(sql_mota, [datuak["mota"]])
+               self.db.insert(sql_item, [
+                  datuak["id"],
+                  datuak["izena"],
+                  datuak["deskripzioa"],
+                  datuak["argazkia"],
+                  datuak["mota"]
+               ])
          except Exception as e:
-            print(f"Error cargando item {item['name']}: {e}")
-            continue
+               print(f"Error item {item['name']}: {e}")
 
       print("=== CARGA DE ITEMS COMPLETADA ===")
       print("Tipos únicos cargados:")
