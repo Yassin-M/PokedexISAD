@@ -20,6 +20,7 @@ class EreduKontroladorea:
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
       self.motak_irudiak_eguneratu_simple();
+      self.ikasdezake_mugimenduak_fix_all();
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -169,6 +170,26 @@ class EreduKontroladorea:
          except Exception as e:
             print(f"UPDATE {mota_izena} error: {e}")
 
+   def ikasdezake_mugimenduak_fix_all(self):
+      sql = """
+            UPDATE IkasDezake
+            SET mugiIzena = (SELECT izena \
+                             FROM Mugimendua \
+                             WHERE LOWER(Mugimendua.izena) = LOWER(IkasDezake.mugiIzena)
+               LIMIT 1
+               )
+            WHERE EXISTS (
+               SELECT 1
+               FROM Mugimendua
+               WHERE LOWER (Mugimendua.izena) = LOWER (IkasDezake.mugiIzena)
+               ) \
+            """
+      try:
+         self.db.insert(sql, [])
+         print("IkasDezake 所有技能名已统一修正为 Mugimendua 标准名字")
+      except Exception as e:
+         print("批量更新 IkasDezake 错误:", e)
+
    def abileziak_kargatu(self):
       sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
       sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena) VALUES (?, ?)"
@@ -199,17 +220,17 @@ class EreduKontroladorea:
 
    def eboluzioak_kargatu(self):
       """
-      Eboluzio-kate guztiak kargatzeko（优化版，无进度显示）
+      Eboluzio-kate guztiak kargatzeko
       """
       sql = "INSERT OR IGNORE INTO Eboluzioa (pokemonPokedexID, eboluzioaPokeId) VALUES (?, ?)"
 
-      # 辅助函数：从 URL 中提取 Pokémon ID
+      # Laguntza-funtzioa: URL-tik Pokémon ID atera
       def get_id_from_url(url):
          if not url:
             return None
          return int(url.rstrip('/').split('/')[-1])
 
-      # 递归处理节点
+      # Nodoa errekurtsiboki prozesatu
       def prozesatu_nodoa(nodoa, aurreko_id):
          if isinstance(nodoa, dict):
             species_url = nodoa.get("species", {}).get("url")
@@ -224,12 +245,13 @@ class EreduKontroladorea:
          uneko_id = get_id_from_url(species_url)
 
          if aurreko_id is not None:
+            # Eboluzio erlazioa datu-basera sartu
             self.db.insert(sql, [aurreko_id, uneko_id])
 
          for eboluzioa in evolves_to_list:
             prozesatu_nodoa(eboluzioa, uneko_id)
 
-      # 遍历 evolution chain ID
+      # Evolution chain ID guztiak iteratu
       for i in range(1, 560):
          try:
             katea = pb.evolution_chain(i)
