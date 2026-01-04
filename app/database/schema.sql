@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS Eboluzioa (
 );
 
 CREATE TABLE IF NOT EXISTS PokemonTalde (
+    harraptuId INT AUTO_INCREMENT,
     izena VARCHAR(25),
     maila INT,
     adiskidetasun_maila INT,
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS PokemonTalde (
     SPE INT,
     PokemonPokedexID INT,
     ErabiltzaileIzena VARCHAR(25),
-    PRIMARY KEY (izena),
+    PRIMARY KEY (harraptuId),
     FOREIGN KEY (PokemonPokedexID) REFERENCES PokemonPokedex(pokeId),
     FOREIGN KEY (ErabiltzaileIzena) REFERENCES Erabiltzailea(izena)
 );
@@ -125,10 +126,10 @@ CREATE TABLE IF NOT EXISTS Mugimendua (
 );
 
 CREATE TABLE IF NOT EXISTS MugimenduIzanTalde (
-    pokemonID INT,
+    harraptuId INT,
     mugimenduIzena VARCHAR(25),
-    PRIMARY KEY (pokemonID, mugimenduIzena),
-    FOREIGN KEY (pokemonID) REFERENCES PokemonPokedex(pokeId),
+    PRIMARY KEY (harraptuId, mugimenduIzena),
+    FOREIGN KEY (harraptuId) REFERENCES PokemonTalde(harraptuId),
     FOREIGN KEY (mugimenduIzena) REFERENCES Mugimendua(izena)
 );
 
@@ -159,7 +160,8 @@ CREATE TABLE IF NOT EXISTS Taldea (
 CREATE TABLE IF NOT EXISTS PokemonTaldean (
     taldeIzena VARCHAR(25),
     pokeId INT,
-    PRIMARY KEY (taldeIzena, pokeId),
-    FOREIGN KEY (taldeIzena) REFERENCES Taldea(taldeIzena) ON DELETE CASCADE,
+    erabiltzaileIzena VARCHAR(25),
+    PRIMARY KEY (taldeIzena, pokeId, erabiltzaileIzena),
+    FOREIGN KEY (taldeIzena, erabiltzaileIzena) REFERENCES Taldea(taldeIzena) ON DELETE CASCADE,
     FOREIGN KEY (pokeId) REFERENCES PokemonPokedex(pokeId) ON DELETE CASCADE
 );
