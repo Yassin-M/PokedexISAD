@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itemdex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/itemdex.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="form-container">
+    <div class="itemdex-layout">
+        <form method="POST">
+            <!-- CABECERA -->
+            <div class="header-bar">
+                <a href="javascript:history.back()" class="nav-icon">
+                    <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+                </a>
+
+                <!-- BUSCADOR SIMPLE -->
+                <div class="search-container">
+                    <input type="text"
+                           name="izena"
+                           class="search-input"
+                           placeholder="Buscar...">
+                </div>
+
+                <a href="/" class="nav-icon">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+            </div>
+
+            <!-- GRID DE ITEMS -->
+            <div class="grid-container">
+                <div class="item-grid">
+                    {% for item in items %}
+                    <a href="{{ url_for('itemdex.item', id=item.ID) }}" class="item-card">
+                        {% if item.argazkia %}
+                            <img src="{{ item.argazkia }}" alt="{{ item.izena }}" loading="lazy">
+                        {% else %}
+                            <div class="no-image">?</div>
+                        {% endif %}
+                        <span>{{ item.izena }}</span>
+                    </a>
+                    {% endfor %}
+
+                    {% if not items %}
+                    <div class="no-results">
+                        <p>No se encontraron items</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- FILTROS -->
+            <div class="filter-container">
+                <button type="button" class="filter-btn" id="filter-toggle">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
+
+                <div class="filter-menu" id="filter-menu">
+                    <div class="filter-item-tipo">
+                        TIPO
+                        <div class="filter-submenu">
+                            {% for mota_row in motak %}
+                            {% set mota = mota_row[0] %}
+                            <label>
+                                <input type="checkbox" name="motak" value="{{ mota }}"
+                                    {% if mota in request.form.getlist('motak') %}checked{% endif %}>
+                                {{ mota }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="filter-item-orden">
+                        <button type="button" id="orden-btn" class="orden-btn">
+                            {% if request.form.orden == 'desc' %}
+                                Z > A
+                            {% else %}
+                                A > Z
+                            {% endif %}
+                        </button>
+                        <input type="hidden" name="orden" id="orden-input"
+                               value="{{ request.form.orden if request.form.orden else 'asc' }}">
+                    </div>
+
+                    <button type="submit" class="apply-filters">
+                        APLICAR
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const filterBtn = document.getElementById('filter-toggle');
+const filterMenu = document.getElementById('filter-menu');
+const ordenBtn = document.getElementById('orden-btn');
+const ordenInput = document.getElementById('orden-input');
+
+filterBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    filterMenu.classList.toggle('active');
+});
+
+document.addEventListener('click', (e) => {
+    if (!filterMenu.contains(e.target) && e.target !== filterBtn) {
+        filterMenu.classList.remove('active');
+    }
+});
+
+ordenBtn.addEventListener('click', () => {
+    if (ordenInput.value === 'asc') {
+        ordenInput.value = 'desc';
+        ordenBtn.textContent = 'Z > A';
+    } else {
+        ordenInput.value = 'asc';
+        ordenBtn.textContent = 'A > Z';
+    }
+});
+</script>
+
+</body>
+</html>

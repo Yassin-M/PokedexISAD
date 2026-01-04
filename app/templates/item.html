@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item.izena }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/itemdex.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="form-container">
+    <div class="detail-layout">
+        <!-- CABECERA CON ICONOS DE NAVEGACIÓN -->
+        <div class="detail-header">
+            <!-- Icono de volver (mismo que en itemdex) -->
+            <a href="javascript:history.back()" class="nav-icon">
+                <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+            </a>
+
+            <!-- Título centrado -->
+            <div class="detail-title">DETALLES</div>
+
+            <!-- Icono de home (mismo que en itemdex) -->
+            <a href="/" class="nav-icon">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
+        <div class="detail-grid">
+            <!-- Columna izquierda: imagen -->
+            <div class="left-col">
+                <div class="image-container">
+                    {% if item.argazkia and item.argazkia != '?' %}
+                        <img src="{{ item.argazkia }}" alt="{{ item.izena }}">
+                    {% else %}
+                        <div class="no-image">?</div>
+                    {% endif %}
+                </div>
+                <div class="name-box">{{ item.izena }}</div>
+            </div>
+
+            <!-- Columna derecha: información -->
+            <div class="right-col">
+                <div class="info-box description-box">
+                    <h3>Descripción</h3>
+                    <p>{{ item.deskripzioa }}</p>
+                </div>
+                <div class="info-box white-box">
+                    <h3>Tipo de Item</h3>
+                    <p>{{ item.MotaIzena }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
