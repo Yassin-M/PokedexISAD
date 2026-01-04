@@ -68,7 +68,7 @@ bista_bp = Blueprint('bista_orokorra', __name__)
 
 @bista_bp.route('/changelog')
 def changelog():
-    ErabiltzaileIzena = 'Ash'
+    ErabiltzaileIzena = session.get('username')
 
     bilatutakoIzena = request.args.get('bilatutako_erabiltzaile_izena')
 
