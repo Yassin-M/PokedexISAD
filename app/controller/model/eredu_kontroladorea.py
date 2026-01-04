@@ -27,8 +27,6 @@ class EreduKontroladorea:
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
       self.delete_test_team()
-      #self.create_simple_test_team()
-      #motak_irudiak_eguneratu()
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -131,56 +129,6 @@ class EreduKontroladorea:
          #esta parte habra que ver como acortarla un poco
       pass
 
-   def motak_irudiak_eguneratu(self):
-      mota_irudiak = [
-         ('normal', '/static/icons/normal.svg'),
-         ('fire', '/static/icons/fire.svg'),
-         ('water', '/static/icons/water.svg'),
-         ('electric', '/static/icons/electric.svg'),
-         ('grass', '/static/icons/grass.svg'),
-         ('ice', '/static/icons/ice.svg'),
-         ('fighting', '/static/icons/fighting.svg'),
-         ('poison', '/static/icons/poison.svg'),
-         ('ground', '/static/icons/ground.svg'),
-         ('flying', '/static/icons/flying.svg'),
-         ('psychic', '/static/icons/psychic.svg'),
-         ('bug', '/static/icons/bug.svg'),
-         ('rock', '/static/icons/rock.svg'),
-         ('ghost', '/static/icons/ghost.svg'),
-         ('dark', '/static/icons/dark.svg'),
-         ('dragon', '/static/icons/dragon.svg'),
-         ('steel', '/static/icons/steel.svg'),
-         ('fairy', '/static/icons/fairy.svg')
-      ]
-
-      sql = "UPDATE MotaPokemon SET irudia = ? WHERE pokemonMotaIzena = ?"
-
-      for mota_izena, irudia in mota_irudiak:
-         try:
-            self.db.insert(sql, [irudia, mota_izena])
-         except Exception as e:
-            print(f"UPDATE {mota_izena} error: {e}")
-
-   def ikasdezake_mugimenduak(self):
-      sql = """
-            UPDATE IkasDezake
-            SET mugiIzena = (SELECT izena \
-                             FROM Mugimendua \
-                             WHERE LOWER(Mugimendua.izena) = LOWER(IkasDezake.mugiIzena)
-               LIMIT 1
-               )
-            WHERE EXISTS (
-               SELECT 1
-               FROM Mugimendua
-               WHERE LOWER (Mugimendua.izena) = LOWER (IkasDezake.mugiIzena)
-               ) \
-            """
-      try:
-         self.db.insert(sql, [])
-         print("IkasDezake 所有技能名已统一修正为 Mugimendua 标准名字")
-      except Exception as e:
-         print("批量更新 IkasDezake 错误:", e)
-
    def abileziak_kargatu(self):
       sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
       sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
@@ -203,6 +151,18 @@ class EreduKontroladorea:
             pokemon_id = int(pokemon.url.split('/')[-2])
             self.db.insert(sql2, [pokemon_id, mugimendua["izena"]])
 
+   def __lortu_deskripzioa(self, objektua):
+      for sarrera in objektua.flavor_text_entries:
+         if sarrera.language.name == 'es':
+            return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
+      return 'Ez dago deskripziorik gaztelaniaz'
+
+   def __lortu_izena(self, objektua):
+      for sarrera in objektua.names:
+         if sarrera.language.name == 'es':
+            return sarrera.name.replace('\n', ' ').replace('\f', ' ')
+      return objektua.name
+
    def eboluzioak_kargatu(self):
       sql = """
             INSERT \
@@ -222,21 +182,6 @@ class EreduKontroladorea:
       except Exception as e:
          print(f"Eboluzioak kargatzean errorea: {e}")
 
-   def eboluzioak_konprobatu(self):
-      return len(self.db.select("SELECT * FROM Eboluzioa LIMIT 1")) > 0
-
-   def __lortu_deskripzioa(self, objektua):
-      for sarrera in objektua.flavor_text_entries:
-         if sarrera.language.name == 'es':
-            return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
-      return 'Ez dago deskripziorik gaztelaniaz'
-
-   def __lortu_izena(self, objektua):
-      for sarrera in objektua.names:
-         if sarrera.language.name == 'es':
-            return sarrera.name.replace('\n', ' ').replace('\f', ' ')
-      return objektua.name
-
    def pokemonak_konprobatu(self):
       return len(self.db.select("SELECT * FROM PokemonPokedex"))>1
 
@@ -252,6 +197,9 @@ class EreduKontroladorea:
       hay_relaciones = len(self.db.select("SELECT pokemonPokedexID FROM IzanDezake LIMIT 1")) > 0
 
       return hay_defs and hay_relaciones
+
+   def eboluzioak_konprobatu(self):
+      return len(self.db.select("SELECT * FROM Eboluzioa LIMIT 1")) > 0
 
    # =====================================================
    # ITEMDEX
@@ -590,6 +538,9 @@ class EreduKontroladorea:
       print("=== 结束 ===")
       return onena_info
 
+   # =====================================================
+   # CHATBOT PROBARAKO METODOAK, BUKAERARAKO BORRATU
+   # =====================================================
    def create_simple_test_team(self):
 
       try:
@@ -759,6 +710,56 @@ class EreduKontroladorea:
          import traceback
          traceback.print_exc()
          return False
+
+   def motak_irudiak_eguneratu(self):
+      mota_irudiak = [
+         ('normal', '/static/icons/normal.svg'),
+         ('fire', '/static/icons/fire.svg'),
+         ('water', '/static/icons/water.svg'),
+         ('electric', '/static/icons/electric.svg'),
+         ('grass', '/static/icons/grass.svg'),
+         ('ice', '/static/icons/ice.svg'),
+         ('fighting', '/static/icons/fighting.svg'),
+         ('poison', '/static/icons/poison.svg'),
+         ('ground', '/static/icons/ground.svg'),
+         ('flying', '/static/icons/flying.svg'),
+         ('psychic', '/static/icons/psychic.svg'),
+         ('bug', '/static/icons/bug.svg'),
+         ('rock', '/static/icons/rock.svg'),
+         ('ghost', '/static/icons/ghost.svg'),
+         ('dark', '/static/icons/dark.svg'),
+         ('dragon', '/static/icons/dragon.svg'),
+         ('steel', '/static/icons/steel.svg'),
+         ('fairy', '/static/icons/fairy.svg')
+      ]
+
+      sql = "UPDATE MotaPokemon SET irudia = ? WHERE pokemonMotaIzena = ?"
+
+      for mota_izena, irudia in mota_irudiak:
+         try:
+            self.db.insert(sql, [irudia, mota_izena])
+         except Exception as e:
+            print(f"UPDATE {mota_izena} error: {e}")
+
+   def ikasdezake_mugimenduak(self):
+      sql = """
+            UPDATE IkasDezake
+            SET mugiIzena = (SELECT izena \
+                             FROM Mugimendua \
+                             WHERE LOWER(Mugimendua.izena) = LOWER(IkasDezake.mugiIzena)
+               LIMIT 1
+               )
+            WHERE EXISTS (
+               SELECT 1
+               FROM Mugimendua
+               WHERE LOWER (Mugimendua.izena) = LOWER (IkasDezake.mugiIzena)
+               ) \
+            """
+      try:
+         self.db.insert(sql, [])
+         print("IkasDezake 所有技能名已统一修正为 Mugimendua 标准名字")
+      except Exception as e:
+         print("批量更新 IkasDezake 错误:", e)
 
 # =====================================================
 # NOTIFIKAZIOAK
