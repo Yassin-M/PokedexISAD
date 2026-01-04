@@ -13,10 +13,6 @@ class EreduKontroladorea:
       taldeak = self.db.select(sql1, (erabiltzailea,))
 
       json4 = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
-      print("=== taldeak_kargatu 输出 ===")
-      print(f"用户 '{erabiltzailea}' 的队伍列表:")
-      print(f"JSON4: {json4}")
-      print("=== 结束 ===")
       return json4
 
    def pokedex_kargatu(self, JSON2):
@@ -30,7 +26,9 @@ class EreduKontroladorea:
          self.mugimenduak_kargatu()
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
-      self.create_simple_test_team()
+      self.delete_test_team()
+      #self.create_simple_test_team()
+      #motak_irudiak_eguneratu()
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -150,7 +148,7 @@ class EreduKontroladorea:
             self.db.insert(sql3, parametroak)
          #esta parte habra que ver como acortarla un poco
 
-   def motak_irudiak_eguneratu_simple(self):
+   def motak_irudiak_eguneratu(self):
       mota_irudiak = [
          ('normal', '/static/icons/normal.svg'),
          ('fire', '/static/icons/fire.svg'),
@@ -180,7 +178,7 @@ class EreduKontroladorea:
          except Exception as e:
             print(f"UPDATE {mota_izena} error: {e}")
 
-   def ikasdezake_mugimenduak_fix_all(self):
+   def ikasdezake_mugimenduak(self):
       sql = """
             UPDATE IkasDezake
             SET mugiIzena = (SELECT izena \
@@ -497,34 +495,6 @@ class EreduKontroladorea:
             """
 
       pokemon_zerrenda = self.db.select(sql, [taldeIzena, erabiltzaileIzena])
-      # 简单打印结果
-      print("=== pokemon_zerrenda 查询结果 ===")
-      print(f"查询参数: taldeIzena={taldeIzena}, erabiltzaileIzena={erabiltzaileIzena}")
-      print(f"结果数量: {len(pokemon_zerrenda) if pokemon_zerrenda else 0}")
-      if pokemon_zerrenda:
-         for i, pokemon in enumerate(pokemon_zerrenda):
-            print(f"宝可梦 {i + 1}: {pokemon}")
-      else:
-         print("没有找到任何宝可梦")
-      print("=== 结束 ===")
-
-      if pokemon_zerrenda:
-         for i, row in enumerate(pokemon_zerrenda):
-            # 将 Row 对象转换为字典
-            pokemon_dict = dict(row)
-            print(f"\n宝可梦 {i + 1}:")
-            print(f"  ID: {pokemon_dict.get('PokemonPokedexID')}")
-            print(f"  名称: {pokemon_dict.get('izena')}")
-            print(f"  HP: {pokemon_dict.get('HP')}")
-            print(f"  ATK: {pokemon_dict.get('ATK')}")
-            print(f"  DEF: {pokemon_dict.get('DEF')}")
-            print(f"  SPATK: {pokemon_dict.get('SPATK')}")
-            print(f"  SPDEF: {pokemon_dict.get('SPDEF')}")
-            print(f"  SPE: {pokemon_dict.get('SPE')}")
-            print(f"  图片: {pokemon_dict.get('irudia')}")
-      else:
-         print("没有找到任何宝可梦")
-      print("=== 结束 ===")
 
       if not pokemon_zerrenda:
          return None
@@ -534,9 +504,7 @@ class EreduKontroladorea:
       puntuazio_maximoa = -1
 
       for row in pokemon_zerrenda:
-         # 将 Row 对象转换为字典
          pokemon = dict(row)
-
          # Puntuazioa kalkulatu (estatistika guztien batura)
          puntuazioa = (
                  pokemon["HP"] +
@@ -554,20 +522,6 @@ class EreduKontroladorea:
          if puntuazioa > puntuazio_maximoa:
             puntuazio_maximoa = puntuazioa
             onena = pokemon
-      print(f"\n最终选择的 onena:")
-      if onena:
-         print(f"  宝可梦名称: {onena['izena']}")
-         print(f"  宝可梦ID: {onena['PokemonPokedexID']}")
-         print(f"  总分: {onena['puntuazioa']}")
-         print(f"  详细数据:")
-         print(f"    HP: {onena['HP']}")
-         print(f"    ATK: {onena['ATK']}")
-         print(f"    DEF: {onena['DEF']}")
-         print(f"    SPATK: {onena['SPATK']}")
-         print(f"    SPDEF: {onena['SPDEF']}")
-         print(f"    SPE: {onena['SPE']}")
-      else:
-         print("  没有找到最强宝可梦 (onena is None)")
 
       if not onena:
          return None
@@ -586,18 +540,15 @@ class EreduKontroladorea:
          "taldeIzena": taldeIzena,
          "erabiltzaileIzena": erabiltzaileIzena
       }
-      print("\n=== onena_info 字典 ===")
-      print(f"完整字典: {onena_info}")
-      print("\n键值对详情:")
+      print("\n=== onena_info ===")
+      print(f"Hiztegia: {onena_info}")
       for key, value in onena_info.items():
          print(f"  {key}: {value}")
       print("=== 结束 ===")
       return onena_info
 
    def create_simple_test_team(self):
-      """
-      直接创建测试队伍，不检查，直接插入
-      """
+
       try:
          taldeIzena = "MY_TEST_TEAM"
          erabiltzaileIzena = "test_user"
@@ -609,6 +560,9 @@ class EreduKontroladorea:
          print(f"✓ User '{erabiltzaileIzena}' created/verified")
 
          # 2. 删除已存在的测试队伍（避免重复）
+         sql_delete_team = "DELETE FROM Taldea WHERE taldeIzena = ?"
+         self.db.delete(sql_delete_team, [taldeIzena])
+         print(f"✓ Deleted existing team '{taldeIzena}' if it existed")
 
          # 3. 创建队伍
          sql_team = "INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
@@ -691,4 +645,75 @@ class EreduKontroladorea:
          traceback.print_exc()
          return False
 
+   def delete_test_team(self):
+
+      try:
+         taldeIzena = "MY_TEST_TEAM"
+         erabiltzaileIzena = "test_user"
+         print(f"[INFO] Deleting test team '{taldeIzena}' for user '{erabiltzaileIzena}'")
+
+         # 1. 首先获取队伍中的所有宝可梦ID
+         sql_get_pokemon_ids = """
+                               SELECT pt.pokeId \
+                               FROM PokemonTaldean pt
+                               WHERE pt.taldeIzena = ? \
+                               """
+         pokemon_ids = self.db.select(sql_get_pokemon_ids, [taldeIzena])
+
+         # 2. 删除 PokemonTalde 表中的数据
+         sql_delete_pokemon_stats = """
+                                    DELETE \
+                                    FROM PokemonTalde
+                                    WHERE ErabiltzaileIzena = ?
+                                      AND izena IN (SELECT izena \
+                                                    FROM PokemonTalde \
+                                                    WHERE izena LIKE '%_test_%' \
+                                                       OR izena LIKE 'MY_TEST_TEAM%') \
+                                    """
+         stats_deleted = self.db.delete(sql_delete_pokemon_stats, [erabiltzaileIzena])
+         print(f"✓ Deleted {stats_deleted} pokemon stats from PokemonTalde")
+
+         # 3. 删除 PokemonTaldean 表中的关联数据
+         sql_delete_team_assoc = """
+                                 DELETE \
+                                 FROM PokemonTaldean
+                                 WHERE taldeIzena = ? \
+                                 """
+         assoc_deleted = self.db.delete(sql_delete_team_assoc, [taldeIzena])
+         print(f"✓ Deleted {assoc_deleted} associations from PokemonTaldean")
+
+         # 4. 删除 Taldea 表中的队伍
+         sql_delete_team = """
+                           DELETE \
+                           FROM Taldea
+                           WHERE taldeIzena = ? \
+                             AND erabiltzaileIzena = ? \
+                           """
+         team_deleted = self.db.delete(sql_delete_team, [taldeIzena, erabiltzaileIzena])
+         print(f"✓ Deleted {team_deleted} team from Taldea")
+
+         # 5. 如果这是该用户的唯一队伍，也可以删除用户（可选）
+         sql_check_other_teams = """
+                                 SELECT COUNT(*) as count \
+                                 FROM Taldea
+                                 WHERE erabiltzaileIzena = ? \
+                                 """
+         result = self.db.select(sql_check_other_teams, [erabiltzaileIzena])
+         if result and result[0]['count'] == 0:
+            sql_delete_user = """
+                              DELETE \
+                              FROM Erabiltzailea
+                              WHERE izena = ? \
+                              """
+            user_deleted = self.db.delete(sql_delete_user, [erabiltzaileIzena])
+            print(f"✓ Deleted user '{erabiltzaileIzena}' (no other teams found)")
+
+         print(f"[SUCCESS] Test team '{taldeIzena}' deleted successfully")
+         return True
+
+      except Exception as e:
+         print(f"[ERROR] delete_test_team failed: {e}")
+         import traceback
+         traceback.print_exc()
+         return False
 

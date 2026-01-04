@@ -1,17 +1,15 @@
-[file name]: onenak.css
-[file content begin]
-/* onenak.css - Styles specific to the Best Pokemon page */
+/* onenak.css - Onenak orrialdeko estilo bereziak */
 
-/* 覆盖 style.css 中的 detail-grid */
+/* style.css-ko detail-grid gainidatzi */
 .detail-grid {
     display: grid;
     grid-template-columns: 35% 60%;
     gap: 5%;
-    height: 90%;
+    height: auto;
     padding-top: 10px;
 }
 
-/* 覆盖 style.css 中的 left-col 和 right-col */
+/* style.css-ko left-col eta right-col gainidatzi */
 .left-col {
     display: flex;
     flex-direction: column;
@@ -24,48 +22,58 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    height: auto;
 }
 
-/* 覆盖 style.css 中的 info-box 在右边 - 调整高度 */
+/* Eskuin markoaren arazoa konpontzeko - barne-marjinak txikitu */
 .right-col .info-box {
     border: 2px solid black;
-    padding: 20px;
+    padding: 12px 15px; /* Barne-marjinak txikitu */
     box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
-    flex-grow: 1;
-    overflow-y: auto;
     background-color: white;
     height: auto;
-    min-height: 0;
+    min-height: auto;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 0;
 }
 
-/* 隐藏标题和计算说明 */
-.right-col .info-box h3 {
-    display: none;
-}
-
+/* Izenburua eta kalkuluen azalpena ezkutatu */
 .calculation-container {
     display: none;
 }
 
-/* Left column styles - 简化版 */
+/* Pokemon edukiontzia - trinkoago */
+.best-pokemon-container {
+    text-align: center;
+    width: 100%;
+    max-width: 350px; /* Gehienezko zabalera txikitu */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ezkerreko zutabearen estiloak */
 .trophy-container {
     text-align: center;
-    padding: 30px;
+    padding: 25px;
     background-color: white;
     border-radius: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 200px;
+    height: 180px;
     width: 100%;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     border: 3px solid #FFD700;
 }
 
 .trophy-container i {
-    font-size: 6rem;
+    font-size: 5rem;
     color: #FFD700;
     text-shadow: 3px 3px 0 #000;
 }
@@ -73,10 +81,10 @@
 .team-name-box {
     background-color: #98fb98;
     border: 3px solid #3b4cca;
-    padding: 15px 25px;
+    padding: 12px 20px;
     font-family: 'Fredoka', sans-serif;
     font-weight: bold;
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     text-transform: uppercase;
     box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
     text-align: center;
@@ -88,7 +96,7 @@
 .team-info {
     background-color: white;
     border: 2px solid #ccc;
-    padding: 15px;
+    padding: 12px;
     border-radius: 10px;
     width: 100%;
     text-align: center;
@@ -97,235 +105,159 @@
 }
 
 .team-info p {
-    margin: 8px 0;
+    margin: 6px 0;
     color: #555;
 }
 
 .team-info p:first-child {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #3b4cca;
     font-weight: bold;
 }
 
-/* Right column styles - Best Pokemon */
-.best-pokemon-box {
-    overflow-y: auto;
-    max-height: 85vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.best-pokemon-container {
-    text-align: center;
-    padding: 15px;
-    width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
+/* Pokemon irudia - txikiago */
 .pokemon-image-container {
-    margin-bottom: 20px;
+    margin-bottom: 12px; /* Tartea txikitu */
 }
 
 .pokemon-image {
-    width: 140px;
-    height: 140px;
+    width: 90px; /* Txikiago */
+    height: 90px; /* Txikiago */
     object-fit: contain;
 }
 
 .pokemon-name {
     color: #3b4cca;
     text-transform: uppercase;
-    margin-bottom: 15px;
+    margin-bottom: 8px; /* Tartea txikitu */
     font-family: 'Fredoka', sans-serif;
-    font-size: 1.8rem;
+    font-size: 1.3rem; /* Letra-tamaina txikiago */
     text-shadow: 1px 1px 0 #ffcb05;
 }
 
-/* Score container */
+/* Puntuazio edukiontzia - txikiago */
 .score-container {
     background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
-    padding: 15px;
-    border-radius: 10px;
+    padding: 10px; /* Barne-marjinak txikitu */
+    border-radius: 8px;
     border: 3px solid black;
-    margin: 15px auto;
-    max-width: 250px;
+    margin: 10px auto; /* Kanpo-marjinak txikitu */
+    width: 190px; /* Estuago */
     box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
 }
 
 .score-label {
-    font-size: 0.9rem;
-    margin-bottom: 5px;
+    font-size: 0.75rem; /* Letra-tamaina txikiago */
+    margin-bottom: 3px;
     text-shadow: 1px 1px 0 #000;
 }
 
 .score-value {
-    font-size: 2rem;
+    font-size: 1.5rem; /* Letra-tamaina txikiago */
     font-weight: bold;
     font-family: 'Pokemon', sans-serif;
-    letter-spacing: 2px;
-    margin: 8px 0;
+    letter-spacing: 1px;
+    margin: 5px 0;
 }
 
 .score-formula {
-    font-size: 0.8rem;
-    margin-top: 5px;
+    font-size: 0.7rem; /* Letra-tamaina txikiago */
+    margin-top: 2px;
     opacity: 0.9;
 }
 
-/* Stats grid */
+/* Estatistiken sareta - trinkoago */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 20px;
-    max-width: 350px;
-    margin-left: auto;
-    margin-right: auto;
+    gap: 6px; /* Tartea txikitu */
+    margin-top: 12px; /* Goiko marjina txikitu */
+    width: 100%;
+    max-width: 260px; /* Estuago */
 }
 
 .stat-item {
     text-align: center;
-    padding: 12px;
+    padding: 8px 4px; /* Barne-marjinak txikitu */
     background-color: #f0f0f0;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid #ddd;
-    transition: transform 0.2s;
-}
-
-.stat-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
 }
 
 .stat-value {
-    font-size: 1.3rem;
+    font-size: 1rem; /* Letra-tamaina txikiago */
     font-weight: bold;
     color: #ff0000;
     font-family: 'Fredoka', sans-serif;
 }
 
 .stat-label {
-    font-size: 0.85rem;
+    font-size: 0.7rem; /* Letra-tamaina txikiago */
     color: #666;
-    margin-top: 5px;
+    margin-top: 2px;
     text-transform: uppercase;
     font-weight: bold;
 }
 
-/* Empty state */
+/* Hutsik dagoen egoera - txikiago */
 .empty-state {
     text-align: center;
-    padding: 40px 20px;
+    padding: 20px 15px; /* Barne-marjinak txikitu */
     color: #888;
 }
 
 .empty-state i {
-    font-size: 3rem;
-    margin-bottom: 15px;
+    font-size: 2rem; /* Ikono txikiago */
+    margin-bottom: 8px;
     color: #dc0a2d;
 }
 
 .empty-state p {
-    font-size: 1.1rem;
+    font-size: 0.9rem; /* Letra-tamaina txikiago */
     margin: 0;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .detail-grid {
-        grid-template-columns: 1fr;
-        gap: 25px;
-        height: auto;
-    }
-
-    .left-col {
-        gap: 15px;
-    }
-
-    .trophy-container {
-        height: 150px;
-        padding: 20px;
-    }
-
-    .trophy-container i {
-        font-size: 4rem;
-    }
-
-    .team-name-box {
-        font-size: 1.4rem;
-        padding: 12px 20px;
-    }
-
-    .pokemon-image {
-        width: 120px;
-        height: 120px;
-    }
-
-    .pokemon-name {
-        font-size: 1.5rem;
-    }
-
-    .score-container {
-        max-width: 220px;
-        padding: 12px;
-    }
-
-    .score-value {
-        font-size: 1.8rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        max-width: 300px;
-        gap: 10px;
-    }
 }
 
 @media (max-width: 480px) {
     .trophy-container {
-        height: 120px;
-    }
-
-    .trophy-container i {
-        font-size: 3rem;
-    }
-
-    .team-name-box {
-        font-size: 1.2rem;
-        padding: 10px 15px;
-    }
-
-    .pokemon-image {
-        width: 100px;
         height: 100px;
     }
 
+    .trophy-container i {
+        font-size: 2.5rem;
+    }
+
+    .team-name-box {
+        font-size: 1.1rem;
+        padding: 8px 12px;
+    }
+
+    .pokemon-image {
+        width: 70px;
+        height: 70px;
+    }
+
     .pokemon-name {
-        font-size: 1.3rem;
+        font-size: 1.1rem;
     }
 
     .score-container {
-        max-width: 200px;
+        width: 150px;
     }
 
     .score-value {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
     .stats-grid {
-        gap: 8px;
-        max-width: 250px;
-    }
-
-    .stat-item {
-        padding: 10px;
+        max-width: 200px;
     }
 
     .stat-value {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
     }
 }
-[file content end]
