@@ -1,0 +1,224 @@
+/* taldezerrenda.css - Talde Zerrenda orrirako estilo bereziak */
+
+/* Talde Zerrenda orrirako bakarrik balio duena */
+.taldezerrenda-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.taldezerrenda-header {
+    text-align: center;
+    margin: 20px 0 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #3b4cca 0%, #2a3b9e 100%);
+    color: #ffcb05;
+    border-radius: 20px;
+    border: 5px solid #ff0000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.taldezerrenda-title {
+    font-family: 'Pokemon', sans-serif;
+    font-size: 3rem;
+    margin: 0;
+    text-shadow: 5px 5px 0 #ff0000;
+    letter-spacing: 2px;
+}
+
+.taldezerrenda-subtitle {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    text-shadow: 2px 2px 0 #000;
+    color: white;
+}
+
+/* Talde zerrenda edukiontzia */
+.taldeak-container {
+    flex-grow: 1;
+    background: white;
+    border-radius: 15px;
+    border: 3px solid black;
+    padding: 20px;
+    margin-bottom: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Talde zerrenda */
+.taldeak-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex-grow: 1;
+}
+
+/* Talde botoia */
+.talde-botoia {
+    background: linear-gradient(to bottom, #f0f4f8 0%, #d1dce8 100%);
+    border: 3px solid #3b4cca;
+    border-radius: 12px;
+    padding: 20px;
+    text-decoration: none;
+    color: #333;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.talde-botoia:hover {
+    transform: translateY(-5px);
+    background: linear-gradient(to bottom, #ffcb05 0%, #ffa500 100%);
+    border-color: #ff0000;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    color: #3b4cca;
+}
+
+.talde-botoia:active {
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+}
+
+/* Talde botoiaren efektua */
+.talde-botoia::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.talde-botoia:hover::before {
+    left: 100%;
+}
+
+/* Talde kopuru txikia dagoenean */
+.taldeak-hutsik {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+}
+
+.taldeak-hutsik p:first-child {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.taldeak-hutsik p:last-child {
+    font-size: 1rem;
+}
+
+/* Scrollbar estiloak */
+.taldeak-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.taldeak-container::-webkit-scrollbar-track {
+    background: #f0f4f8;
+    border-radius: 5px;
+}
+
+.taldeak-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
+    border-radius: 5px;
+    border: 2px solid #f0f4f8;
+}
+
+.taldeak-container::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #ff5555 0%, #cc0000 100%);
+}
+
+/* Nabigazio botoiak */
+.taldezerrenda-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.taldezerrenda-nav-btn {
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 50px;
+    border: 4px solid black;
+    box-shadow: 0 6px 0 #000;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    font-family: 'Fredoka', sans-serif;
+}
+
+.taldezerrenda-btn-back {
+    background: linear-gradient(to bottom, #3b4cca 0%, #2a3b9e 100%);
+    color: white;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.taldezerrenda-btn-home {
+    background: linear-gradient(to bottom, #ff0000 0%, #cc0000 100%);
+    color: #ffcb05;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.taldezerrenda-nav-btn:hover {
+    transform: translateY(3px);
+    box-shadow: 0 3px 0 #000;
+}
+
+/* Erantzunkortasuna */
+@media (max-width: 768px) {
+    .taldezerrenda-title {
+        font-size: 2.2rem;
+    }
+
+    .taldezerrenda-subtitle {
+        font-size: 1rem;
+    }
+
+    .talde-botoia {
+        font-size: 1.5rem;
+        padding: 15px;
+    }
+
+    .taldezerrenda-nav {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .taldezerrenda-nav-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .taldezerrenda-container {
+        padding: 10px;
+    }
+
+    .taldezerrenda-header {
+        padding: 15px;
+        margin: 10px 0 20px;
+    }
+
+    .taldeak-container {
+        padding: 15px;
+    }
+}

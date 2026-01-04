@@ -195,3 +195,44 @@ class APIKontroladorea:
             "argazkia": api_item.sprites.default,
             "mota": mota
         }
+
+   def eboluzioak_eskatu(self):
+
+       eboluzioKateak = []
+
+       def get_id_from_url(url):
+           if not url:
+               return None
+           return int(url.rstrip('/').split('/')[-1])
+
+       def prozesatu_nodoa(nodoa, aurreko_id):
+           if isinstance(nodoa, dict):
+               species_url = nodoa.get("species", {}).get("url")
+               evolves_to_list = nodoa.get("evolves_to", [])
+           else:
+               species_url = getattr(nodoa.species, 'url', None)
+               evolves_to_list = getattr(nodoa, 'evolves_to', [])
+
+           if not species_url:
+               return
+
+           uneko_id = get_id_from_url(species_url)
+
+           if aurreko_id is not None:
+               eboluzioKateak.append((aurreko_id, uneko_id))
+
+           for eboluzioa in evolves_to_list:
+               prozesatu_nodoa(eboluzioa, uneko_id)
+
+       for i in range(1, 560):
+           try:
+               katea = pb.evolution_chain(i)
+               if hasattr(katea, 'chain'):
+                   prozesatu_nodoa(katea.chain, None)
+               elif isinstance(katea, dict) and 'chain' in katea:
+                   prozesatu_nodoa(katea['chain'], None)
+           except:
+               continue
+
+       return eboluzioKateak
+

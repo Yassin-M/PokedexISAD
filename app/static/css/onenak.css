@@ -1,0 +1,263 @@
+/* onenak.css - Onenak orrialdeko estilo bereziak */
+
+/* style.css-ko detail-grid gainidatzi */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 35% 60%;
+    gap: 5%;
+    height: auto;
+    padding-top: 10px;
+}
+
+/* style.css-ko left-col eta right-col gainidatzi */
+.left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+}
+
+.right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: auto;
+}
+
+/* Eskuin markoaren arazoa konpontzeko - barne-marjinak txikitu */
+.right-col .info-box {
+    border: 2px solid black;
+    padding: 12px 15px; /* Barne-marjinak txikitu */
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    background-color: white;
+    height: auto;
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 0;
+}
+
+/* Izenburua eta kalkuluen azalpena ezkutatu */
+.calculation-container {
+    display: none;
+}
+
+/* Pokemon edukiontzia - trinkoago */
+.best-pokemon-container {
+    text-align: center;
+    width: 100%;
+    max-width: 350px; /* Gehienezko zabalera txikitu */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ezkerreko zutabearen estiloak */
+.trophy-container {
+    text-align: center;
+    padding: 25px;
+    background-color: white;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 180px;
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 3px solid #FFD700;
+}
+
+.trophy-container i {
+    font-size: 5rem;
+    color: #FFD700;
+    text-shadow: 3px 3px 0 #000;
+}
+
+.team-name-box {
+    background-color: #98fb98;
+    border: 3px solid #3b4cca;
+    padding: 12px 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: bold;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    text-align: center;
+    width: 100%;
+    color: #3b4cca;
+    text-shadow: 1px 1px 0 #ffcb05;
+}
+
+.team-info {
+    background-color: white;
+    border: 2px solid #ccc;
+    padding: 12px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+}
+
+.team-info p {
+    margin: 6px 0;
+    color: #555;
+}
+
+.team-info p:first-child {
+    font-size: 1rem;
+    color: #3b4cca;
+    font-weight: bold;
+}
+
+/* Pokemon irudia - txikiago */
+.pokemon-image-container {
+    margin-bottom: 12px; /* Tartea txikitu */
+}
+
+.pokemon-image {
+    width: 90px; /* Txikiago */
+    height: 90px; /* Txikiago */
+    object-fit: contain;
+}
+
+.pokemon-name {
+    color: #3b4cca;
+    text-transform: uppercase;
+    margin-bottom: 8px; /* Tartea txikitu */
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem; /* Letra-tamaina txikiago */
+    text-shadow: 1px 1px 0 #ffcb05;
+}
+
+/* Puntuazio edukiontzia - txikiago */
+.score-container {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: white;
+    padding: 10px; /* Barne-marjinak txikitu */
+    border-radius: 8px;
+    border: 3px solid black;
+    margin: 10px auto; /* Kanpo-marjinak txikitu */
+    width: 190px; /* Estuago */
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+}
+
+.score-label {
+    font-size: 0.75rem; /* Letra-tamaina txikiago */
+    margin-bottom: 3px;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.score-value {
+    font-size: 1.5rem; /* Letra-tamaina txikiago */
+    font-weight: bold;
+    font-family: 'Pokemon', sans-serif;
+    letter-spacing: 1px;
+    margin: 5px 0;
+}
+
+.score-formula {
+    font-size: 0.7rem; /* Letra-tamaina txikiago */
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+/* Estatistiken sareta - trinkoago */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px; /* Tartea txikitu */
+    margin-top: 12px; /* Goiko marjina txikitu */
+    width: 100%;
+    max-width: 260px; /* Estuago */
+}
+
+.stat-item {
+    text-align: center;
+    padding: 8px 4px; /* Barne-marjinak txikitu */
+    background-color: #f0f0f0;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.stat-value {
+    font-size: 1rem; /* Letra-tamaina txikiago */
+    font-weight: bold;
+    color: #ff0000;
+    font-family: 'Fredoka', sans-serif;
+}
+
+.stat-label {
+    font-size: 0.7rem; /* Letra-tamaina txikiago */
+    color: #666;
+    margin-top: 2px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* Hutsik dagoen egoera - txikiago */
+.empty-state {
+    text-align: center;
+    padding: 20px 15px; /* Barne-marjinak txikitu */
+    color: #888;
+}
+
+.empty-state i {
+    font-size: 2rem; /* Ikono txikiago */
+    margin-bottom: 8px;
+    color: #dc0a2d;
+}
+
+.empty-state p {
+    font-size: 0.9rem; /* Letra-tamaina txikiago */
+    margin: 0;
+}
+
+@media (max-width: 480px) {
+    .trophy-container {
+        height: 100px;
+    }
+
+    .trophy-container i {
+        font-size: 2.5rem;
+    }
+
+    .team-name-box {
+        font-size: 1.1rem;
+        padding: 8px 12px;
+    }
+
+    .pokemon-image {
+        width: 70px;
+        height: 70px;
+    }
+
+    .pokemon-name {
+        font-size: 1.1rem;
+    }
+
+    .score-container {
+        width: 150px;
+    }
+
+    .score-value {
+        font-size: 1.2rem;
+    }
+
+    .stats-grid {
+        max-width: 200px;
+    }
+
+    .stat-value {
+        font-size: 0.9rem;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+    }
+}

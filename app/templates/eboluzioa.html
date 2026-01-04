@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pokemon.izena }} - Eboluzioa</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eboluzioa.css') }}">
+</head>
+<body>
+
+<div class="form-container">
+    <div class="detail-layout">
+
+        <!-- HEADER -->
+        <div class="header-bar">
+            <a href="javascript:history.back()" class="nav-icon">
+                <i class="fa-solid fa-reply fa-flip-horizontal"></i>
+            </a>
+            <a href="/" class="nav-icon">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
+        <div class="detail-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="left-col">
+                <div class="image-container">
+                    <img src="{{ pokemon.irudia }}" alt="{{ pokemon.izena }}">
+                </div>
+
+                <div class="name-box">
+                    {{ pokemon.izena|upper }}
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="right-col">
+
+                <!-- Aurreko forma -->
+                <div class="info-box white-box">
+                    <h3>Aurreko Forma:</h3>
+                    {% if pokemon.aurrekoak %}
+                        <div class="evolution-list-container">
+                            {% for p in pokemon.aurrekoak %}
+                                <div class="evolution-item">
+                                    <img src="{{ p.irudia }}" alt="{{ p.izena }}" class="evolution-img">
+                                    <div class="evolution-info">
+                                        <span class="evolution-name">{{ p.izena }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Ez dago aurreko forma.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Hurrengo forma -->
+                <div class="info-box white-box">
+                    <h3>Hurrengo Forma:</h3>
+                    {% if pokemon.hurrengoak %}
+                        <div class="evolution-list-container">
+                            {% for p in pokemon.hurrengoak %}
+                                <div class="evolution-item">
+                                    <img src="{{ p.irudia }}" alt="{{ p.izena }}" class="evolution-img">
+                                    <div class="evolution-info">
+                                        <span class="evolution-name">{{ p.izena }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Ez dago hurrengo forma.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

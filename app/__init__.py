@@ -3,8 +3,7 @@ from flask import Flask
 from app.database.database import Connection
 from app.controller.view.bista_kontroladorea import pokedex_blueprint
 from app.controller.view.bista_kontroladorea import itemdex_blueprint
-
-
+from app.controller.view.bista_kontroladorea import chatbot_blueprint
 from app.controller.view.bista_kontroladorea import bista_bp
 
 def init_db():
@@ -18,6 +17,8 @@ def create_app():
     # Registrar blueprint de Itemdex
     app.register_blueprint(itemdex_blueprint(db))
     app.register_blueprint(pokedex_blueprint(db))
+    app.register_blueprint(chatbot_blueprint(db))
     app.register_blueprint(bista_bp)
+
     return app
 

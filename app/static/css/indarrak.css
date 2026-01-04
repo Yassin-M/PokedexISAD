@@ -1,0 +1,360 @@
+/* static/css/indarrak.css */
+
+/* Oinarrizko estiloak */
+html, body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #effdff;
+}
+
+/* ====== Mota irudien atzeko planoa ====== */
+
+/* 1. metodoa: [alt*="mota-izena"] hautatzailea erabiltzea */
+img[alt*="bug"], img[alt*="Bug"] {
+    background-color: #92BC2C !important;
+    box-shadow: 0 0 8px #92BC2C;
+}
+
+img[alt*="dark"], img[alt*="Dark"] {
+    background-color: #595761 !important;
+    box-shadow: 0 0 8px #595761;
+}
+
+img[alt*="dragon"], img[alt*="Dragon"] {
+    background-color: #0C69C8 !important;
+    box-shadow: 0 0 8px #0C69C8;
+}
+
+img[alt*="electric"], img[alt*="Electric"] {
+    background-color: #F2D94E !important;
+    box-shadow: 0 0 8px #F2D94E;
+}
+
+img[alt*="fire"], img[alt*="Fire"] {
+    background-color: #FBA54C !important;
+    box-shadow: 0 0 8px #FBA54C;
+}
+
+img[alt*="fairy"], img[alt*="Fairy"] {
+    background-color: #EE90E6 !important;
+    box-shadow: 0 0 8px #EE90E6;
+}
+
+img[alt*="fighting"], img[alt*="Fighting"] {
+    background-color: #D3425F !important;
+    box-shadow: 0 0 8px #D3425F;
+}
+
+img[alt*="flying"], img[alt*="Flying"] {
+    background-color: #A1BBEC !important;
+    box-shadow: 0 0 8px #A1BBEC;
+}
+
+img[alt*="ghost"], img[alt*="Ghost"] {
+    background-color: #5F6DBC !important;
+    box-shadow: 0 0 8px #5F6DBC;
+}
+
+img[alt*="grass"], img[alt*="Grass"] {
+    background-color: #5FBD58 !important;
+    box-shadow: 0 0 8px #5FBD58;
+}
+
+img[alt*="ground"], img[alt*="Ground"] {
+    background-color: #DA7C4D !important;
+    box-shadow: 0 0 8px #DA7C4D;
+}
+
+img[alt*="ice"], img[alt*="Ice"] {
+    background-color: #75D0C1 !important;
+    box-shadow: 0 0 8px #75D0C1;
+}
+
+img[alt*="normal"], img[alt*="Normal"] {
+    background-color: #A0A29F !important;
+    box-shadow: 0 0 8px #A0A29F;
+}
+
+img[alt*="poison"], img[alt*="Poison"] {
+    background-color: #B763CF !important;
+    box-shadow: 0 0 8px #B763CF;
+}
+
+img[alt*="psychic"], img[alt*="Psychic"] {
+    background-color: #FA8581 !important;
+    box-shadow: 0 0 8px #FA8581;
+}
+
+img[alt*="rock"], img[alt*="Rock"] {
+    background-color: #C9BB8A !important;
+    box-shadow: 0 0 8px #C9BB8A;
+}
+
+img[alt*="steel"], img[alt*="Steel"] {
+    background-color: #5695A3 !important;
+    box-shadow: 0 0 8px #5695A3;
+}
+
+img[alt*="water"], img[alt*="Water"] {
+    background-color: #539DDF !important;
+    box-shadow: 0 0 8px #539DDF;
+}
+
+/* ====== Irudi estilo orokorrak ====== */
+
+/* Mota irudi guztiak */
+.type-img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    margin: 0 3px;
+    border-radius: 50% !important;
+    padding: 2px !important;
+    box-sizing: border-box !important;
+}
+
+/* Indarrak eta ahuleziak zerrendako irudiak */
+.strength-item img,
+.weakness-item img {
+    width: 24px !important;
+    height: 24px !important;
+    margin-right: 8px !important;
+    border-radius: 50% !important;
+    padding: 2px !important;
+    display: inline-block !important;
+}
+
+/* Mota mota edukiontziko irudiak */
+.type-item img {
+    width: 24px;
+    height: 24px;
+}
+
+/* Eboluzio zerrendako irudiak */
+.evolution-img {
+    width: 55px;
+    height: 55px;
+    margin-right: 10px;
+    border-radius: 6px;
+    padding: 2px;
+}
+
+/* Pokemon-en mota edukiontzia */
+.types-box {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.types-box h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Indarrak eta ahuleziak zerrendako elementuak */
+.strength-item, .weakness-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.strength-item:hover, .weakness-item:hover {
+    background-color: #e9ecef;
+    transform: translateX(3px);
+}
+
+.strength-item img, .weakness-item img {
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
+}
+
+.strength-item span, .weakness-item span {
+    font-weight: 500;
+    text-transform: capitalize;
+    color: #333;
+}
+
+/* Korritze edukiontzia */
+.evolution-list-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 8px;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+/* Eboluzio elementu estiloak */
+.evolution-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.evolution-item:hover {
+    background-color: rgba(240, 240, 240, 0.9);
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.evolution-info {
+    flex: 1;
+}
+
+.evolution-name {
+    font-weight: 600;
+    color: #333;
+    text-transform: capitalize;
+}
+
+/* Mota mota edukiontzia */
+.types-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.type-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.type-item img {
+    width: 32px;
+    height: 32px;
+}
+
+.type-item span {
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+/* Korritze-barra estiloak */
+.evolution-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.evolution-list-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.evolution-list-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.evolution-list-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Firefox korritze-barra */
+.evolution-list-container {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+
+/* Hutsik dagoen egoerarako irakurria */
+.info-box p {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* ====== KAUTOK IRTEN DIREN KUTXAK ZUZENTZEA ====== */
+
+/* MOTAK karrerako kaxa (motentzat bakarrik) */
+.types-container {
+    max-height: 120px; /* Gehienezko altuera */
+    overflow-y: auto; /* Beharrezkoa baina bertikaleko korritze-barra */
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+/* INDARRAK eta AHULEZIAK kaxetarako */
+.evolution-list-container {
+    max-height: 180px; /* 250px baino pixka bat txikiagoa hobeto doan */
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+/* Korritze-barra types-container-erako ere */
+.types-container::-webkit-scrollbar {
+    width: 5px;
+}
+
+.types-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.types-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.types-container::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Firefox types-container-erako */
+.types-container {
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f1f1f1;
+}
+
+/* Kutxa zuriek altuera finkoa izatea ziurtatu */
+.white-box {
+    min-height: 150px; /* Gutxieneko altuera */
+    max-height: 300px; /* Gehienezko altuera */
+    overflow: hidden; /* Gehiegi haztea ekiditeko */
+    display: flex;
+    flex-direction: column;
+}
+
+/* White-box barruko edukia korritze-barrarekin hazi behar da */
+.white-box > .types-container,
+.white-box > .evolution-list-container {
+    flex-grow: 1; /* Eskuragarri dagoen espazioa okupatu */
+}
+
+/* MOTAK kaxa zehazki */
+.info-box.white-box:has(.types-container) {
+    max-height: 250px; /* Mota askotarako pixka bat altuagoa */
+}
+
+/* Eduki asko duten kaxetarako, espazio gehiago gehitu */
+.info-box.white-box h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    flex-shrink: 0; /* Izenburua ez da txikitzen */
+}
+
+/* Daturik ez dagoenean mezua */
+.info-box p {
+    margin: 0;
+    padding: 20px 0;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
