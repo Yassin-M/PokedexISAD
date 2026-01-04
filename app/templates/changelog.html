@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Changelog</title>
+        <link rel="stylesheet" href="../static/css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <title>Changelog</title>
+    </head>
+    <body>
+        <div class="form-container changelog-mode">
+    <div class="login-container">
+
+        <div class="top-bar">
+            <button class="icon-btn" onclick="history.back()">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <h2>CHANGELOG</h2>
+            <a href="/" class="icon-btn">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
+        <div class="changelog-list">
+
+            {% for noti in notificaciones %}
+            
+            <div class="changelog-item">
+                <span class="sprite">
+                    <img src="{{ url_for('static', filename='../static/img/rojo.gif') }}" alt="Sprite">
+                </span>
+                
+                <span class="changelog-text">
+                    <strong>{{ noti['JarraituIzena'] }}:</strong> 
+                    
+                    {{ noti['deskripzioa'] }}
+                    
+                    <br>
+                    <small style="color: grey; font-size: 0.8em;">
+                        {{ noti['DataOrdua'] }}
+                    </small>
+                </span>
+            </div>
+
+            {% endfor %}
+
+        </div>
+        
+
+        <div class="search-container">
+            <form action="{{ url_for('bista_orokorra.changelog') }}" method="GET" class="search-form">
+        
+            <input type="text" 
+               name="bilatutako_erabiltzaile_izena" 
+               class="search-input" 
+               placeholder="Bilatu erabilztaile bat..."
+               value="{{ request.args.get('bilatu den erabiltzailea', '') }}"> 
+            <button type="submit" class="btn btn-login">Buscar</button>
+            </form>
+        </div> 
+    </body>
+</html>
