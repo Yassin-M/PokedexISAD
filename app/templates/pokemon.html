@@ -35,16 +35,28 @@
 
                     <div class="info-box description-box">
                         {% if akzioa == 'hauta_pokemon' %}
+                            <h3>TALDEA: {{ session.get('editatzen_ari_den_taldea') }}</h3>
+                            <p>Hautatu Pokémon hau taldera gehitzeko?</p>
                             <div class="selection-container" style="text-align: center; padding: 10px;">
-                                <form action="{{ url_for('taldeak.kargatu_taldea') }}" method="POST">
-                                    <input type="hidden" name="pokemon_id" value="{{ pokemon.id }}">
-                                    <input type="hidden" name="talde_izena" value="{{ talde_izena }}">
-                                    
+                                <form action="{{ url_for('taldeak.sartu_taldera') }}" method="POST">
                                     <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
                                         HAUTATU POKEMONA
                                     </button>
                                 </form>
                             </div>
+                        {% elif akzioa == 'aldatu_pokemon' %}
+                            <h3>TALDEA: {{ session.get('editatzen_ari_den_taldea') }}</h3>
+                            <p>Zer egin nahi duzu?</p>
+                            <form action="{{ url_for('taldeak.ezabatu_taldetik') }}" method="POST">
+                                <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
+                                    ALDATU POKEMONA
+                                </button>
+                            </form>
+                            <form action="{{ url_for('taldeak.ezabatu_taldetik') }}" method="POST">
+                                <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
+                                    EZABATU POKEMONA
+                                </button>
+                            </form>
                         {% else %}
                             <h3>POKEDEX SARRERA:</h3>
                             <p>{{ pokemon.deskr }}</p>

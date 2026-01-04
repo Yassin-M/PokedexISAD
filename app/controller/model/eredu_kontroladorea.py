@@ -44,6 +44,30 @@ class EreduKontroladorea:
       json5 = [ {'pokeID': pokeID, 'argazkia': irudia} for (pokeID, irudia) in taldea ]
       return json5
     
+    def sartu_taldera(self, taldeIzena, erabiltzailea, pokemonId):
+      sql3 = "SELECT COUNT(*) as count FROM PokemonTaldean PT JOIN Taldea T ON PT.taldeIzena = T.taldeIzena WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
+      count_result = self.db.select(sql3, (erabiltzailea, taldeIzena))
+      if count_result and count_result[0]['count'] >= 6:
+          raise ValueError("Ezin dira 6 pokémon baino gehiago sartu talde batean")
+      
+      sql4 = "INSERT INTO PokemonTaldean (taldeIzena, pokeID) VALUES (?, ?)"
+      self.db.insert(sql4, (taldeIzena, pokemonId))
+
+    def ezabatu_taldetik(self, taldeIzena, erabiltzailea, pokemonId):
+      sql5 = "DELETE FROM PokemonTaldean WHERE pokeId = ? AND taldeIzena = ? AND taldeIzena IN (SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?)"
+      self.db.delete(sql5, (pokemonId, taldeIzena, erabiltzailea))
+
+    def ezabatu_taldea(self, taldeIzena, erabiltzailea):
+      sql7 = "DELETE FROM PokemonTaldean WHERE taldeIzena = ? AND taldeIzena IN (SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?)"
+      self.db.delete(sql7, (taldeIzena, erabiltzailea))
+
+      sql6 = "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
+      self.db.delete(sql6, (taldeIzena, erabiltzailea))
+      
+
+
+
+
     def pokedex_kargatu(self, JSON2):
       if not self.pokemonak_konprobatu():
          self.pokemonak_kargatu()

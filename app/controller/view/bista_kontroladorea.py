@@ -13,11 +13,12 @@ def taldeak_blueprint(db):
    def taldeak_kargatu():
       talde_zerrenda = service.taldeak_kargatu('juan')
       return render_template('taldeak.html', taldeak=talde_zerrenda)
-
+   
    @taldeak_bp.route('/taldea/<string:izena>')
    def taldea(izena):
       taldea = service.get_taldea(izena, 'juan')
       return render_template('taldea.html', taldea=taldea)
+
 
    @taldeak_bp.route('/taldea', methods=['POST'])
    def sortu_taldea():
@@ -29,15 +30,41 @@ def taldeak_blueprint(db):
          flash(str(e), "error") # Enviamos el mensaje de error al HTML
          return redirect(url_for('taldeak.taldeak_kargatu'))
    
-   @taldeak_bp.route('/editatu_taldea', methods=['POST'])
+   @taldeak_bp.route('/editatu_taldea', methods=['GET', 'POST'])
    def kargatu_taldea():
-      talde_izena = request.form.get('talde_izena')
-      talde_datuak = service.get_taldea(talde_izena, 'juan')
-      
-      session['editatzen_ari_den_taldea'] = talde_izena
-      
-      return render_template('taldea.html', pokemons=talde_datuak, izena=talde_izena)
 
+      if request.form.get('talde_izena'):
+         talde_izena = request.form.get('talde_izena')
+         session['editatzen_ari_den_taldea'] = talde_izena
+      else:
+         talde_izena = session.get('editatzen_ari_den_taldea')
+      talde_datuak = service.get_taldea(talde_izena, 'juan')
+      return render_template('taldea.html', pokemons=talde_datuak, izena=talde_izena)
+   
+   @taldeak_bp.route('/pokemon_taldea', methods=['POST'])
+   def sartu_taldera():
+      talde_izena = session.get('editatzen_ari_den_taldea')
+      pokemon_id = session.get('pokemon_datuak')
+      try:
+         service.sartu_taldera(talde_izena, 'juan', pokemon_id)
+         return redirect(url_for('taldeak.kargatu_taldea'))
+      except ValueError as e:
+         flash(str(e), "error")
+         return redirect(url_for('taldeak.kargatu_taldea'))
+   
+   @taldeak_bp.route('/pokemon_taldea/ezabatu', methods=['POST'])
+   def ezabatu_taldetik():
+      talde_izena = session.get('editatzen_ari_den_taldea')
+      pokemon_id = session.get('pokemon_datuak')
+      service.ezabatu_taldetik(talde_izena, 'juan', pokemon_id)
+      return redirect(url_for('taldeak.taldeak_kargatu'))
+
+   @taldeak_bp.route('/taldea/ezabatu', methods=['GET', 'POST'])
+   def taldea_ezabatu():
+      talde_izena = session.get('editatzen_ari_den_taldea')
+      flash("Deleting team:", talde_izena)  # Debugging output
+      service.ezabatu_taldea(talde_izena, 'juan')
+      return redirect(url_for('taldeak.taldeak_kargatu'))
    
    return taldeak_bp  # Ensure the Blueprint object is returned
 
@@ -67,9 +94,13 @@ def pokedex_blueprint(db):
    @pokedex_bp.route('/pokedex/pokemon/<int:id>', methods=['GET'])
    def pokemon(id):
       datuak = service.bistaratu_pokemon(id)
+      session['pokemon_datuak'] = id
 
       taldea = session.get('editatzen_ari_den_taldea')
-      akzioa = session.get('akzioa')
+      if request.args.get('akzioa'):
+          akzioa = request.args.get('akzioa')
+      else:
+         akzioa = session.get('akzioa')
 
       return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
    return pokedex_bp

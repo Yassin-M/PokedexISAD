@@ -160,6 +160,6 @@ CREATE TABLE IF NOT EXISTS PokemonTaldean (
     taldeIzena VARCHAR(25),
     pokeId INT,
     PRIMARY KEY (taldeIzena, pokeId),
-    FOREIGN KEY (taldeIzena) REFERENCES Taldea(taldeIzena),
-    FOREIGN KEY (pokeId) REFERENCES PokemonPokedex(pokeId)
+    FOREIGN KEY (taldeIzena) REFERENCES Taldea(taldeIzena) ON DELETE CASCADE,
+    FOREIGN KEY (pokeId) REFERENCES PokemonPokedex(pokeId) ON DELETE CASCADE
 );

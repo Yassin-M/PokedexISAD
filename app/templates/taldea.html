@@ -14,32 +14,41 @@
             <a href="{{ url_for('taldeak.taldeak_kargatu') }}">
                 <i class="fas fa-reply nav-icon" title="Atzera"></i>
             </a>
-            <!--a href="{{ url_for('taldeak.sortu_taldea') }}"-->
-                <i class="fas fa-home nav-icon" title="Hasiera"></i>
-            <!--/a-->
+            <i class="fas fa-home nav-icon" title="Hasiera"></i>
+        </div>
+    
+        <!-- Taldea Name Section -->
+        <div class="taldea-name-container">
+            <h1 class="taldea-name">{{ session.get('editatzen_ari_den_taldea') }}</h1>
         </div>
     
         <div class="main-content">
             <div class="sidebar-actions">
-                <button class="action-btn large-text">EZABATU</button>
-                <button class="action-btn large-text">GORDE</button>
+                <a href="{{ url_for('taldeak.taldeak_kargatu') }}">
+                    <button class="action-btn large-text">GORDE</button>
+                </a>
+                <a href="{{ url_for('taldeak.taldea_ezabatu') }}" onclick="return confirm('Ziur zaude talde hau ezabatu nahi duzula?');">
+                    <button class="action-btn large-text">EZABATU</button>
+                </a>
             </div>
     
             <div class="pokemon-grid">
                 {% for pokemon in pokemons %}
-                    <a href="/pokedex/pokemon/{{ pokemon['id'] }}" class="pokemon-card">
+                    <a href="{{ url_for('pokedex.pokemon', id=pokemon['pokeID'], akzioa='aldatu_pokemon') }}" class="pokemon-card">
                         <img src="{{ pokemon['argazkia'] }}" 
                              loading="lazy">
                         <span>{{ pokemon.izena }}</span>
                     </a>
                 {% endfor %}
                 
+                {% if pokemons|length < 6 %}
                 <div class="pokemon-card add-card">
                     <form action="{{ url_for('pokedex.pokedex') }}" method="post">
                         <input type="hidden" name="akzioa" value="hauta_pokemon">
                         <button type="submit" class="add-pokemon-btn">+</button>
                     </form>  
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
