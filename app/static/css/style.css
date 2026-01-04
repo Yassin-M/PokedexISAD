@@ -626,6 +626,8 @@ body {
     box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
     flex-grow: 1;
     overflow-y: auto;
+    height: 100%;
+    max-height: 550px;
 }
 
 .info-box h3 {
@@ -676,4 +678,102 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ESTILOS PARA LA BARRA DE PRECISIÓN - SIN CAMBIAR EL DISEÑO EXISTENTE */
+.movement-container {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px dotted #999;
+}
+
+.accuracy-bar {
+    width: 100%;
+    height: 16px;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #aaa;
+    margin-top: 5px;
+    box-sizing: border-box; /* Esto evita que sobresalga */
+}
+
+.accuracy-fill {
+    height: 100%;
+    width: 0; /* Se llenará con JavaScript */
+    border-radius: 7px;
+    transition: width 0.8s ease-in-out;
+}
+
+/* COLORES DE LA BARRA SEGÚN RANGOS */
+.accuracy-fill.accuracy-high {
+    background: linear-gradient(to right, #2E7D32, #4CAF50); /* Verde fuerte 100-90 */
+}
+
+.accuracy-fill.accuracy-medium-high {
+    background: linear-gradient(to right, #66BB6A, #81C784); /* Verde claro 90-75 */
+}
+
+.accuracy-fill.accuracy-medium {
+    background: linear-gradient(to right, #FFD600, #FFEE58); /* Amarillo 75-50 */
+}
+
+.accuracy-fill.accuracy-low-medium {
+    background: linear-gradient(to right, #FF9800, #FFB74D); /* Naranja 50-25 */
+}
+
+.accuracy-fill.accuracy-low {
+    background: linear-gradient(to right, #D32F2F, #F44336); /* Rojo 25-0 */
+}
+
+.accuracy-fill.accuracy-none {
+    background: #9E9E9E; /* Gris para None/0 */
+    width: 100% !important;
+}
+
+/* Mantén el estilo original del párrafo */
+.info-box p {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-bottom: none; /* Quitamos el border-bottom porque ya lo tiene .movement-container */
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+/* BARRA DE DESPLAZAMIENTO VERTICAL PARA MOVIMIENTOS */
+.info-box.white-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-box h3 {
+    flex-shrink: 0; /* El título no se reduce */
+    margin-bottom: 10px;
+}
+
+/* Contenedor de desplazamiento para los movimientos */
+.movements-scroll-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-right: 5px; /* Espacio para la barra de scroll */
+}
+
+/* Estilo de la barra de scroll */
+.info-box::-webkit-scrollbar {
+    width: 10px;
+}
+
+.info-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+.info-box::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+.info-box::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

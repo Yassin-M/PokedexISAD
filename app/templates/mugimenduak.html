@@ -44,11 +44,16 @@
 
                         {% if pokemon.mugimenduak %}
                             {% for mugimendu in pokemon.mugimenduak %}
-                                <p>
-                                    <strong>{{ mugimendu.mugimenduIzena }}</strong> -
-                                    Potentzia: {{ mugimendu.potentzia }} ,
-                                    Zehaztasuna: {{ mugimendu.zehaztasuna }}
-                                </p>
+                                <div class="movement-container">
+                                    <p>
+                                        <strong>{{ mugimendu.mugimenduIzena }}</strong> -
+                                        Potentzia: {{ mugimendu.potentzia }} ,
+                                        Zehaztasuna: {{ mugimendu.zehaztasuna }}
+                                    </p>
+                                    <div class="accuracy-bar" data-accuracy="{{ mugimendu.zehaztasuna if mugimendu.zehaztasuna else 0 }}">
+                                        <div class="accuracy-fill"></div>
+                                    </div>
+                                </div>
                             {% endfor %}
                         {% else %}
                             <p>Pokemon honek ez du ikas ditzakeen mugimendurik.</p>
@@ -63,3 +68,31 @@
 
 </body>
 </html>
+<script>
+    // JavaScript para llenar las barras con colores según el rango
+    document.addEventListener('DOMContentLoaded', function() {
+        const bars = document.querySelectorAll('.accuracy-bar');
+        bars.forEach(bar => {
+            const accuracy = parseInt(bar.dataset.accuracy) || 0;
+            const fill = bar.querySelector('.accuracy-fill');
+
+            // Establece el ancho de la barra
+            fill.style.width = accuracy > 0 ? accuracy + '%' : '100%';
+
+            // Añade clase según el rango de precisión
+            if (accuracy === 0) {
+                fill.classList.add('accuracy-none'); // Gris para None
+            } else if (accuracy >= 90) {
+                fill.classList.add('accuracy-high'); // 100-90: Verde fuerte
+            } else if (accuracy >= 75) {
+                fill.classList.add('accuracy-medium-high'); // 90-75: Verde claro
+            } else if (accuracy >= 50) {
+                fill.classList.add('accuracy-medium'); // 75-50: Amarillo
+            } else if (accuracy >= 25) {
+                fill.classList.add('accuracy-low-medium'); // 50-25: Naranja
+            } else {
+                fill.classList.add('accuracy-low'); // 25-0: Rojo
+            }
+        });
+    });
+</script>
