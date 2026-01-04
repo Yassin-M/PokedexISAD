@@ -80,14 +80,14 @@ class EreduKontroladorea:
          return json3
 
    def motak_kargatu(self):
-      sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena) VALUES (?)"
+      sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
       sql2 = "INSERT INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
       mota_izenak = self.api.mota_izenak_eskatu()
       for mota in mota_izenak:
          try:
             if mota['name'] in ['unknown', 'shadow']:
                   continue
-            self.db.insert(sql1, [mota['name'].capitalize()])
+            self.db.insert(sql1, [mota['name'].capitalize(), f"/static/icons/{mota['name']}.svg" ])
             tipo = self.api.mota_eskatu(mota['name'])
             for pokemon in tipo["pokemonak"]:
                try:
