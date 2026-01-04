@@ -401,25 +401,20 @@ class EreduKontroladorea:
 
    def getEboluzioa(self, poke_id):
 
-      aurrekoak, hurrengoak = [], []
+      aurrekoak, hurrengoak = [], []  # Aurreko eta hurrengo eboluzioak gordetzeko
 
       def bilatu_evoluzioak(start_id, aurreko=True):
-         """
-         Iteratiboki jasotzen ditu evoluzioak.
-         start_id : Pokemonaren ID hasierakoa
-         aurreko : True → aurreko evoluzioak, False → hurrengo evoluzioak
-         """
-         emaitza = []  # Bilatutako evoluzioak gordetzeko lista
-         bisitatuak = set()  # Errepikapenak saihesteko ID multzoa
-         itzuli = [start_id]  # Bisitatu beharreko ID zerrenda
+         emaitza = []
+         bisitatuak = set()  # Errepikapenak saihesteko, jadanik bisitatu ditugun ID-ak
+         itzuli = [start_id]  # Oraindik bisitatu beharreko ID-ak (BFS algoritmoa)
 
-         while itzuli:
-            unekoa = itzuli.pop(0)  # Uneko pokemona
-            if unekoa in bisitatuak:
+         while itzuli:  # BFS bilaketa
+            unekoa = itzuli.pop(0)
+            if unekoa in bisitatuak:  # Jadanik bisitatutakoa bada, jarraitu
                continue
             bisitatuak.add(unekoa)  # Markatu bisitatu bezala
 
-            # SQL, aurreko edo hurrengo evoluzioak lortzeko
+            # SQL kontsulta prestatu aurreko edo hurrengo eboluzioak lortzeko
             if aurreko:
                sql = """
                      SELECT P.pokeId, P.izena, P.irudia
@@ -435,31 +430,104 @@ class EreduKontroladorea:
                      WHERE E.pokemonPokedexID = ? \
                      """
 
-            # Emaitzak gehitu eta hurrengo bisitak prestatu
+            # SQL exekutatu eta emaitzak prozesatu
             for unekoa_info in self.db.select(sql, [unekoa]):
                emaitza.append(unekoa_info)
+               # Hurrengo bilaketarako gehitu ID-a
                if unekoa_info["pokeId"] not in bisitatuak:
                   itzuli.append(unekoa_info["pokeId"])
 
          return emaitza
 
-      # Aurreko eta hurrengo evoluzioak lortu
       aurrekoak = bilatu_evoluzioak(poke_id, aurreko=True)
       hurrengoak = bilatu_evoluzioak(poke_id, aurreko=False)
-
-      # Oraingo pokemona lortu
       unekoa = self.db.select("SELECT izena, irudia FROM PokemonPokedex WHERE pokeId = ?", [poke_id])
+
       if not unekoa:
          return None
 
-      # Bueltatu pokemona info osoa
-      return {
+      eboluzio_info = {
          "izena": unekoa[0]["izena"],
          "irudia": unekoa[0]["irudia"],
          "aurrekoak": aurrekoak,
          "hurrengoak": hurrengoak
       }
 
+      return eboluzio_info
+
+   def getOnenak(self, talde_info):
+      taldeIzena = talde_info.get("taldeIzena")
+      erabiltzaileIzena = talde_info.get("erabiltzaileIzena")
+
+      if not taldeIzena or not erabiltzaileIzena:
+         return None
+
+      # SQL kontsulta taldeko pokemon guztiak lortzeko
+      sql = """
+            SELECT pt.PokemonPokedexID, \
+                   pt.izena, \
+                   pt.HP, \
+                   pt.ATK, \
+                   pt.DEF, \
+                   pt.SPATK, \
+                   pt.SPDEF, \
+                   pt.SPE, \
+                   pd.irudia
+            FROM Taldea t
+                    JOIN PokemonTaldean pta
+                         ON pta.taldeIzena = t.taldeIzena
+                    JOIN PokemonPokedex pd
+                         ON pd.pokeId = pta.pokeId
+                    JOIN PokemonTalde pt
+                         ON pt.PokemonPokedexID = pd.pokeId
+            WHERE t.taldeIzena = ?
+              AND t.erabiltzaileIzena = ?; \
+            """
+
+      pokemon_zerrenda = self.db.select(sql, [taldeIzena, erabiltzaileIzena])
+
+      if not pokemon_zerrenda:
+         return None
+
+      # Bilatu puntuazio altuena duen pokemona
+      onena = None
+      puntuazio_maximoa = -1
+
+      for pokemon in pokemon_zerrenda:
+         # Puntuazioa kalkulatu (estatistika guztien batura)
+         puntuazioa = (
+                 pokemon["HP"] +
+                 pokemon["ATK"] +
+                 pokemon["DEF"] +
+                 pokemon["SPATK"] +
+                 pokemon["SPDEF"] +
+                 pokemon["SPE"]
+         )
+
+         # Puntuazioa gehitu pokemonaren datuei
+         pokemon["puntuazioa"] = puntuazioa
+
+         # Egiaztatu puntuazio maximoa den
+         if puntuazioa > puntuazio_maximoa:
+            puntuazio_maximoa = puntuazioa
+            onena = pokemon
+
+      onena_info = {
+         "PokemonPokedexID": onena["PokemonPokedexID"],
+         "izena": onena["izena"],
+         "irudia": onena["irudia"],
+         "HP": onena["HP"],
+         "ATK": onena["ATK"],
+         "DEF": onena["DEF"],
+         "SPATK": onena["SPATK"],
+         "SPDEF": onena["SPDEF"],
+         "SPE": onena["SPE"],
+         "puntuazioa": onena["puntuazioa"],
+         "taldeIzena": taldeIzena,
+         "erabiltzaileIzena": erabiltzaileIzena
+      }
+
+      return onena_info
 
 
 

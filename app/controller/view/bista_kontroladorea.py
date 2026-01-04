@@ -1,5 +1,4 @@
-import json
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
 from app.controller.model.eredu_kontroladorea import EreduKontroladorea
 
 def pokedex_blueprint(db):
@@ -46,11 +45,6 @@ def chatbot_blueprint(db):
         pokemonMugimenduak = service.getMugimenduIkasgarriak(id)
         return render_template('mugimenduak.html', pokemon=pokemonMugimenduak)
 
-    @chatbot_bp.route('/chatbot/onenak/<int:id>')
-    def onenak(id):
-        pokemonOnenak = service.bistaratu_pokemon(id)
-        return render_template('onenak.html', pokemon=pokemonOnenak)
-
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
     def getEboluzioa(id):
         pokemonEboluzioa = service.getEboluzioa(id)
@@ -61,5 +55,37 @@ def chatbot_blueprint(db):
         pokemonIndarrak = service.getIndarrak(id)
         return render_template("indarrak.html", pokemon=pokemonIndarrak)
 
+    @chatbot_bp.route('/onenak/<taldeIzena>')
+    def getOnenak(taldeIzena):
+        erabiltzaileIzena = session.get('username')
+        pokemonOnenak=service.getOnenak({
+            "taldeIzena": taldeIzena,
+            "erabiltzaileIzena": erabiltzaileIzena
+        })
+        return render_template('onenak.html', taldea=pokemonOnenak)
+
+    @chatbot_bp.route('/taldezerrenda')
+    def taldeZerrenda():
+        erabiltzaileIzena = session.get('username')
+        taldeZerrenda = service.getTaldeZerrenda(erabiltzaileIzena)
+        return render_template('taldeZerrenda.html', taldeak=taldeZerrenda)
+
+    @chatbot_bp.route('/taldezerrenda_test')
+    def taldeZerrenda_test():
+        # 使用模拟数据测试HTML模板
+        mock_taldeak = [
+            {"taldeIzena": "LEHEN TALDEA"},
+            {"taldeIzena": "BIGARREN TALDEA"},
+            {"taldeIzena": "HIRUGARREN TALDEA"},
+            {"taldeIzena": "LAUGARREN TALDEA"},
+            {"taldeIzena": "BOSTGARREN TALDEA"},
+            {"taldeIzena": "SEIGARREN TALDEA"},
+            {"taldeIzena": "ZAZPIGARREN TALDEA"},
+            {"taldeIzena": "ZORTZIGARREN TALDEA"},
+            {"taldeIzena": "BEDERATZIGARREN TALDEA"},
+            {"taldeIzena": "HAMARGARREN TALDEA"}
+        ]
+
+        return render_template('taldeZerrenda.html', taldeak=mock_taldeak)
     return chatbot_bp
 

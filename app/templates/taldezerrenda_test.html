@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talde Zerrenda</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/taldezerrenda.css') }}">
+</head>
+<body class="chatbot-body">
+    <!-- Talde Zerrenda nabigazio barra -->
+    <div class="taldezerrenda-nav">
+        <button onclick="window.history.back()" class="taldezerrenda-nav-btn taldezerrenda-btn-back">
+            ⇦ Itzuli
+        </button>
+        <button onclick="window.location.href='/'" class="taldezerrenda-nav-btn taldezerrenda-btn-home">
+            🏠 Etxea
+        </button>
+    </div>
+
+    <!-- Talde Zerrenda edukia -->
+    <div class="taldezerrenda-container">
+        <!-- Izenburu eremua -->
+        <header class="taldezerrenda-header">
+            <h1 class="taldezerrenda-title">TALDE ZERRENDA</h1>
+            <p class="taldezerrenda-subtitle">Aukeratu talde bat bere ONENAK ikusteko</p>
+        </header>
+
+        <!-- Taldeak erakusteko edukiontzia -->
+        <div class="taldeak-container">
+            <div class="taldeak-lista">
+                {% if taldeak %}
+                    {% for taldea in taldeak %}
+                        <a href="{{ url_for('chatbot.getOnenak', taldeIzena=taldea.taldeIzena) }}" class="talde-botoia">
+                            {{ taldea.taldeIzena }}
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="taldeak-hutsik">
+                        <p>Ez duzu talderik sortu</p>
+                        <p>Sortu talde bat lehenik ONENAK ikusteko</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
