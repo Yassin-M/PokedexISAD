@@ -8,6 +8,17 @@ class EreduKontroladorea:
    def __init__(self, db):
       self.db = db
 
+   def taldeak_kargatu(self, erabiltzailea):
+      sql1 = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
+      taldeak = self.db.select(sql1, (erabiltzailea,))
+
+      json4 = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
+      print("=== taldeak_kargatu 输出 ===")
+      print(f"用户 '{erabiltzailea}' 的队伍列表:")
+      print(f"JSON4: {json4}")
+      print("=== 结束 ===")
+      return json4
+
    def pokedex_kargatu(self, JSON2):
       if not self.pokemonak_konprobatu():
          self.pokemonak_kargatu()
@@ -19,6 +30,7 @@ class EreduKontroladorea:
          self.mugimenduak_kargatu()
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
+      self.create_simple_test_team()
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -485,6 +497,34 @@ class EreduKontroladorea:
             """
 
       pokemon_zerrenda = self.db.select(sql, [taldeIzena, erabiltzaileIzena])
+      # 简单打印结果
+      print("=== pokemon_zerrenda 查询结果 ===")
+      print(f"查询参数: taldeIzena={taldeIzena}, erabiltzaileIzena={erabiltzaileIzena}")
+      print(f"结果数量: {len(pokemon_zerrenda) if pokemon_zerrenda else 0}")
+      if pokemon_zerrenda:
+         for i, pokemon in enumerate(pokemon_zerrenda):
+            print(f"宝可梦 {i + 1}: {pokemon}")
+      else:
+         print("没有找到任何宝可梦")
+      print("=== 结束 ===")
+
+      if pokemon_zerrenda:
+         for i, row in enumerate(pokemon_zerrenda):
+            # 将 Row 对象转换为字典
+            pokemon_dict = dict(row)
+            print(f"\n宝可梦 {i + 1}:")
+            print(f"  ID: {pokemon_dict.get('PokemonPokedexID')}")
+            print(f"  名称: {pokemon_dict.get('izena')}")
+            print(f"  HP: {pokemon_dict.get('HP')}")
+            print(f"  ATK: {pokemon_dict.get('ATK')}")
+            print(f"  DEF: {pokemon_dict.get('DEF')}")
+            print(f"  SPATK: {pokemon_dict.get('SPATK')}")
+            print(f"  SPDEF: {pokemon_dict.get('SPDEF')}")
+            print(f"  SPE: {pokemon_dict.get('SPE')}")
+            print(f"  图片: {pokemon_dict.get('irudia')}")
+      else:
+         print("没有找到任何宝可梦")
+      print("=== 结束 ===")
 
       if not pokemon_zerrenda:
          return None
@@ -493,7 +533,10 @@ class EreduKontroladorea:
       onena = None
       puntuazio_maximoa = -1
 
-      for pokemon in pokemon_zerrenda:
+      for row in pokemon_zerrenda:
+         # 将 Row 对象转换为字典
+         pokemon = dict(row)
+
          # Puntuazioa kalkulatu (estatistika guztien batura)
          puntuazioa = (
                  pokemon["HP"] +
@@ -511,6 +554,23 @@ class EreduKontroladorea:
          if puntuazioa > puntuazio_maximoa:
             puntuazio_maximoa = puntuazioa
             onena = pokemon
+      print(f"\n最终选择的 onena:")
+      if onena:
+         print(f"  宝可梦名称: {onena['izena']}")
+         print(f"  宝可梦ID: {onena['PokemonPokedexID']}")
+         print(f"  总分: {onena['puntuazioa']}")
+         print(f"  详细数据:")
+         print(f"    HP: {onena['HP']}")
+         print(f"    ATK: {onena['ATK']}")
+         print(f"    DEF: {onena['DEF']}")
+         print(f"    SPATK: {onena['SPATK']}")
+         print(f"    SPDEF: {onena['SPDEF']}")
+         print(f"    SPE: {onena['SPE']}")
+      else:
+         print("  没有找到最强宝可梦 (onena is None)")
+
+      if not onena:
+         return None
 
       onena_info = {
          "PokemonPokedexID": onena["PokemonPokedexID"],
@@ -526,9 +586,109 @@ class EreduKontroladorea:
          "taldeIzena": taldeIzena,
          "erabiltzaileIzena": erabiltzaileIzena
       }
-
+      print("\n=== onena_info 字典 ===")
+      print(f"完整字典: {onena_info}")
+      print("\n键值对详情:")
+      for key, value in onena_info.items():
+         print(f"  {key}: {value}")
+      print("=== 结束 ===")
       return onena_info
 
+   def create_simple_test_team(self):
+      """
+      直接创建测试队伍，不检查，直接插入
+      """
+      try:
+         taldeIzena = "MY_TEST_TEAM"
+         erabiltzaileIzena = "test_user"
+         print(f"[INFO] Creating test team '{taldeIzena}' for user '{erabiltzaileIzena}'")
 
+         # 1. 检查用户是否存在，如果不存在则创建
+         sql_check_user = "INSERT OR IGNORE INTO Erabiltzailea (izena) VALUES (?)"
+         self.db.insert(sql_check_user, [erabiltzaileIzena])
+         print(f"✓ User '{erabiltzaileIzena}' created/verified")
+
+         # 2. 删除已存在的测试队伍（避免重复）
+
+         # 3. 创建队伍
+         sql_team = "INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
+         self.db.insert(sql_team, [taldeIzena, erabiltzaileIzena])
+         print(f"✓ Created team '{taldeIzena}'")
+
+         # 4. 获取5个宝可梦
+         sql_get_pokemon = "SELECT pokeId, izena FROM PokemonPokedex ORDER BY pokeId LIMIT 5"
+         pokemons = self.db.select(sql_get_pokemon, [])
+
+         if not pokemons:
+            print("[ERROR] No pokemons in PokemonPokedex!")
+            return False
+
+         print(f"✓ Found {len(pokemons)} pokemons in Pokedex")
+
+         # 5. 为每个宝可梦插入数据
+         stat_sets = [
+            (50, 50, 50, 50, 50, 50),  # 总分300
+            (60, 60, 60, 60, 60, 60),  # 总分360
+            (70, 70, 70, 70, 70, 70),  # 总分420
+            (80, 80, 80, 80, 80, 80),  # 总分480
+            (100, 100, 100, 100, 100, 100)  # 总分600
+         ]
+
+         for i, pokemon in enumerate(pokemons):
+            poke_id = pokemon['pokeId']
+            izena = f"{pokemon['izena']}_test_{i + 1}"  # 避免名称冲突
+
+            if i < len(stat_sets):
+               hp, atk, spatk, defense, spdef, spe = stat_sets[i]
+            else:
+               hp, atk, spatk, defense, spdef, spe = stat_sets[-1]
+
+            # 添加其他必需字段
+            maila = 50  # 默认级别
+            adiskidetasun_maila = 70  # 默认亲密度
+            generoa = ['Ar', 'Eme', 'Neutroa'][i % 3]  # 轮流分配性别
+
+            # 5.1 插入统计数据到 PokemonTalde 表
+            sql_stats = """
+                        INSERT INTO PokemonTalde
+                        (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, \
+                         ErabiltzaileIzena)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
+                        """
+            params = [
+               izena,  # izena
+               maila,  # maila
+               adiskidetasun_maila,  # adiskidetasun_maila
+               generoa,  # generoa
+               hp,  # HP
+               atk,  # ATK
+               spatk,  # SPATK
+               defense,  # DEF
+               spdef,  # SPDEF
+               spe,  # SPE
+               poke_id,  # PokemonPokedexID
+               erabiltzaileIzena  # ErabiltzaileIzena
+            ]
+
+            self.db.insert(sql_stats, params)
+
+            # 5.2 添加到 PokemonTaldean 表（根据表结构，只有两个字段）
+            sql_add_to_team = """
+                              INSERT INTO PokemonTaldean (taldeIzena, pokeId)
+                              VALUES (?, ?) \
+                              """
+            self.db.insert(sql_add_to_team, [taldeIzena, poke_id])
+
+            total = hp + atk + spatk + defense + spdef + spe
+            print(f"✓ Added {izena} (ID: {poke_id}) - Gender: {generoa} - Score: {total}")
+
+         print(f"[SUCCESS] Team '{taldeIzena}' created successfully")
+         return True
+
+      except Exception as e:
+         print(f"[ERROR] create_simple_test_team failed: {e}")
+         import traceback
+         traceback.print_exc()
+         return False
 
 

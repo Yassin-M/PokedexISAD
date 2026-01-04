@@ -26,20 +26,28 @@
 
             <div class="detail-grid">
 
-                <!-- LEFT COLUMN - Trophy and Team Name -->
+                <!-- LEFT COLUMN - Only Trophy and Team Name -->
                 <div class="left-col">
+                    <!-- Trophy container -->
                     <div class="trophy-container">
                         <i class="fa-solid fa-trophy"></i>
                     </div>
 
+                    <!-- Team name -->
                     <div class="team-name-box">
-                        {{ taldeIzena|upper }}
+                        {{ pokemon.taldeIzena|upper }}
+                    </div>
+
+                    <!-- Optional: Add team info or other details here if needed -->
+                    <div class="team-info">
+                        <p><strong>Talde honen onena:</strong></p>
+                        <p>Puntuazio altuena lortutako pokemona</p>
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN - Best Pokemon -->
+                <!-- RIGHT COLUMN - Best Pokemon with all stats -->
                 <div class="right-col">
-                    <div class="info-box white-box">
+                    <div class="info-box white-box best-pokemon-box">
                         <h3>ONENAK (PUNTUAZIO MAXIMOA):</h3>
 
                         {% if pokemon %}
@@ -119,3 +127,4 @@
 
 </body>
 </html>
+[file content end]

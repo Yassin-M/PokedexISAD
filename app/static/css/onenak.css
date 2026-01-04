@@ -1,43 +1,127 @@
+[file name]: onenak.css
+[file content begin]
 /* onenak.css - Styles specific to the Best Pokemon page */
 
-/* Left column styles */
+/* 覆盖 style.css 中的 detail-grid */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 35% 60%;
+    gap: 5%;
+    height: 90%;
+    padding-top: 10px;
+}
+
+/* 覆盖 style.css 中的 left-col 和 right-col */
+.left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+}
+
+.right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* 覆盖 style.css 中的 info-box 在右边 - 调整高度 */
+.right-col .info-box {
+    border: 2px solid black;
+    padding: 20px;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: white;
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 隐藏标题和计算说明 */
+.right-col .info-box h3 {
+    display: none;
+}
+
+.calculation-container {
+    display: none;
+}
+
+/* Left column styles - 简化版 */
 .trophy-container {
     text-align: center;
-    padding: 40px;
+    padding: 30px;
     background-color: white;
     border-radius: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
+    width: 100%;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    border: 3px solid #FFD700;
 }
 
 .trophy-container i {
-    font-size: 8rem;
+    font-size: 6rem;
     color: #FFD700;
     text-shadow: 3px 3px 0 #000;
 }
 
 .team-name-box {
     background-color: #98fb98;
-    border: 2px solid black;
-    padding: 10px 20px;
-    font-family: Arial, sans-serif;
+    border: 3px solid #3b4cca;
+    padding: 15px 25px;
+    font-family: 'Fredoka', sans-serif;
     font-weight: bold;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     text-transform: uppercase;
-    width: fit-content;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
-    margin: 0 auto;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
     text-align: center;
+    width: 100%;
+    color: #3b4cca;
+    text-shadow: 1px 1px 0 #ffcb05;
 }
 
-/* Right column styles */
+.team-info {
+    background-color: white;
+    border: 2px solid #ccc;
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+}
+
+.team-info p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.team-info p:first-child {
+    font-size: 1.1rem;
+    color: #3b4cca;
+    font-weight: bold;
+}
+
+/* Right column styles - Best Pokemon */
+.best-pokemon-box {
+    overflow-y: auto;
+    max-height: 85vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .best-pokemon-container {
     text-align: center;
-    padding: 20px;
+    padding: 15px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .pokemon-image-container {
@@ -45,8 +129,8 @@
 }
 
 .pokemon-image {
-    width: 180px;
-    height: 180px;
+    width: 140px;
+    height: 140px;
     object-fit: contain;
 }
 
@@ -63,11 +147,11 @@
 .score-container {
     background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
     color: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 10px;
     border: 3px solid black;
-    margin: 20px auto;
-    max-width: 300px;
+    margin: 15px auto;
+    max-width: 250px;
     box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
 }
 
@@ -78,11 +162,11 @@
 }
 
 .score-value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: bold;
     font-family: 'Pokemon', sans-serif;
     letter-spacing: 2px;
-    margin: 10px 0;
+    margin: 8px 0;
 }
 
 .score-formula {
@@ -95,16 +179,16 @@
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-top: 30px;
-    max-width: 500px;
+    gap: 12px;
+    margin-top: 20px;
+    max-width: 350px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .stat-item {
     text-align: center;
-    padding: 15px;
+    padding: 12px;
     background-color: #f0f0f0;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -117,54 +201,35 @@
 }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
     color: #ff0000;
     font-family: 'Fredoka', sans-serif;
 }
 
 .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #666;
     margin-top: 5px;
     text-transform: uppercase;
     font-weight: bold;
 }
 
-/* Calculation container */
-.calculation-container {
-    margin-top: 30px;
-    padding: 15px;
-    background-color: #fffacd;
-    border-left: 4px solid #ffcb05;
-    border-radius: 5px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.calculation-container p {
-    margin: 0;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1rem;
-    line-height: 1.5;
-}
-
 /* Empty state */
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     color: #888;
 }
 
 .empty-state i {
-    font-size: 4rem;
-    margin-bottom: 20px;
+    font-size: 3rem;
+    margin-bottom: 15px;
     color: #dc0a2d;
 }
 
 .empty-state p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin: 0;
 }
 
@@ -172,41 +237,95 @@
 @media (max-width: 768px) {
     .detail-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 25px;
+        height: auto;
+    }
+
+    .left-col {
+        gap: 15px;
     }
 
     .trophy-container {
         height: 150px;
+        padding: 20px;
     }
 
     .trophy-container i {
-        font-size: 5rem;
+        font-size: 4rem;
     }
 
     .team-name-box {
-        font-size: 1.2rem;
-        padding: 8px 15px;
+        font-size: 1.4rem;
+        padding: 12px 20px;
     }
 
     .pokemon-image {
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
     }
 
     .pokemon-name {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
     }
 
     .score-container {
-        max-width: 250px;
+        max-width: 220px;
+        padding: 12px;
     }
 
     .score-value {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
-        max-width: 400px;
+        max-width: 300px;
+        gap: 10px;
     }
 }
+
+@media (max-width: 480px) {
+    .trophy-container {
+        height: 120px;
+    }
+
+    .trophy-container i {
+        font-size: 3rem;
+    }
+
+    .team-name-box {
+        font-size: 1.2rem;
+        padding: 10px 15px;
+    }
+
+    .pokemon-image {
+        width: 100px;
+        height: 100px;
+    }
+
+    .pokemon-name {
+        font-size: 1.3rem;
+    }
+
+    .score-container {
+        max-width: 200px;
+    }
+
+    .score-value {
+        font-size: 1.5rem;
+    }
+
+    .stats-grid {
+        gap: 8px;
+        max-width: 250px;
+    }
+
+    .stat-item {
+        padding: 10px;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+}
+[file content end]

@@ -35,6 +35,7 @@ def pokedex_blueprint(db):
 def chatbot_blueprint(db):
     chatbot_bp = Blueprint('chatbot', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
+    #service.create_simple_test_team()
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
@@ -57,35 +58,18 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/onenak/<taldeIzena>')
     def getOnenak(taldeIzena):
-        erabiltzaileIzena = session.get('username')
+        #erabiltzaileIzena = session.get('username')
         pokemonOnenak=service.getOnenak({
             "taldeIzena": taldeIzena,
-            "erabiltzaileIzena": erabiltzaileIzena
+            "erabiltzaileIzena": "test_user"
         })
-        return render_template('onenak.html', taldea=pokemonOnenak)
+        return render_template('onenak.html', pokemon=pokemonOnenak)
 
-    @chatbot_bp.route('/taldezerrenda')
+    @chatbot_bp.route('/taldeZerrenda')
     def taldeZerrenda():
-        erabiltzaileIzena = session.get('username')
-        taldeZerrenda = service.getTaldeZerrenda(erabiltzaileIzena)
+        #erabiltzaileIzena = session.get('username')
+        taldeZerrenda = service.taldeak_kargatu("test_user")
         return render_template('taldeZerrenda.html', taldeak=taldeZerrenda)
 
-    @chatbot_bp.route('/taldezerrenda_test')
-    def taldeZerrenda_test():
-        # 使用模拟数据测试HTML模板
-        mock_taldeak = [
-            {"taldeIzena": "LEHEN TALDEA"},
-            {"taldeIzena": "BIGARREN TALDEA"},
-            {"taldeIzena": "HIRUGARREN TALDEA"},
-            {"taldeIzena": "LAUGARREN TALDEA"},
-            {"taldeIzena": "BOSTGARREN TALDEA"},
-            {"taldeIzena": "SEIGARREN TALDEA"},
-            {"taldeIzena": "ZAZPIGARREN TALDEA"},
-            {"taldeIzena": "ZORTZIGARREN TALDEA"},
-            {"taldeIzena": "BEDERATZIGARREN TALDEA"},
-            {"taldeIzena": "HAMARGARREN TALDEA"}
-        ]
-
-        return render_template('taldeZerrenda.html', taldeak=mock_taldeak)
     return chatbot_bp
 
