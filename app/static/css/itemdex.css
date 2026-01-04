@@ -1,0 +1,751 @@
+/* =========================================
+   1. FUENTES Y ESTILOS GENERALES
+   ========================================= */
+@font-face {
+    font-family: 'Pokemon';
+    src: url("../fonts/Pokemon Solid.ttf") format('truetype');
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(red 50%, black 50%, black 52%, white 52%);
+}
+
+/* =========================================
+   2. CONTENEDOR PRINCIPAL (La caja blanca)
+   ========================================= */
+.form-container {
+    background-color: white;
+    width: 80%;
+    height: 90vh; /* Altura total del recuadro */
+    border-radius: 15px;
+    border: 10px solid black;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden; /* nada se sale */
+}
+
+/* =========================================
+   3. LAYOUT INTERIOR (Fondo gris)
+   ========================================= */
+/* =========================================
+   3. LAYOUT INTERIOR (Fondo gris)
+   ========================================= */
+.itemdex-layout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #999;
+}
+
+/* =========================================
+   4. CABECERA
+   ========================================= */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.nav-icon {
+    font-size: 2rem;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 #000;
+    transition: transform 0.2s;
+}
+
+.nav-icon:hover {
+    transform: scale(1.1);
+}
+
+/* =========================================
+   5. BUSCADOR - SOLUCIÓN SIN JAVASCRIPT
+   ========================================= */
+.search-container {
+    flex-grow: 1; /* Ocupa todo el espacio disponible */
+    margin: 0 20px;
+    position: relative; /* Para posicionar elementos */
+}
+
+/* INPUT con placeholder nativo - MÁS SIMPLE */
+.search-input {
+    width: 100%; /* OCUPA TODO EL ANCHO DISPONIBLE */
+    padding: 12px 16px;
+    font-size: 1.3rem;
+    border: 3px solid black; /* Borde más grueso */
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'Pokemon', Arial, sans-serif; /* fuente Pokémon */
+    letter-spacing: 1px;
+    height: 48px;
+    background-color: white;
+    border-radius: 10px; /* BORDES REDONDEADOS */
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc;
+}
+
+/* Placeholder nativo VISIBLE y con estilo Pokémon */
+.search-input::placeholder {
+    font-family: 'Pokemon', Arial, sans-serif;
+    letter-spacing: 1px;
+    font-size: 1.3rem;
+    color: #999;
+    text-shadow: 1px 1px 0 #ccc,
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc;
+}
+
+/* Efecto focus */
+.search-input:focus {
+    border-color: #ee1515; /* Rojo Pokémon al focus */
+    box-shadow: 0 0 0 2px rgba(238, 21, 21, 0.3); /* Sombra suave roja */
+}
+
+/* Cuando el input tiene texto, el placeholder se oculta automáticamente */
+/* Esto es COMPORTAMIENTO NATIVO del navegador - NO necesita JavaScript */
+
+/* =========================================
+   6. GRID DE ITEMS (scroll vertical) - 5 COLUMNAS
+   ========================================= */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* CAMBIADO: 5 columnas en vez de 6 */
+    gap: 15px; /* Más espacio entre recuadros */
+
+    flex: 1 1 auto; /* ocupa espacio restante */
+    min-height: 0;  /* clave: permite scroll en flexbox */
+    overflow-y: auto; /* scroll vertical */
+    box-sizing: border-box;
+    padding-right: 6px;
+    max-height: 65vh; /* Añadido para el scroll */
+}
+
+/* solo scroll vertical */
+.item-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.item-grid::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 6px;
+}
+
+.grid-container {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+}
+
+/* =========================================
+   7. TARJETAS - IMÁGENES MÁS PEQUEÑAS
+   ========================================= */
+.item-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: black;
+    padding: 15px 8px; /* Un poco menos de padding horizontal */
+    transition: all 0.2s;
+    background-color: white; /* Fondo blanco */
+    border: 3px solid black; /* Borde negro grueso */
+    border-radius: 8px; /* Esquinas ligeramente redondeadas */
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8); /* Sombra tipo Pokémon */
+    height: 170px; /* Altura ligeramente reducida */
+    box-sizing: border-box;
+}
+
+.item-card:hover {
+    transform: scale(1.05) translateY(-3px); /* Efecto elevación */
+    background-color: #ffffff; /* Mantiene blanco */
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.9); /* Sombra más intensa */
+    border-color: #ee1515; /* Borde rojo al hover */
+}
+
+.item-card img {
+    width: 85px; /* CAMBIADO: Más pequeña (antes 100px) */
+    height: 85px; /* CAMBIADO: Más pequeña (antes 100px) */
+    object-fit: contain;
+    image-rendering: pixelated;
+    margin-bottom: 6px; /* Menos espacio entre imagen y texto */
+}
+
+.item-card span {
+    color: #000000; /* negro */
+    font-weight: bold;
+    font-size: 0.95rem; /* Un poco más pequeño */
+    margin-top: 0;
+    text-transform: capitalize;
+    text-align: center; /* CENTRADO */
+    font-family: 'Pokemon', Arial, sans-serif; /* SOLO LETRAS POKEMON */
+    letter-spacing: 1px;
+    padding: 3px 0; /* Padding solo vertical */
+    background-color: transparent; /* Sin fondo */
+    border-radius: 0; /* Sin bordes redondeados */
+    width: 100%; /* Ocupa todo el ancho */
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO para letras negras */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc,
+                 0px 1px 0 #ccc,
+                 0px -1px 0 #ccc,
+                 1px 0px 0 #ccc,
+                 -1px 0px 0 #ccc;
+}
+
+/* =========================================
+   8. FILTROS FLOTANTES - TEXTO MÁS PEQUEÑO EN SUBMENÚ
+   ========================================= */
+.filter-container {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    z-index: 100;
+}
+
+.filter-btn {
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 5px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+    transition: transform 0.1s;
+}
+
+.filter-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+}
+
+.filter-menu {
+    display: none;
+    background: white; /* Fondo blanco */
+    border: 2px solid black;
+    margin-bottom: 10px;
+    width: 220px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+}
+
+.filter-menu.active {
+    display: block;
+}
+
+/* TIPO - REBORDE GRIS CLARO para letras blancas */
+.filter-item-tipo {
+    padding: 12px;
+    cursor: pointer;
+    position: relative;
+    font-family: 'Pokemon', Arial, sans-serif; /* fuente Pokémon */
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase; /* mayúsculas */
+    text-align: center; /* centrado */
+    border-bottom: none; /* sin borde inferior */
+    background-color: #ee1515; /* fondo rojo */
+    color: #ffffff; /* letras blancas */
+    text-shadow: 1px 1px 0 #888, /* REBORDE GRIS CLARO para letras blancas */
+                 -1px 1px 0 #888,
+                 1px -1px 0 #888,
+                 -1px -1px 0 #888,
+                 0px 1px 0 #888,
+                 0px -1px 0 #888,
+                 1px 0px 0 #888,
+                 -1px 0px 0 #888;
+}
+
+.filter-item-tipo:hover {
+    background-color: #ffcb05; /* Amarillo al hover */
+    color: #000000; /* Negro al hover */
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO para letras negras en hover */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc,
+                 0px 1px 0 #ccc,
+                 0px -1px 0 #ccc,
+                 1px 0px 0 #ccc,
+                 -1px 0px 0 #ccc;
+}
+
+/* SUBMENÚ - TEXTO MÁS PEQUEÑO */
+.filter-submenu {
+    display: none;
+    position: absolute;
+    left: 100%; /* Aparece a la derecha */
+    top: 0;
+    background: white; /* Fondo blanco */
+    border: 2px solid black;
+    width: 210px; /* Más compacto */
+    max-height: 160px; /* Más bajo */
+    overflow-y: auto;
+    padding: 6px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    font-size: 0.75rem; /* CAMBIADO: Texto más pequeño (antes 0.85rem) */
+}
+
+.filter-item-tipo:hover .filter-submenu {
+    display: block;
+}
+
+.filter-submenu label {
+    display: flex;
+    align-items: center;
+    padding: 3px 2px; /* Menos padding */
+    margin: 1px 0;
+    font-size: 0.75rem; /* CAMBIADO: Texto más pequeño (antes 0.85rem) */
+    cursor: pointer;
+    font-family: Arial, sans-serif; /* Texto normal */
+    font-weight: bold;
+    line-height: 1.1; /* Menos espacio entre líneas */
+    min-height: 20px; /* Menor altura */
+    color: #000000; /* Letras negras */
+    text-shadow: 0.5px 0.5px 0 #ccc, /* REBORDE GRIS CLARO */
+                 -0.5px 0.5px 0 #ccc,
+                 0.5px -0.5px 0 #ccc,
+                 -0.5px -0.5px 0 #ccc;
+}
+
+.filter-submenu label:hover {
+    background-color: #ffcb05;
+    color: #000000; /* Negro al hover */
+}
+
+.filter-submenu input[type="checkbox"] {
+    margin-right: 4px; /* Menos espacio */
+    cursor: pointer;
+    transform: scale(0.8); /* Checkbox más pequeño */
+}
+
+/* Scrollbar del submenú más delgada */
+.filter-submenu::-webkit-scrollbar {
+    width: 3px; /* Más delgada */
+}
+
+.filter-submenu::-webkit-scrollbar-track {
+    background: #777;
+    border-radius: 2px;
+}
+
+.filter-submenu::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 2px;
+}
+
+/* Botón A > Z - REBORDE GRIS CLARO para letras blancas */
+.orden-btn {
+    width: 100%;
+    padding: 12px 10px; /* Un poco más de padding vertical */
+    background: #ee1515; /* fondo rojo */
+    color: #ffffff; /* letras blancas */
+    border: none; /* sin borde */
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Pokemon', Arial, sans-serif; /* fuente Pokémon */
+    letter-spacing: 1px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.1s;
+    text-shadow: 1px 1px 0 #888, /* REBORDE GRIS CLARO para letras blancas */
+                 -1px 1px 0 #888,
+                 1px -1px 0 #888,
+                 -1px -1px 0 #888,
+                 0px 1px 0 #888,
+                 0px -1px 0 #888,
+                 1px 0px 0 #888,
+                 -1px 0px 0 #888;
+}
+
+.orden-btn:hover {
+    background-color: #ffcb05; /* Amarillo al hover */
+    color: #000000; /* Negro al hover */
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO para letras negras en hover */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc,
+                 0px 1px 0 #ccc,
+                 0px -1px 0 #ccc,
+                 1px 0px 0 #ccc,
+                 -1px 0px 0 #ccc;
+}
+
+/* Contenedor del botón A>Z - sin borde inferior */
+.filter-item-orden {
+    padding: 0; /* Sin padding */
+    border-bottom: none; /* Sin borde */
+}
+
+/* Botón APLICAR - REBORDE GRIS CLARO para letras negras */
+.apply-filters {
+    width: 100%;
+    padding: 10px;
+    background: #ffffff; /* fondo blanco */
+    color: #000000; /* letras negras */
+    border: none;
+    border-top: 2px solid black;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Pokemon', Arial, sans-serif; /* SOLO LETRAS POKEMON */
+    letter-spacing: 1px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    transition: all 0.1s;
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO para letras negras */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc,
+                 0px 1px 0 #ccc,
+                 0px -1px 0 #ccc,
+                 1px 0px 0 #ccc,
+                 -1px 0px 0 #ccc;
+}
+
+.apply-filters:hover {
+    background-color: #ffcb05; /* Amarillo al hover */
+    color: #000000; /* Negro al hover */
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO para letras negras en hover */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc,
+                 0px 1px 0 #ccc,
+                 0px -1px 0 #ccc,
+                 1px 0px 0 #ccc,
+                 -1px 0px 0 #ccc;
+}
+
+/* =========================================
+   9. VISTA DETALLE - MINIMALISTA CORREGIDA
+   ========================================= */
+.detail-layout {
+    width: 100%;
+    height: 100%;
+    background-color: #999;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* CABECERA DE DETALLE (con iconos de navegación) */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.detail-header .nav-icon {
+    font-size: 2rem;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 #000;
+    transition: transform 0.2s;
+}
+
+.detail-header .nav-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Título centrado en la cabecera - MÁS GRANDE */
+.detail-title {
+    font-family: 'Pokemon', Arial, sans-serif;
+    font-size: 2.2rem; /* Más grande */
+    color: white;
+    text-shadow: 2px 2px 0 #000,
+                 2px -2px 0 #000,
+                 -2px 2px 0 #000,
+                 -2px -2px 0 #000;
+    letter-spacing: 3px; /* Más espacio entre letras */
+    text-transform: uppercase;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+    gap: 25px; /* Más espacio */
+    height: calc(100% - 70px); /* Ajustar por título más grande */
+    flex: 1;
+}
+
+.left-col, .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Más espacio */
+}
+
+/* Contenedor de imagen */
+.image-container {
+    background-color: white;
+    border: 3px solid black;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px; /* Un poco más alto */
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+    overflow: hidden;
+}
+
+.image-container img {
+    width: 220px; /* Más grande */
+    height: 220px;
+    object-fit: contain;
+}
+
+/* Nombre del item - MÁS GRANDE */
+.name-box {
+    background-color: white;
+    border: 3px solid black;
+    padding: 15px 25px; /* Más padding */
+    font-family: 'Pokemon', Arial, sans-serif;
+    font-weight: bold;
+    font-size: 2rem; /* MÁS GRANDE */
+    text-transform: uppercase;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+    letter-spacing: 3px; /* Más espacio entre letras */
+    text-align: center;
+    color: #000000;
+    text-shadow: 2px 2px 0 #ccc, /* REBORDE MÁS PRONUNCIADO */
+                 -2px 2px 0 #ccc,
+                 2px -2px 0 #ccc,
+                 -2px -2px 0 #ccc,
+                 0px 2px 0 #ccc,
+                 0px -2px 0 #ccc,
+                 2px 0px 0 #ccc,
+                 -2px 0px 0 #ccc;
+    border-radius: 8px;
+}
+
+/* Cajas de información */
+.info-box {
+    border: 3px solid black;
+    padding: 20px; /* Más padding */
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+    flex-grow: 1;
+    overflow-y: auto;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Títulos de las cajas - MÁS GRANDES */
+.info-box h3 {
+    margin-top: 0;
+    margin-bottom: 20px; /* Más espacio */
+    font-family: 'Pokemon', Arial, sans-serif;
+    text-transform: uppercase;
+    font-size: 1.8rem; /* MÁS GRANDE */
+    color: #000;
+    text-shadow: 2px 2px 0 #ccc, /* REBORDE MÁS PRONUNCIADO */
+                 -2px 2px 0 #ccc,
+                 2px -2px 0 #ccc,
+                 -2px -2px 0 #ccc,
+                 0px 2px 0 #ccc,
+                 0px -2px 0 #ccc,
+                 2px 0px 0 #ccc,
+                 -2px 0px 0 #ccc;
+    letter-spacing: 2px; /* Más espacio */
+    padding-bottom: 10px; /* Más espacio */
+    border-bottom: 3px solid black; /* Línea más gruesa */
+    text-align: center;
+}
+
+/* Texto de descripción */
+.info-box p {
+    font-family: 'Pokemon', Arial, sans-serif;
+    font-size: 1.3rem; /* Más grande */
+    line-height: 1.6; /* Más espacio entre líneas */
+    color: #000000;
+    text-shadow: 1px 1px 0 #ccc,
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc;
+    text-align: justify;
+    flex-grow: 1;
+    margin: 0;
+}
+
+/* Caja de descripción - SIN COLOR AMARILLO */
+.description-box {
+    background-color: white; /* Blanco en lugar de amarillo */
+    min-height: 200px;
+}
+
+/* Caja de tipo de item - SIN RECUADRO NEGRO */
+.white-box {
+    background-color: white;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Texto del tipo de item - NEGRO Y SIN RECUADRO */
+.white-box p {
+    font-family: 'Pokemon', Arial, sans-serif;
+    font-size: 1.8rem; /* MÁS GRANDE */
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #000000; /* NEGRO en lugar de rojo */
+    text-shadow: 2px 2px 0 #ccc, /* REBORDE GRIS en lugar de negro */
+                 -2px 2px 0 #ccc,
+                 2px -2px 0 #ccc,
+                 -2px -2px 0 #ccc,
+                 0px 2px 0 #ccc,
+                 0px -2px 0 #ccc,
+                 2px 0px 0 #ccc,
+                 -2px 0px 0 #ccc;
+    letter-spacing: 2px; /* Más espacio */
+    text-align: center;
+    margin: 0;
+    padding: 0; /* Sin padding extra */
+    background-color: transparent; /* Sin fondo */
+    border: none; /* SIN BORDE */
+    border-radius: 0; /* Sin bordes redondeados */
+    box-shadow: none; /* Sin sombra */
+}
+
+/* Scrollbar */
+.info-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.info-box::-webkit-scrollbar-track {
+    background: #ddd;
+    border-radius: 3px;
+}
+
+.info-box::-webkit-scrollbar-thumb {
+    background: #777;
+    border-radius: 3px;
+}
+
+.info-box::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .image-container {
+        height: 260px;
+    }
+
+    .image-container img {
+        width: 190px;
+        height: 190px;
+    }
+
+    .detail-title {
+        font-size: 1.8rem;
+    }
+
+    .name-box {
+        font-size: 1.7rem;
+    }
+
+    .info-box h3 {
+        font-size: 1.5rem;
+    }
+
+    .info-box p {
+        font-size: 1.1rem;
+    }
+
+    .white-box p {
+        font-size: 1.5rem;
+    }
+}
+
+/* =========================================
+   10. SIN RESULTADOS - EN NEGRO CON REBORDE GRIS CLARO
+   ========================================= */
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    font-size: 1.5rem;
+    color: #000000; /* CAMBIADO: Negro en lugar de #333 */
+    background-color: white;
+    border: 3px solid black;
+    border-radius: 8px;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+    margin: 20px;
+    font-family: 'Pokemon', Arial, sans-serif;
+    text-shadow: 1px 1px 0 #ccc, /* REBORDE GRIS CLARO */
+                 -1px 1px 0 #ccc,
+                 1px -1px 0 #ccc,
+                 -1px -1px 0 #ccc,
+                 0px 1px 0 #ccc,
+                 0px -1px 0 #ccc,
+                 1px 0px 0 #ccc,
+                 -1px 0px 0 #ccc;
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-top: 20px;
+    color: #666;
+}
+
+.no-image {
+    width: 85px;
+    height: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: lightgray;
+    border: 2px dashed #999;
+    font-size: 40px;
+    font-weight: bold;
+    color: #666;
+    border-radius: 5px;
+    margin-bottom: 6px;
+}
+
+.image-container .no-image {
+    width: 220px;
+    height: 220px;
+    font-size: 100px;
+    border: 3px solid black;
+}
