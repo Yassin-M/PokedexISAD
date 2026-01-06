@@ -5,12 +5,11 @@ from app.controller.view.bista_kontroladorea import pokedex_blueprint
 from app.controller.view.bista_kontroladorea import itemdex_blueprint
 from app.controller.view.bista_kontroladorea import chatbot_blueprint
 from app.controller.view.bista_kontroladorea import bista_bp
+from app.controller.view.bista_kontroladorea import pokedex_blueprint, taldeak_blueprint
 
-def init_db():
-   pass
 def create_app():
     app = Flask(__name__)
-
+    app.secret_key = 'claveultrasupermegasecreta'
     # Inicializar la DB
     db = Connection()
 
@@ -18,7 +17,7 @@ def create_app():
     app.register_blueprint(itemdex_blueprint(db))
     app.register_blueprint(pokedex_blueprint(db))
     app.register_blueprint(chatbot_blueprint(db))
+    app.register_blueprint(taldeak_blueprint(db))
     app.register_blueprint(bista_bp)
 
     return app
-

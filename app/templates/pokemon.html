@@ -34,8 +34,33 @@
                     </div>
 
                     <div class="info-box description-box">
-                        <h3>POKEDEX SARRERA:</h3>
-                        <p>{{ pokemon.deskr }}</p>
+                        {% if akzioa == 'hauta_pokemon' %}
+                            <h3>TALDEA: {{ session.get('editatzen_ari_den_taldea') }}</h3>
+                            <p>Hautatu Pokémon hau taldera gehitzeko?</p>
+                            <div class="selection-container" style="text-align: center; padding: 10px;">
+                                <form action="{{ url_for('taldeak.sartu_taldera') }}" method="POST">
+                                    <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
+                                        HAUTATU POKEMONA
+                                    </button>
+                                </form>
+                            </div>
+                        {% elif akzioa == 'aldatu_pokemon' %}
+                            <h3>TALDEA: {{ session.get('editatzen_ari_den_taldea') }}</h3>
+                            <p>Zer egin nahi duzu?</p>
+                            <form action="{{ url_for('taldeak.ezabatu_taldetik', akzioa='hauta_pokemon') }}" method="POST">
+                                <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
+                                    ALDATU POKEMONA
+                                </button>
+                            </form>
+                            <form action="{{ url_for('taldeak.ezabatu_taldetik', akzioa='ezabatu') }}" method="POST">
+                                <button type="submit" class="action-btn edit" style="width: 100%; height: auto; padding: 10px;">
+                                    EZABATU POKEMONA
+                                </button>
+                            </form>
+                        {% else %}
+                            <h3>POKEDEX SARRERA:</h3>
+                            <p>{{ pokemon.deskr }}</p>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -47,6 +72,16 @@
                             {{ gaitasuna }}
                         </p>
                         {% endfor %}
+
+                        {% if pokemon.mugimenduak%}
+                        <h3>MUGIMENDUAK:</h3>
+                        {% for mugimendua in pokemon.mugimenduak %}
+                        <p>
+                            {{ mugimendua }}
+                        </p>
+                        {% endfor %}
+
+                        {% endif %}
                     </div>
 
                     <div class="info-box white-box">
@@ -55,6 +90,12 @@
                             <li><strong>Altuera:</strong> {{ pokemon.altuera/10 }} m</li>
                             <li><strong>Pisua:</strong> {{ pokemon.pisua/10 }} kg</li>
                             <li><strong>Id:</strong> #{{ pokemon.id }}</li>
+                            <li><hr></li>
+                            {% if pokemon.stats %}
+                            {% for stat_name, stat_value in pokemon.stats.items() %}
+                                <li><strong>{{ stat_name|capitalize }}:</strong> {{ stat_value }}</li>
+                            {% endfor %}
+                            {% endif %}
                         </ul>
                     </div>
                 </div>

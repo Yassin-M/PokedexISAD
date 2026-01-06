@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talde Kudeaketa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="nav-bar">
+            <i class="fas fa-reply nav-icon" onclick="window.history.back()" title="Atzera"></i>
+            
+            <!--a href="{{ url_for('taldeak.sortu_taldea') }}"-->
+                <i class="fas fa-home nav-icon" title="Hasiera"></i>
+            <!--/a-->
+        </div>
+
+        <div class="list-container" id="taldes-list">
+            
+            <div class="column">
+                <div class="row">
+                    <form action="{{ url_for('taldeak.sortu_taldea') }}" method="post">
+                        <button type="submit" class="action-btn add">+</button>
+                    </form>                    
+                    <input type="text" class="talde-input new" value="TALDE BERRIA" readonly>
+                </div>        
+
+                {% for talde in taldeak %}
+                <div class="row">
+                    <form action="{{ url_for('taldeak.kargatu_taldea') }}" method="post">
+                        <input type="hidden" name="talde_izena" value="{{ talde.izena }}">
+                        <button type="submit" class="action-btn add">EDIT</button>
+                    </form>     
+                    <input type="text" class="talde-input" value="{{ talde.izena }}" readonly>
+                </div>
+                {% endfor %}
+            </div>
+
+            </div>
+    </div>
+
+</body>
+</html>
