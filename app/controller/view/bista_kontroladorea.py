@@ -14,6 +14,7 @@ def taldeak_blueprint(db):
 
    @taldeak_bp.route('/taldeak', methods=['GET', 'POST'])
    def taldeak_kargatu():
+      session.pop('editatzen_ari_den_taldea', None)
       talde_zerrenda = service.taldeak_kargatu('juan')
       return render_template('taldeak.html', taldeak=talde_zerrenda)
    
@@ -69,7 +70,7 @@ def taldeak_blueprint(db):
 
       akzioa = request.args.get('akzioa')
       if akzioa == 'hauta_pokemon':
-         session['akzioa'] = 'hauta_pokemon'
+         session['akzioa'] = 'aldatu'
          print(session['akzioa'])
          return redirect(url_for('pokedex.pokedex'))
       else:
@@ -102,7 +103,11 @@ def pokedex_blueprint(db):
       
       if request.form.get('akzioa') is not None:
          session['akzioa'] = request.form.get('akzioa')
-         
+      elif session.get('akzioa') == 'aldatu':
+         session['akzioa'] = 'hauta_pokemon'
+      else:
+         session.pop('akzioa', None)
+
       iragazkiak = {'izena': None, 'generazioak': [], 'motak': []}
       if request.method == 'POST':
          izena = request.form.get('izena')
@@ -126,7 +131,7 @@ def pokedex_blueprint(db):
       else:
          akzioa = session.get('akzioa')
 
-      if akzioa == 'hauta_pokemon':
+      if akzioa == 'hauta_pokemon' or akzioa == None:
          datuak = service.bistaratu_pokemon(id)
       else:
          datuak = service.bistaratu_pokemon_taldea(id)
