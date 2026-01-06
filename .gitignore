@@ -1,2 +1,25 @@
 venv/
 .venv/
+# Python
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# PyCharm
+.idea/
+.vscode/
+*.iml
+
+# Base de datos
+*.db
+*.sqlite3
+*.sqlite
+
+# Sistema
+.DS_Store
+Thumbs.db
