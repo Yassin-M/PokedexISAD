@@ -26,8 +26,7 @@ class EreduKontroladorea:
          self.mugimenduak_kargatu()
       if not self.eboluzioak_konprobatu():
          self.eboluzioak_kargatu()
-      #self.delete_test_team()
-      #self.create_simple_test_team()
+      self.delete_test_team()
 
       sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
       parametroak = []
@@ -576,11 +575,11 @@ class EreduKontroladorea:
 
          # 5. 为每个宝可梦插入数据
          stat_sets = [
-            (50, 50, 50, 50, 50, 110),  # 总分300
+            (50, 50, 50, 50, 50, 50),  # 总分300
             (60, 60, 60, 60, 60, 60),  # 总分360
             (70, 70, 70, 70, 70, 70),  # 总分420
             (80, 80, 80, 80, 80, 80),  # 总分480
-            (100, 100, 100, 100, 100, 80)  # 总分600
+            (100, 100, 100, 100, 100, 100)  # 总分600
          ]
 
          for i, pokemon in enumerate(pokemons):
@@ -712,6 +711,56 @@ class EreduKontroladorea:
          traceback.print_exc()
          return False
 
+   def motak_irudiak_eguneratu(self):
+      mota_irudiak = [
+         ('normal', '/static/icons/normal.svg'),
+         ('fire', '/static/icons/fire.svg'),
+         ('water', '/static/icons/water.svg'),
+         ('electric', '/static/icons/electric.svg'),
+         ('grass', '/static/icons/grass.svg'),
+         ('ice', '/static/icons/ice.svg'),
+         ('fighting', '/static/icons/fighting.svg'),
+         ('poison', '/static/icons/poison.svg'),
+         ('ground', '/static/icons/ground.svg'),
+         ('flying', '/static/icons/flying.svg'),
+         ('psychic', '/static/icons/psychic.svg'),
+         ('bug', '/static/icons/bug.svg'),
+         ('rock', '/static/icons/rock.svg'),
+         ('ghost', '/static/icons/ghost.svg'),
+         ('dark', '/static/icons/dark.svg'),
+         ('dragon', '/static/icons/dragon.svg'),
+         ('steel', '/static/icons/steel.svg'),
+         ('fairy', '/static/icons/fairy.svg')
+      ]
+
+      sql = "UPDATE MotaPokemon SET irudia = ? WHERE pokemonMotaIzena = ?"
+
+      for mota_izena, irudia in mota_irudiak:
+         try:
+            self.db.insert(sql, [irudia, mota_izena])
+         except Exception as e:
+            print(f"UPDATE {mota_izena} error: {e}")
+
+   def ikasdezake_mugimenduak(self):
+      sql = """
+            UPDATE IkasDezake
+            SET mugiIzena = (SELECT izena \
+                             FROM Mugimendua \
+                             WHERE LOWER(Mugimendua.izena) = LOWER(IkasDezake.mugiIzena)
+               LIMIT 1
+               )
+            WHERE EXISTS (
+               SELECT 1
+               FROM Mugimendua
+               WHERE LOWER (Mugimendua.izena) = LOWER (IkasDezake.mugiIzena)
+               ) \
+            """
+      try:
+         self.db.insert(sql, [])
+         print("IkasDezake 所有技能名已统一修正为 Mugimendua 标准名字")
+      except Exception as e:
+         print("批量更新 IkasDezake 错误:", e)
+
 # =====================================================
 # NOTIFIKAZIOAK
 # =====================================================
@@ -742,3 +791,13 @@ def notifikazioenInformazioaLortu(erabiltzaile_izena, bilatutako_izena):
       })
 
    return notifikazioJSON
+
+def notifikazioBerria(ErabiltzaileIzena, DataOrdua, deskripzioa):
+   query = "INSERT INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
+   db.insert(ErabiltzaileIzena, deskripzioa, DataOrdua)
+   return
+
+def jarraitzaileBerria (JarraitzaileIzena, JarraituIzena):
+   query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
+   db.insert(JarraitzaileIzena, JarraituIzena)
+   return
