@@ -64,8 +64,11 @@ class EreduKontroladorea:
         spe = int(stats.get('speed', 40) * 1.5)
         izena = self.api.pokemon_izena_lortu(pokemonId)
         
-        generoa = random.choice(['Ar', 'Eme', 'Neutroa'])
-
+        sql_gen = "SELECT generoa FROM PokemonPokedex WHERE pokeId = ?"
+        gen_result = self.db.select(sql_gen, (pokemonId,))
+        aukerak = gen_result[0]['generoa'].split('/')
+        
+        generoa = random.choice(aukerak)
         sql_insert_instance = """
               INSERT INTO PokemonTalde 
               (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, ErabiltzaileIzena) 
