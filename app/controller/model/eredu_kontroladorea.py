@@ -2,7 +2,6 @@ from .api_kontroladorea import APIKontroladorea
 from app.database import db
 import os
 import random
-import pokebase as pb #Esto tengo que cambiar
 
 class EreduKontroladorea:
   def __init__(self, db):
@@ -55,8 +54,7 @@ class EreduKontroladorea:
         raise ValueError("Ezin dira 6 pokémon baino gehiago sartu talde batean")
 
     try:
-        p_api = pb.pokemon(int(pokemonId))
-        stats = {s.stat.name: s.base_stat for s in p_api.stats}
+        stats = self.api.hartu_stats(pokemonId)
 
         hp = int(stats.get('hp', 40) * 2)
         atk = int(stats.get('attack', 40) * 1.5)
@@ -64,7 +62,7 @@ class EreduKontroladorea:
         def_ = int(stats.get('defense', 40) * 1.5)
         spdef = int(stats.get('special-defense', 40) * 1.5)
         spe = int(stats.get('speed', 40) * 1.5)
-        izena = p_api.name.capitalize()
+        izena = self.api.pokemon_izena_lortu(pokemonId)
         
         generoa = random.choice(['Ar', 'Eme', 'Neutroa'])
 

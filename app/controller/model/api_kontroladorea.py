@@ -236,3 +236,13 @@ class APIKontroladorea:
 
        return eboluzioKateak
 
+   def hartu_stats(self, id):
+        uneko_pokemon = pb.pokemon(int(id))
+        stats = {}
+        for stat in uneko_pokemon.stats:
+            stats[stat.stat.name] = stat.base_stat
+        return stats
+  
+   def pokemon_izena_lortu(self, id):
+        uneko_pokemon = pb.pokemon(int(id))
+        return uneko_pokemon.name.capitalize()
