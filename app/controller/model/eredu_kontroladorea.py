@@ -73,18 +73,16 @@ class EreduKontroladorea:
               (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, ErabiltzaileIzena) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           """
-          # Defektuz maila 50 eta adiskidetasuna 0 jarri dugu
+          # Defektuz maila 50 eta adiskidetasuna 0
         self.db.insert(sql_insert_instance, (izena, 50, 0, generoa, hp, atk, spatk, def_, spdef, spe, pokemonId, erabiltzailea))
 
     except Exception as e:
         print(f"Errorea API deian edo txertatzean: {e}")
-          # APIak huts egiten badu, balio lehenetsiekin sartu
         sql_fallback = "INSERT INTO PokemonTalde (izena, maila, PokemonPokedexID, ErabiltzaileIzena) VALUES (?, 50, ?, ?)"
         self.db.insert(sql_fallback, ("Pokemon", pokemonId, erabiltzailea))
 
       # 4. ID-A LORTU (Auto Increment)
       # Azken harrapatuId-a lortu behar dugu abileziak eta mugimenduak lotzeko
-      # Oharra: Hau DB kudeatzailearen arabera alda daiteke, baina SQLite-n orokorrean MAX(id) funtzionatzen du testuinguru honetan
     sql_last_id = "SELECT MAX(harrapatuId) as id FROM PokemonTalde WHERE ErabiltzaileIzena = ? AND PokemonPokedexID = ?"
     res_id = self.db.select(sql_last_id, (erabiltzailea, pokemonId))
     harrapatu_id = res_id[0]['id'] if res_id and res_id[0]['id'] else None
@@ -102,9 +100,8 @@ class EreduKontroladorea:
             if isinstance(aukeratua, dict): 
                 aukeratua_izena = aukeratua['izena']
             else:
-                aukeratua_izena = aukeratua[0] # Tupla bada
+                aukeratua_izena = aukeratua[0]
 
-            # KONTUZ: Schema.sql-an 'harraptuId' jartzen du (typo), ez 'harrapatuId'
             sql_dauka = "INSERT INTO Dauka (abileziIzena, harrapatuId) VALUES (?, ?)"
             self.db.insert(sql_dauka, (aukeratua_izena, harrapatu_id))
 
@@ -138,8 +135,7 @@ class EreduKontroladorea:
 
 
   def ezabatu_taldetik(self, taldeIzena, erabiltzailea, pokemonId):
-      # Delete movements associated with the Pokémon in the team
-
+      
       sql6 = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
       izena = self.db.select(sql6, (pokemonId,))
       pokeIzena = izena[0]['izena']
@@ -147,15 +143,12 @@ class EreduKontroladorea:
       sql_delete_moves = "DELETE FROM MugimenduIzanTalde WHERE harrapatuId = ?"
       self.db.delete(sql_delete_moves, (pokemonId,))
 
-      # Delete abilities associated with the Pokémon in the team
       sql_delete_ability = "DELETE FROM Dauka WHERE harrapatuId = ?"
       self.db.delete(sql_delete_ability, (pokemonId,))
 
-      # Delete the Pokémon from the team
       sql_delete_pokemon_team = "DELETE FROM PokemonTaldean WHERE harrapatuId = ? AND taldeIzena = ? AND erabiltzaileIzena = ?"
       self.db.delete(sql_delete_pokemon_team, (pokemonId, taldeIzena, erabiltzailea))
 
-      # Delete the Pokémon from the PokemonTalde table
       sql_delete_pokemon = "DELETE FROM PokemonTalde WHERE harrapatuId = ?"
       self.db.delete(sql_delete_pokemon, (pokemonId,))
 
@@ -163,31 +156,16 @@ class EreduKontroladorea:
 
 
   def ezabatu_taldea(self, taldeIzena, erabiltzailea):
-      # Get all Pokémon IDs in the team
       sql_get_pokemon_ids = "SELECT harrapatuId FROM PokemonTaldean WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
       pokemon_ids = self.db.select(sql_get_pokemon_ids, (taldeIzena, erabiltzailea))
 
-      # Delete movements, abilities, and Pokémon for each Pokémon in the team
       for pokemon in pokemon_ids:
           pokemonId = pokemon['harrapatuId']
+          self.ezabatu_taldetik(taldeIzena, erabiltzailea, pokemonId)
 
-          # Delete movements associated with the Pokémon
-          sql_delete_moves = "DELETE FROM MugimenduIzanTalde WHERE harrapatuId = ?"
-          self.db.delete(sql_delete_moves, (pokemonId,))
-
-          # Delete abilities associated with the Pokémon
-          sql_delete_ability = "DELETE FROM Dauka WHERE harrapatuId = ?"
-          self.db.delete(sql_delete_ability, (pokemonId,))
-
-          # Delete the Pokémon from the PokemonTalde table
-          sql_delete_pokemon = "DELETE FROM PokemonTalde WHERE harrapatuId = ?"
-          self.db.delete(sql_delete_pokemon, (pokemonId,))
-
-      # Delete all Pokémon from the team
       sql_delete_pokemon_team = "DELETE FROM PokemonTaldean WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
       self.db.delete(sql_delete_pokemon_team, (taldeIzena, erabiltzailea))
 
-      # Delete the team itself
       sql_delete_team = "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
       self.db.delete(sql_delete_team, (taldeIzena, erabiltzailea))
     
@@ -971,43 +949,39 @@ class EreduKontroladorea:
     except Exception as e:
         print("批量更新 IkasDezake 错误:", e)
 
-# =====================================================
-# NOTIFIKAZIOAK
-# =====================================================
-from app.database import db
-# metodos
-def __init__(self):
-   pass
+  # =====================================================
+  # NOTIFIKAZIOAK
+  # =====================================================
 
-def notifikazioenInformazioaLortu(erabiltzaile_izena, bilatutako_izena):
-   query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ?"
+  def notifikazioenInformazioaLortu(erabiltzaile_izena, bilatutako_izena):
+    query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ?"
 
-   if bilatutako_izena != None and bilatutako_izena != '':
-      query += "AND J.JarraituIzena LIKE ?"
+    if bilatutako_izena != None and bilatutako_izena != '':
+        query += "AND J.JarraituIzena LIKE ?"
 
-   query += "ORDER BY N.DataOrdua DESC;"
+    query += "ORDER BY N.DataOrdua DESC;"
 
-   if bilatutako_izena != None and bilatutako_izena != '':
-      notifikazioZerrenda = db.select(query, (erabiltzaile_izena, bilatutako_izena))
-   else:
-      notifikazioZerrenda = db.select(query, (erabiltzaile_izena,))
+    if bilatutako_izena != None and bilatutako_izena != '':
+        notifikazioZerrenda = db.select(query, (erabiltzaile_izena, bilatutako_izena))
+    else:
+        notifikazioZerrenda = db.select(query, (erabiltzaile_izena,))
 
-   notifikazioJSON = []
-   for notifikazio in notifikazioZerrenda:
-      notifikazioJSON.append({
-         'JarraituIzena': notifikazio[0],
-         'DataOrdua': notifikazio[1],
-         'deskripzioa': notifikazio[2]
-      })
+    notifikazioJSON = []
+    for notifikazio in notifikazioZerrenda:
+        notifikazioJSON.append({
+          'JarraituIzena': notifikazio[0],
+          'DataOrdua': notifikazio[1],
+          'deskripzioa': notifikazio[2]
+        })
 
-   return notifikazioJSON
+    return notifikazioJSON
 
-def notifikazioBerria(ErabiltzaileIzena, DataOrdua, deskripzioa):
-   query = "INSERT INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
-   db.insert(ErabiltzaileIzena, deskripzioa, DataOrdua)
-   return
+  def notifikazioBerria(self, ErabiltzaileIzena, DataOrdua, deskripzioa):
+    query = "INSERT INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
+    self.db.insert(query, (ErabiltzaileIzena, deskripzioa, DataOrdua))
+    return
 
-def jarraitzaileBerria (JarraitzaileIzena, JarraituIzena):
-   query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
-   db.insert(JarraitzaileIzena, JarraituIzena)
-   return
+  def jarraitzaileBerria (JarraitzaileIzena, JarraituIzena):
+    query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
+    db.insert(JarraitzaileIzena, JarraituIzena)
+    return

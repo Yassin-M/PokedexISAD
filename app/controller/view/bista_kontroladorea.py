@@ -2,6 +2,9 @@ from flask import flash, Blueprint, render_template, request, redirect, session,
 from app.controller.model.eredu_kontroladorea import EreduKontroladorea
 import datetime
 
+# =====================================================
+# TALDEAK
+# =====================================================
 def taldeak_blueprint(db):
    taldeak_bp = Blueprint('taldeak', __name__, template_folder="../../templates")
    service = EreduKontroladorea(db)
@@ -79,9 +82,11 @@ def taldeak_blueprint(db):
       service.notifikazioBerria('juan', f"{talde_izena} taldea ezabatu du.", datetime.datetime.now())
       return redirect(url_for('taldeak.taldeak_kargatu'))
    
-   return taldeak_bp  # Ensure the Blueprint object is returned
+   return taldeak_bp
 
-
+# =====================================================
+# POKEDEX
+# =====================================================
 def pokedex_blueprint(db):
    pokedex_bp = Blueprint('pokedex', __name__, template_folder="../../templates")
    service = EreduKontroladorea(db)
@@ -131,6 +136,9 @@ def pokedex_blueprint(db):
       return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
    return pokedex_bp
 
+# =====================================================
+# ITEMDEX
+# =====================================================
 def itemdex_blueprint(db):
 
    bp = Blueprint("itemdex", __name__, template_folder="../../templates")
@@ -162,6 +170,9 @@ def itemdex_blueprint(db):
 
    return bp
 
+# =====================================================
+# CHANGELOG
+# =====================================================
 from flask import Blueprint, render_template, request, session
 from app.controller.model import eredu_kontroladorea
 bista_bp = Blueprint('bista_orokorra', __name__)
