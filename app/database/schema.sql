@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS Eboluzioa (
 );
 
 CREATE TABLE IF NOT EXISTS PokemonTalde (
-    harraptuId INT AUTO_INCREMENT,
+    harrapatuId INTEGER PRIMARY KEY AUTOINCREMENT,
     izena VARCHAR(25),
     maila INT,
     adiskidetasun_maila INT,
@@ -85,17 +85,16 @@ CREATE TABLE IF NOT EXISTS PokemonTalde (
     SPE INT,
     PokemonPokedexID INT,
     ErabiltzaileIzena VARCHAR(25),
-    PRIMARY KEY (harraptuId),
     FOREIGN KEY (PokemonPokedexID) REFERENCES PokemonPokedex(pokeId),
     FOREIGN KEY (ErabiltzaileIzena) REFERENCES Erabiltzailea(izena)
 );
 
 CREATE TABLE IF NOT EXISTS Dauka (
     abileziIzena VARCHAR(25),
-    pokemonIzena VARCHAR(25),
-    PRIMARY KEY (abileziIzena, pokemonIzena),
+    harrapatuId VARCHAR(25),
+    PRIMARY KEY (abileziIzena, harrapatuId),
     FOREIGN KEY (abileziIzena) REFERENCES Abilezia(izena),
-    FOREIGN KEY (pokemonIzena) REFERENCES PokemonTalde(izena)
+    FOREIGN KEY (harrapatuId) REFERENCES PokemonTalde(harrapatuId)
 );
 
 CREATE TABLE IF NOT EXISTS JarraitzenDu (
@@ -126,10 +125,10 @@ CREATE TABLE IF NOT EXISTS Mugimendua (
 );
 
 CREATE TABLE IF NOT EXISTS MugimenduIzanTalde (
-    harraptuId INT,
+    harrapatuId INT,
     mugimenduIzena VARCHAR(25),
-    PRIMARY KEY (harraptuId, mugimenduIzena),
-    FOREIGN KEY (harraptuId) REFERENCES PokemonTalde(harraptuId),
+    PRIMARY KEY (harrapatuId, mugimenduIzena),
+    FOREIGN KEY (harrapatuId) REFERENCES PokemonTalde(harrapatuId),
     FOREIGN KEY (mugimenduIzena) REFERENCES Mugimendua(izena)
 );
 
@@ -159,9 +158,9 @@ CREATE TABLE IF NOT EXISTS Taldea (
 
 CREATE TABLE IF NOT EXISTS PokemonTaldean (
     taldeIzena VARCHAR(25),
-    pokeId INT,
+    harrapatuId INT,
     erabiltzaileIzena VARCHAR(25),
-    PRIMARY KEY (taldeIzena, pokeId, erabiltzaileIzena),
-    FOREIGN KEY (taldeIzena, erabiltzaileIzena) REFERENCES Taldea(taldeIzena) ON DELETE CASCADE,
-    FOREIGN KEY (pokeId) REFERENCES PokemonPokedex(pokeId) ON DELETE CASCADE
+    PRIMARY KEY (taldeIzena, harrapatuId, erabiltzaileIzena),
+    FOREIGN KEY (taldeIzena, erabiltzaileIzena) REFERENCES Taldea(taldeIzena, erabiltzaileIzena),
+    FOREIGN KEY (harrapatuId) REFERENCES PokemonTalde(harrapatuId)
 );
