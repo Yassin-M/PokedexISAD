@@ -1,0 +1,277 @@
+/* Lagunak Estilos - Estilo Pokemon */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.lagunak-container {
+    background: linear-gradient(red 50%, black 50%, black 52%, white 52%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.lagunak-wrapper {
+    width: 100%;
+    max-width: 900px;
+    background: #c0c0c0;
+    border: 3px solid #000;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Header */
+.lagunak-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #000;
+}
+
+.lagunak-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #000;
+    flex-grow: 1;
+    text-align: center;
+    font-weight: bold;
+}
+
+.nav-btn {
+    font-size: 1.5rem;
+    color: #333 !important;
+    background: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+    background: #ffcb05;
+}
+
+/* Mensajes */
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 2px solid #28a745;
+    font-weight: bold;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 2px solid #dc3545;
+    font-weight: bold;
+}
+
+/* Botón Gehitu */
+.gehitu-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.gehitu-btn {
+    background: #28a745;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: 2px solid #000;
+}
+
+.gehitu-btn:hover {
+    background: #20c997;
+    transform: translateY(-2px);
+}
+
+/* Buscador */
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-container label {
+    display: block;
+    color: #000;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #f7f0dd;
+    font-size: 14px;
+    color: #000;
+    box-sizing: border-box;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: #333;
+}
+
+/* Lista de amigos */
+.friends-list-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #f0f0f0;
+    padding: 10px;
+}
+
+.friends-list-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.friends-list-container::-webkit-scrollbar-track {
+    background: #e0e0e0;
+}
+
+.friends-list-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+.friends-list-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.friend-item {
+    background: white;
+    border: 2px solid #000;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.friend-item:hover {
+    background: #f7f0dd;
+    transform: translateY(-2px);
+}
+
+.friend-info {
+    flex-grow: 1;
+}
+
+.friend-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+}
+
+.friend-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.action-btn.unfollow {
+    background: #dc3545;
+    color: white;
+}
+
+.action-btn.unfollow:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin: 8px 0;
+    font-weight: bold;
+}
+
+.empty-state-hint {
+    font-size: 14px;
+    color: #666;
+    font-weight: normal;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .lagunak-wrapper {
+        padding: 15px;
+    }
+
+    .lagunak-header h1 {
+        font-size: 20px;
+    }
+
+    .friend-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .friend-actions {
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .action-btn {
+        width: 100%;
+        text-align: center;
+    }
+}

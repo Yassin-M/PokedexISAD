@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saioa Hasi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body> <div class="form-container"> <div class="login-container">
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form action="" method="POST" class="login-form">
+                <div class="form-group">
+                    <label for="erabiltzailea">Erabiltzailea:</label>
+                    <input type="text" 
+                           id="erabiltzailea" 
+                           name="erabiltzailea" 
+                           required 
+                           placeholder="Sartu erabiltzailea"
+                           autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Pasahitza:</label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           required 
+                           placeholder="Sartu pasahitza"
+                           autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">SARTU</button>
+                
+                <div class="form-footer">
+                    <p>Jada kontua ez baduzu?</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary">ERREGISTRATU</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

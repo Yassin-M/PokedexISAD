@@ -1,18 +1,68 @@
 import os.path
 import sqlite3
+from flask import Flask, render_template, redirect, url_for, session, request, flash
 
-
-from flask import Flask
-
-# los controladores
 from app.database.database import Connection
+from app.controller.view.bista_kontroladorea import BistaKontroladorea
 
-def init_db():
-   pass
 def create_app():
-   app = Flask(__name__)
+    app = Flask(__name__)
+    app.secret_key = 'tu_clave_secreta_aqui' 
 
-   #datu basea hasieratu
-   db = Connection()
+    db = Connection()
+    vista_controller = BistaKontroladorea()
+    
+    @app.route('/')
+    def index():
+        return redirect(url_for('login'))
 
-   return app
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        return vista_controller.saioHasi()
+    
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        return vista_controller.erregistratu()
+
+    @app.route('/editatu', methods=['GET', 'POST'])
+    def editatu():
+        return vista_controller.datuakAldatu()
+
+    @app.route('/menu')
+    def menu():
+        return render_template('menu.html')
+    
+    @app.route('/menu_admin')
+    def menu_admin():
+        return render_template('menu_admin.html')
+
+    @app.route('/kudeatu')
+    def kudeatu():
+        return vista_controller.erabiltzaileakKargatu()
+    
+    @app.route('/kudeatu/editatu/<user_id>', methods=['GET', 'POST'])
+    def editatu_user(user_id):
+        return vista_controller.datuakAldatu(user_id)
+
+    @app.route('/kudeatu/ezabatu/<user_id>')
+    def delete_user(user_id):
+        return vista_controller.ezabatu(user_id)
+
+    @app.route('/kudeatu/admin/<user_id>')
+    def make_admin(user_id):
+        return vista_controller.baimendu(user_id)
+    
+    @app.route('/lagunak')
+    def lagunak():
+        return vista_controller.lagunakKargatu()
+
+    @app.route('/lagunak/utzi/<jarraitua>')
+    def utzi_jarraitzen(jarraitua):
+        return vista_controller.utzi_jarraitzen(jarraitua)
+
+    @app.route('/gehituErabiltzailea')
+    @app.route('/gehituErabiltzailea/<jarraitua>')
+    def gehituErabiltzailea(jarraitua=None):
+        return vista_controller.gehituErabiltzailea(jarraitua)
+    
+    return app

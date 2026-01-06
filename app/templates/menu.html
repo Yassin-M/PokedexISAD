@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasiera - Pokedex</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
+</head>
+<body>
+    <div class="form-container main-menu">
+        <div class="content-layout">
+            
+            <div class="left-section">
+                <div class="avatar-box">
+                    <div class="avatar">🙂</div>
+                </div>
+                <div class="sidebar-buttons">
+                    <a class="btn-retro" href="{{ url_for('editatu') }}">EDITATU</a>
+                    <a class="btn-retro" href="{{ url_for('lagunak') }}">LAGUNAK</a>
+                    <a class="btn-retro logout" href="{{ url_for('login') }}">ATERA</a>
+                </div>
+            </div>
+
+            <div class="main-section">
+                <div class="grid-buttons">
+                    <a class="btn-retro" href="#taldeak">TALDEAK</a>
+                    <a class="btn-retro" href="#pokedex">POKEDEX</a>
+                    <a class="btn-retro" href="#notif">NOTIF.</a>
+                    <a class="btn-retro" href="#itemdex">ITEMDEX</a>
+                </div>
+                <a class="btn-retro full-width" href="#chatbot">CHATBOT</a>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

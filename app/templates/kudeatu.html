@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kudeatu Erabiltzaileak</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kudeatu.css') }}">
+</head>
+<body class="kudeatu-container">
+    <div class="kudeatu-wrapper">
+        <div class="kudeatu-header">
+            <a class="nav-btn" href="{{ url_for('menu_admin') }}" title="Atzera">↩</a>
+            <h1>KUDEATU ERABILTZAILEAK</h1>
+            <a class="nav-btn" href="{{ url_for('menu_admin') }}" title="Etxea">⌂</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'success' %}
+                        <div class="success-message">{{ message }}</div>
+                    {% else %}
+                        <div class="error-message">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% if success %}
+            <div class="success-message">{{ success }}</div>
+        {% endif %}
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <div class="search-container">
+            <label for="search-users">Bilatu erabiltzailea:</label>
+            <input 
+                type="text" 
+                id="search-users" 
+                class="search-input" 
+                placeholder="Sartu erabiltzailearen izena edo emaila..."
+                onkeyup="filterUsers()"
+            >
+        </div>
+
+        <div class="users-list-container" id="usersList">
+            {% if users %}
+                {% for user in users %}
+                    <div class="user-item" data-username="{{ user.izena }}" data-email="{{ user.email }}">
+                        <div class="user-info">
+                            <div class="user-name">{{ user.izena }}</div>
+                            <div class="user-details">{{ user.email }}</div>
+                            <div class="user-details">ID: {{ user.id }}</div>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{{ url_for('editatu_user', user_id=user.id) }}" class="action-btn edit" title="Editatu">✏ EDITATU</a>
+                            {% if user.admin == 0 %}
+                                <a href="{{ url_for('make_admin', user_id=user.id) }}" class="action-btn admin" title="Admin bihurtu" onclick="return confirm('Ziur zaude admin bihurtu nahi duzula?');">👑 ADMIN</a>
+                            {% endif %}
+                            <a href="{{ url_for('delete_user', user_id=user.id) }}" class="action-btn delete" title="Ezabatu" onclick="return confirm('Ziur zaude erabiltzaile hau ezabatu nahi duzula? Ekintza hau ezin da desegin.');">🗑 EZABATU</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>Ez dago erabiltzailerik</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function filterUsers() {
+            const searchInput = document.getElementById('search-users').value.toLowerCase();
+            const userItems = document.querySelectorAll('.user-item');
+
+            userItems.forEach(item => {
+                const username = item.getAttribute('data-username').toLowerCase();
+                const email = item.getAttribute('data-email').toLowerCase();
+
+                if (username.includes(searchInput) || email.includes(searchInput)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function confirmDelete(userName) {
+            return confirm(`Ziur zaude ${userName} ezabatu nahi duzula? Ekintza hau ezin da desegin.`);
+        }
+    </script>
+</body>
+</html>

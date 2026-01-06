@@ -13,12 +13,14 @@ class Connection:
       self._taulak_hasieratu()
 
    def _taulak_hasieratu(self):
-       if os.path.exists('schema.sql'):
-           try:
-               with open('schema.sql', 'r', encoding='utf-8') as f:
-                   self.connection.executescript(f.read())
-           except sqlite3.Error as e:
-               print(f"Error inicializando tablas: {e}")
+        # Esta línea es la CLAVE: busca el SQL en la carpeta correcta
+        ruta_schema = os.path.join(os.path.dirname(__file__), 'schema.sql')
+        if os.path.exists(ruta_schema):
+            try:
+                with open(ruta_schema, 'r', encoding='utf-8') as f:
+                    self.connection.executescript(f.read())
+            except sqlite3.Error as e:
+                print(f"Error al crear tablas: {e}")
 
    def select(self, sentence, parameters=None):
       cursor = self.connection.cursor()

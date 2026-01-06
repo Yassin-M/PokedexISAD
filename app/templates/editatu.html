@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editatu Profila</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/editatu.css') }}">
+</head>
+<body class="edit-page">
+    <div class="form-container">
+        <div class="login-container">
+            <div class="edit-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <a class="btn" href="{{ url_for(home_endpoint) }}" style="text-decoration: none; padding: 5px 15px;">↩</a>
+                <h2 style="margin: 0;">Profila Editatu</h2>
+                <a class="btn" href="{{ url_for(home_endpoint) }}" style="text-decoration: none; padding: 5px 15px;">⌂</a>
+            </div>
+
+            {% if success %}
+                <div class="edit-success" style="background: #c6f6d5; padding: 10px; border: 2px solid #2f855a; margin-bottom: 10px;">{{ success }}</div>
+            {% endif %}
+            
+            {% if error %}
+                <div class="edit-error" style="background: #fed7d7; padding: 10px; border: 2px solid #c53030; margin-bottom: 10px;">{{ error }}</div>
+            {% endif %}
+
+            <form action="" method="POST">
+                <p>
+                    <label for="izena">Izena </label>
+                    <input type="text" name="izena" id="izena" placeholder="Utzi hutsik aldatzeko">
+                </p>
+
+                <p>
+                    <label for="email">Gmail </label>
+                    <input type="email" name="email" id="email" placeholder="Utzi hutsik aldatzeko">
+                </p>
+
+                <p>
+                    <label for="jaiotza">Jaiotza data </label>
+                    <input type="date" name="jaiotza" id="jaiotza">
+                </p>
+
+                <p>
+                    <label for="pasahitza">Pasahitza Berria</label>
+                    <input type="password" name="pasahitza" id="pasahitza" placeholder="Hutsik utzi ez aldatzeko">
+                </p>
+
+                <p>
+                    <label for="pasahitza2">Berretsi Pasahitza</label>
+                    <input type="password" name="pasahitza2" id="pasahitza2">
+                </p>
+
+                <p>
+                    <button type="submit" class="btn btn-login" style="width: 100%;">GORDE</button>
+                </p>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

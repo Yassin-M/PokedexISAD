@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagunak</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lagunak.css') }}">
+</head>
+<body class="lagunak-container">
+    <div class="lagunak-wrapper">
+        <div class="lagunak-header">
+            <a class="nav-btn" href="{{ url_for(menu_endpoint) }}" title="Atzera">↩</a>
+            <h1>LAGUNAK</h1>
+            <a class="nav-btn" href="{{ url_for(menu_endpoint) }}" title="Etxea">⌂</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'success' %}
+                        <div class="success-message">{{ message }}</div>
+                    {% else %}
+                        <div class="error-message">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="gehitu-container">
+            <a href="{{ url_for('gehituErabiltzailea') }}" class="gehitu-btn">
+                ➕ GEHITU
+            </a>
+        </div>
+
+        <div class="search-container">
+            <label for="search-friends">Bilatu laguna:</label>
+            <input 
+                type="text" 
+                id="search-friends" 
+                class="search-input" 
+                placeholder="Sartu lagunaren izena..."
+                onkeyup="filterFriends()"
+            >
+        </div>
+
+        <div class="friends-list-container" id="friendsList">
+            {% if lagunak %}
+                {% for laguna in lagunak %}
+                    <div class="friend-item" data-username="{{ laguna.izena }}">
+                        <div class="friend-info">
+                            <div class="friend-name">👤 {{ laguna.izena }}</div>
+                        </div>
+                        <div class="friend-actions">
+                            <a href="{{ url_for('utzi_jarraitzen', jarraitua=laguna.izena) }}" 
+                               class="action-btn unfollow" 
+                               title="Utzi jarraitzen"
+                               onclick="return confirm('Ziur zaude {{ laguna.izena }} jarraitzen utzi nahi duzula?');">
+                                ❌ UTZI JARRAITZEN
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p>Oraindik ez duzu inor jarraitzen</p>
+                    <p class="empty-state-hint">Erabili "GEHITU" botoia jendea bilatzeko</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function filterFriends() {
+            const searchInput = document.getElementById('search-friends').value.toLowerCase();
+            const friendItems = document.querySelectorAll('.friend-item');
+
+            friendItems.forEach(item => {
+                const username = item.getAttribute('data-username').toLowerCase();
+
+                if (username.includes(searchInput)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
