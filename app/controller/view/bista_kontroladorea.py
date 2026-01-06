@@ -133,11 +133,11 @@ def pokedex_blueprint(db):
 
 def itemdex_blueprint(db):
 
-    bp = Blueprint("itemdex", __name__, template_folder="../../templates")
-    service = EreduKontroladorea(db)
+   bp = Blueprint("itemdex", __name__, template_folder="../../templates")
+   service = EreduKontroladorea(db)
 
-    @bp.route("/itemdex", methods=["GET", "POST"])
-    def itemdex():
+   @bp.route("/itemdex", methods=["GET", "POST"])
+   def itemdex():
         iragazkiak = {
             "izena": "",
             "motak": [],
@@ -155,12 +155,12 @@ def itemdex_blueprint(db):
         motak = service.lortu_motak()  # obtenemos los tipos desde la DB
         return render_template("itemdex.html", items=items, motak=motak, service=service)
 
-    @bp.route("/itemdex/item/<int:id>")
-    def item(id):
+   @bp.route("/itemdex/item/<int:id>")
+   def item(id):
         item = service.bistaratu_item(id)
         return render_template("item.html", item=item)
 
-      return bp
+   return bp
 
 from flask import Blueprint, render_template, request, session
 from app.controller.model import eredu_kontroladorea
