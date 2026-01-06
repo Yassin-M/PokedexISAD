@@ -291,7 +291,7 @@ class EreduKontroladorea:
           for pokemon in tipo["pokemonak"]:
               try:
                 pokemon_id = int(pokemon.pokemon.url.split('/')[-2])
-                self.db.insert(sql2, [mota['name'], pokemon_id])
+                self.db.insert(sql2, [mota['name'].capitalize(), pokemon_id])
               except Exception as e:
                 print(f"Error {e}")
         except Exception as e:
@@ -307,10 +307,10 @@ class EreduKontroladorea:
           parametroak = [doble.name.capitalize(), mota["name"].capitalize(), 2.0]
           self.db.insert(sql3, parametroak)
         for mitad in mitades:
-          parametroak = [mitad.name.capitalize(), mota['name'], 0.5]
+          parametroak = [mitad.name.capitalize(), mota['name'].capitalize(), 0.5]
           self.db.insert(sql3, parametroak)
         for zero in zeros:
-          parametroak = [zero.name.capitalize(), mota['name'], 0.0]
+          parametroak = [zero.name.capitalize(), mota['name'].capitalize(), 0.0]
           self.db.insert(sql3, parametroak)
         #esta parte habra que ver como acortarla un poco
     pass
