@@ -30,7 +30,7 @@
 
                 {% for talde in taldeak %}
                 <div class="row">
-                    <form action="{{ url_for('taldeak.kargatu_taldea') }}" method="post">
+                    <form action="{{ url_for('taldeak.taldea', izena=talde.izena) }}" method="post">
                         <input type="hidden" name="talde_izena" value="{{ talde.izena }}">
                         <button type="submit" class="action-btn add">EDIT</button>
                     </form>     
