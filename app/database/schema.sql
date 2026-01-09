@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS Dauka (
 CREATE TABLE IF NOT EXISTS JarraitzenDu (
     JarraitzaileIzena VARCHAR(25),
     JarraituIzena VARCHAR(25),
+    Notifikazioak BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (JarraitzaileIzena, JarraituIzena),
     FOREIGN KEY (JarraitzaileIzena) REFERENCES Erabiltzailea(izena),
     FOREIGN KEY (JarraituIzena) REFERENCES Erabiltzailea(izena)

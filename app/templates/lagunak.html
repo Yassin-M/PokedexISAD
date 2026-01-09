@@ -52,6 +52,11 @@
                             <div class="friend-name">👤 {{ laguna.izena }}</div>
                         </div>
                         <div class="friend-actions">
+                            <a href="{{ url_for('eguneratu_notifikazioak', jarraitua=laguna.izena, isilarazi=not laguna.notifikazioak) }}" 
+                               class="action-btn notification {% if laguna.notifikazioak %}active{% else %}muted{% endif %}" 
+                               title="{% if laguna.notifikazioak %}Notifikazioak desgaitu{% else %}Notifikazioak aktibatu{% endif %}">
+                                {% if laguna.notifikazioak %}🔔{% else %}🔕{% endif %}
+                            </a>
                             <a href="{{ url_for('utzi_jarraitzen', jarraitua=laguna.izena) }}" 
                                class="action-btn unfollow" 
                                title="Utzi jarraitzen"

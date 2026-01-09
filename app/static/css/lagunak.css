@@ -216,6 +216,35 @@
     display: inline-block;
 }
 
+.action-btn.notification {
+    background: #ffc107;
+    color: #000;
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.action-btn.notification:hover {
+    background: #ffcb05;
+    transform: scale(1.1);
+}
+
+.action-btn.notification.muted {
+    background: #ccc;
+    color: #666;
+    opacity: 0.7;
+}
+
+.action-btn.notification.muted:hover {
+    background: #bbb;
+    transform: scale(1.1);
+}
+
 .action-btn.unfollow {
     background: #dc3545;
     color: white;

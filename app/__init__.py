@@ -56,6 +56,10 @@ def create_app():
     def lagunak():
         return vista_controller.lagunakKargatu()
 
+    @app.route('/lagunak/notifikazioak/<jarraitua>')
+    def eguneratu_notifikazioak(jarraitua):
+        return vista_controller.eguneratu_notifikazioak(jarraitua)
+
     @app.route('/lagunak/utzi/<jarraitua>')
     def utzi_jarraitzen(jarraitua):
         return vista_controller.utzi_jarraitzen(jarraitua)

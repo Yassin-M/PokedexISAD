@@ -1,6 +1,7 @@
 from werkzeug.security import check_password_hash
 from app.database.database import Connection
 import json
+import sqlite3
 
 class EreduKontroladorea:
 
@@ -49,6 +50,8 @@ class EreduKontroladorea:
       try:
          self.db.insert(query, (izena, pasahitza, email, jaiotze_data, 'usuario'))
          return True, "Erabiltzailea behar bezala erregistratu da"
+      except sqlite3.IntegrityError:
+         return False, "Erabiltzailea jada existitzen da"
       except Exception as e:
          return False, f"Errorea erabiltzailea erregistratzerakoan: {str(e)}"
    
@@ -141,7 +144,7 @@ class EreduKontroladorea:
    def lagunakKargatu(self, erabiltzaile_izena):
       """Erabiltzaile batek jarraitzen dituen pertsonak lortu"""
       query = """
-         SELECT JarraituIzena 
+         SELECT JarraituIzena, Notifikazioak
          FROM JarraitzenDu 
          WHERE JarraitzaileIzena = ?
          ORDER BY JarraituIzena
@@ -151,7 +154,8 @@ class EreduKontroladorea:
          jarraitutakoak = []
          for jarraitua in emaitza:
             jarraitutakoak.append({
-               'izena': jarraitua['JarraituIzena']
+               'izena': jarraitua['JarraituIzena'],
+               'notifikazioak': bool(jarraitua['Notifikazioak'])
             })
          return json.dumps(jarraitutakoak, ensure_ascii=False)
       except Exception as e:
@@ -208,3 +212,12 @@ class EreduKontroladorea:
       except Exception as e:
          print(f"Errorea erabiltzaileak bilatzerakoan: {str(e)}")
          return json.dumps([], ensure_ascii=False)
+   
+   def eguneratu_notifikazioak(self, jarraitzailea, jarraitua, notifikazioak):
+      """Notifikazio baten egoera aldatu (aktibatu/desgaitu)"""
+      query = "UPDATE JarraitzenDu SET Notifikazioak = ? WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
+      try:
+         self.db.update(query, (notifikazioak, jarraitzailea, jarraitua))
+         return True, "Notifikazioak eguneratuta daude"
+      except Exception as e:
+         return False, f"Errorea notifikazioak eguneratzerakoan: {str(e)}"

@@ -258,3 +258,14 @@ class BistaKontroladorea:
                            erabiltzaileak=erabiltzaileak,
                            bilaketa=bilaketa,
                            menu_endpoint=menu_endpoint)
+   
+   def eguneratu_notifikazioak(self, jarraitua):
+      if 'user' not in session:
+         return redirect(url_for('login'))
+      
+      current_user = session.get('user')
+      isilarazi = request.args.get('isilarazi', 'False').lower() == 'true'
+      
+      self.eredu_kontroladorea.eguneratu_notifikazioak(current_user, jarraitua, isilarazi)
+      
+      return redirect(url_for('lagunak'))
