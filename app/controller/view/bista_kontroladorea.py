@@ -7,33 +7,33 @@ class BistaKontroladorea:
     def __init__(self, db):
         self.eredu_kontroladorea = EreduKontroladorea(db)
     
-    def saioHasi(self):
-        """Saioa hasteko orria"""
-        if request.method == 'POST':
-            erabiltzailea = request.form.get('erabiltzailea')
-            pasahitza = request.form.get('password')
-            error = None
-            
-            if not erabiltzailea or not pasahitza:
-                error = 'Mesedez, bete eremu guztiak'
-                return render_template('login.html', error=error)
-            
-            ondo, erabiltzaile_izena, rola, mezua = self.eredu_kontroladorea.saioHasi(
-                erabiltzailea, pasahitza
-            )
-            
-            if ondo:
-                session['user'] = erabiltzaile_izena
-                session['role'] = rola or 'usuario'
-                if (rola or '').lower() == 'admin':
-                    return render_template('menu_admin.html')
-                return render_template('menu.html')
-            else:
-                error = mezua
-                return render_template('login.html', error=error)
+    def saioHasi(self, erabiltzailea, pasahitza):
+      """Saioa hasteko orria"""
+      if request.method == 'POST':
+        
+         if not erabiltzailea or not pasahitza:
+            error = 'Mesedez, bete eremu guztiak'
+            return render_template('login.html', error=error)
+         
+         erantzuna_json = self.eredu_kontroladorea.saioHasi(erabiltzailea, pasahitza)
+         erantzuna = json.loads(erantzuna_json or '{}')
+         ondo = erantzuna.get('ondo')
+         erabiltzaile_izena = erantzuna.get('erabiltzaile_izena')
+         rola = erantzuna.get('rola')
+         mezua = erantzuna.get('mezua')
+         
+         if ondo:
+            session['user'] = erabiltzaile_izena
+            session['role'] = rola or 'usuario'
+            if (rola or '').lower() == 'admin':
+               return render_template('menu_admin.html')
+            return render_template('menu.html')
+         else:
+            error = mezua
+            return render_template('login.html', error=error)
       
-        return render_template('login.html')
-    
+      return render_template('login.html')
+   
     def erregistratu(self):
         """Erregistro orria"""
         if request.method == 'POST':

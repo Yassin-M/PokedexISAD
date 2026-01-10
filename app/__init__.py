@@ -38,7 +38,9 @@ def create_app():
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
-        return vista_controller.saioHasi()
+        erabiltzailea = request.form.get('erabiltzailea') if request.method == 'POST' else None
+        pasahitza = request.form.get('password') if request.method == 'POST' else None
+        return vista_controller.saioHasi(erabiltzailea, pasahitza)
     
     @app.route('/register', methods=['GET', 'POST'])
     def register():

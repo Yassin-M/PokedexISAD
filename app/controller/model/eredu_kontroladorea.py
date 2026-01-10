@@ -12,19 +12,37 @@ class EreduKontroladorea:
     self.api = APIKontroladorea()
     
   def saioHasi(self, erabiltzaile_izena, pasahitza):
-    """Kredentzialak egiaztatu datu-basean"""
-    query = "SELECT izena, pasahitza, rola FROM Erabiltzailea WHERE izena = ?"
-    emaitza = self.db.select(query, (erabiltzaile_izena,))
-    erabiltzailea = emaitza[0] if emaitza else None
-    
-    if not erabiltzailea:
-      return False, None, None, "Erabiltzailea ez da existitzen"
-    
-    if erabiltzailea['pasahitza'] == pasahitza:
-      return True, erabiltzailea['izena'], erabiltzailea['rola'], "Saioa hasi da"
-    else:
-      return False, None, None, "Pasahitza okerra"
+      """Kredentzialak egiaztatu datu-basean"""
+      query = "SELECT izena, pasahitza, rola FROM Erabiltzailea WHERE izena = ?"
+      emaitza = self.db.select(query, (erabiltzaile_izena,))
+      erabiltzailea = emaitza[0] if emaitza else None
+      
+      if not erabiltzailea:
+         return json.dumps({
+            'ondo': False,
+            'erabiltzaile_izena': None,
+            'rola': None,
+            'mezua': "Erabiltzailea ez da existitzen"
+         }, ensure_ascii=False)
+      
+      
+      pasahitza_zuzena = erabiltzailea['pasahitza'] == pasahitza
 
+      if pasahitza_zuzena:
+         return json.dumps({
+            'ondo': True,
+            'erabiltzaile_izena': erabiltzailea['izena'],
+            'rola': erabiltzailea['rola'],
+            'mezua': "Saioa hasi da"
+         }, ensure_ascii=False)
+      else:
+         return json.dumps({
+            'ondo': False,
+            'erabiltzaile_izena': None,
+            'rola': None,
+            'mezua': "Pasahitza okerra"
+         }, ensure_ascii=False)
+   
   def balioztatu_pasahitza(self, pasahitza, pasahitza_berretsi):
     """Pasahitzak balioztatu: bat etortzea eta karaktere debekatuak"""
     karaktere_debekatuak = "|'¬£$^;#~=@"
