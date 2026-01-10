@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS PokemonPokedex (
     deskripzioa TEXT,
     irudia VARCHAR(255),
     generazioa INT,
+    preEboluzioId INT,
     PRIMARY KEY (pokeId)
 );
 
@@ -153,7 +154,7 @@ CREATE TABLE IF NOT EXISTS IkasDezake (
 CREATE TABLE IF NOT EXISTS Taldea (
     taldeIzena VARCHAR(25),
     erabiltzaileIzena VARCHAR(25),
-    PRIMARY KEY (taldeIzena),
+    PRIMARY KEY (taldeIzena, erabiltzaileIzena),
     FOREIGN KEY (erabiltzaileIzena) REFERENCES Erabiltzailea(izena)
 );
 

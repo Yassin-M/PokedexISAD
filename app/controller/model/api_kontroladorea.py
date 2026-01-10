@@ -72,6 +72,14 @@ class APIKontroladorea:
       uneko_pokemon = pb.pokemon(izena)
       izen_erreala = uneko_pokemon.species.name
       espeziea = pb.pokemon_species(izen_erreala)
+      
+      #########################Para cargar preevoluciones#########################
+      pre_eboluzioa = 0
+      if espeziea.evolves_from_species and espeziea.id < 10000:
+            url = espeziea.evolves_from_species.url
+            pre_eboluzioa = int(url.rstrip('/').split('/')[-1])
+      #########################Para cargar preevoluciones#########################
+
       generoa_rate = espeziea.gender_rate
       generoa = 'Neutroa' if generoa_rate == -1 else 'Ar' if generoa_rate == 0 else 'Eme' if generoa_rate == 8 else 'Ar/Eme'
       irudia = uneko_pokemon.sprites.other.official_artwork.front_default
@@ -84,7 +92,8 @@ class APIKontroladorea:
                            "generoa": generoa,
                            "deskripzioa": self.__lortu_deskripzioa(espeziea),
                            "irudia": irudia,
-                           "generazioa": self.erromatarrak.get(espeziea.generation.name.split('-')[1], 0)}
+                           "generazioa": self.erromatarrak.get(espeziea.generation.name.split('-')[1], 0),
+                           "preEboluzioId": pre_eboluzioa}
       return base_parametroak
    def mota_izenak_eskatu(self):
       return pb.APIResourceList('type')

@@ -448,8 +448,8 @@ class EreduKontroladorea:
         self.abileziak_kargatu()
     if not self.mugimenduak_konprobatu():
         self.mugimenduak_kargatu()
-    if not self.eboluzioak_konprobatu():
-        self.eboluzioak_kargatu()
+    #if not self.eboluzioak_konprobatu():
+        #self.eboluzioak_kargatu()
     self.delete_test_team()
 
     sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
@@ -489,12 +489,12 @@ class EreduKontroladorea:
     return json1
 
   def pokemonak_kargatu(self):
-    sql2 = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    sql2 = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     pokemon_izenak = self.api.pokemon_izenak_eskatu()
     for pokemon in pokemon_izenak:
         try:
           parametroak = self.api.pokemon_eskatu(pokemon['name'])
-          self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"]])
+          self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["preEboluzioId"]])
         except Exception as e:
           print(f"Error {e}")
 
@@ -842,22 +842,37 @@ class EreduKontroladorea:
           bisitatuak.add(unekoa)
 
           # SQL kontsulta prestatu aurreko edo hurrengo eboluzioak lortzeko
-          if aurreko:
+#He cambiado las consultas para hacerse con el atributo de preeboluzioId del pokemonpokedex
+          if aurreko: 
               sql = """
-                    SELECT P.pokeId, P.izena, P.irudia
-                    FROM Eboluzioa E
-                             JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
-                    WHERE E.eboluzioaPokeId = ? \
+                    SELECT P1.pokeId, P1.izena, P1.irudia
+                    FROM PokemonPokedex P1
+                      JOIN PokemonPokedex P2 ON P1.pokeId = P2.preEboluzioId
+                    WHERE P2.pokeId = ? \
                     """
+              
+              #sql = """
+              #      SELECT P.pokeId, P.izena, P.irudia
+              #      FROM Eboluzioa E
+              #               JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
+              #      WHERE E.eboluzioaPokeId = ? \
+              #      """
           else:
               sql = """
-                    SELECT P.pokeId, P.izena, P.irudia
-                    FROM Eboluzioa E
-                             JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
-                    WHERE E.pokemonPokedexID = ? \
+                    SELECT P2.pokeId, P2.izena, P2.irudia
+                    FROM PokemonPokedex P1
+                      JOIN PokemonPokedex P2 ON P1.pokeId = P2.preEboluzioId
+                    WHERE P1.pokeId = ? \
                     """
+              #sql = """
+              #      SELECT P.pokeId, P.izena, P.irudia
+              #      FROM Eboluzioa E
+              #               JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
+              #      WHERE E.pokemonPokedexID = ? \
+              #      """
 
           # SQL exekutatu eta emaitzak prozesatu
+          print(sql)
           for unekoa_info in self.db.select(sql, [unekoa]):
               emaitza.append(unekoa_info)
               # Hurrengo bilaketarako gehitu ID-a
@@ -874,6 +889,7 @@ class EreduKontroladorea:
         return None
 
     # SQL kontsulta taldeko pokemon guztiak lortzeko
+    #He cambiado un poco esta consulta para que funcione con los cambios del id de pokemonatalde
     sql = """
           SELECT pt.PokemonPokedexID, \
                   pt.izena, \
@@ -885,15 +901,19 @@ class EreduKontroladorea:
                   pt.SPE, \
                   pd.irudia
           FROM Taldea t
-                  LEFT JOIN PokemonTaldean pta
+                  INNER JOIN PokemonTaldean pta
                         ON pta.taldeIzena = t.taldeIzena
-                  LEFT JOIN PokemonPokedex pd
-                        ON pd.pokeId = pta.pokeId
                   LEFT JOIN PokemonTalde pt
-                        ON pt.PokemonPokedexID = pd.pokeId
+                        ON pta.harrapatuId = pt.harrapatuId      
+                  LEFT JOIN PokemonPokedex pd
+                        ON pd.pokeId = pt.PokemonPokedexID
           WHERE t.taldeIzena = ?
             AND t.erabiltzaileIzena = ?; \
           """
+          #He cambiado de left join a inner join porque daba error
+          #Esto iba despues del join de pokemonpokedex
+          #LEFT JOIN PokemonTalde pt
+          # ON pt.PokemonPokedexID = pd.pokeId
 
     pokemon_zerrenda = self.db.select(sql, [taldeIzena, erabiltzaileIzena])
 

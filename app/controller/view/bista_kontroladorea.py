@@ -259,7 +259,8 @@ def taldeak_blueprint(db):
     @taldeak_bp.route('/taldeak', methods=['GET', 'POST'])
     def taldeak_kargatu():
         session.pop('editatzen_ari_den_taldea', None)
-        talde_zerrenda = service.taldeak_kargatu('juan')
+        erabiltzailea = session.get('user')
+        talde_zerrenda = service.taldeak_kargatu(erabiltzailea)
         return render_template('taldeak.html', taldeak=talde_zerrenda)
     
     @taldeak_bp.route('/taldea', methods=['GET', 'POST'])
@@ -277,16 +278,19 @@ def taldeak_blueprint(db):
             flash("Ez da talderik zehaztu", "error")
             return redirect(url_for('taldeak.taldeak_kargatu'))
         session['editatzen_ari_den_taldea'] = talde_izena
-        talde_datuak = service.get_taldea(talde_izena, 'juan')
+        erabiltzailea = session.get('user')
+        talde_datuak = service.get_taldea(talde_izena, erabiltzailea)
         return render_template('taldea.html', pokemons=talde_datuak)
 
     @taldeak_bp.route('/taldea_berria', methods=['POST'])
     def sortu_taldea():
         try:
-            taldea_id = service.sortu_taldea_hutsa('juan')  
+            erabiltzailea = session.get('user')
+            print(erabiltzailea)
+            taldea_id = service.sortu_taldea_hutsa(erabiltzailea)  
             session['editatzen_ari_den_taldea'] = taldea_id
             deskripzioa = f"Talde berria sortu du: {taldea_id}."
-            service.notifikazioBerria('juan', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), deskripzioa)
+            service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), deskripzioa)
             return redirect(url_for('taldeak.taldea', izena=taldea_id))
         except ValueError as e:
             flash(str(e), "error")
@@ -297,8 +301,9 @@ def taldeak_blueprint(db):
         talde_izena = session.get('editatzen_ari_den_taldea')
         pokemon_id = session.get('pokemon_datuak')
         try:
-            pokeIzena = service.sartu_taldera(talde_izena, 'juan', pokemon_id)
-            service.notifikazioBerria('juan', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{pokeIzena} bat gehitu du {talde_izena} taldean.")
+            erabiltzailea = session.get('user')
+            pokeIzena = service.sartu_taldera(talde_izena, erabiltzailea, pokemon_id)
+            service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{pokeIzena} bat gehitu du {talde_izena} taldean.")
             return redirect(url_for('taldeak.taldea_dago'))
         except ValueError as e:
             flash(str(e), "error")
@@ -306,10 +311,11 @@ def taldeak_blueprint(db):
     
     @taldeak_bp.route('/pokemon_taldea/ezabatu', methods=['GET', 'POST'])
     def ezabatu_taldetik():
+        erabiltzailea = session.get('user')
         talde_izena = session.get('editatzen_ari_den_taldea')
         pokemon_id = session.get('pokemon_datuak')
-        pokeIzena = service.ezabatu_taldetik(talde_izena, 'juan', pokemon_id)
-        service.notifikazioBerria('juan', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{pokeIzena} bat ezabatu du {talde_izena} taldean.")
+        pokeIzena = service.ezabatu_taldetik(talde_izena, erabiltzailea, pokemon_id)
+        service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{pokeIzena} bat ezabatu du {talde_izena} taldean.")
         akzioa = request.args.get('akzioa')
         if akzioa == 'hauta_pokemon':
             session['akzioa'] = 'aldatu'
@@ -318,9 +324,10 @@ def taldeak_blueprint(db):
 
     @taldeak_bp.route('/taldea/ezabatu_guztia', methods=['GET', 'POST'])
     def taldea_ezabatu():
+        erabiltzailea = session.get('user')
         talde_izena = session.get('editatzen_ari_den_taldea')
-        service.ezabatu_taldea(talde_izena, 'juan')
-        service.notifikazioBerria('juan', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{talde_izena} taldea ezabatu du.")
+        service.ezabatu_taldea(talde_izena, erabiltzailea)
+        service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{talde_izena} taldea ezabatu du.")
         return redirect(url_for('taldeak.taldeak_kargatu'))
     
     return taldeak_bp
@@ -424,15 +431,17 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/onenak/<taldeIzena>')
     def getOnenak(taldeIzena):
+        erabiltzailea = session.get('user')
         pokemonOnenak = service.getOnenak({
             "taldeIzena": taldeIzena,
-            "erabiltzaileIzena": "test_user"
+            "erabiltzaileIzena": erabiltzailea
         })
         return render_template('onenak.html', pokemon=pokemonOnenak)
 
     @chatbot_bp.route('/chatbot/taldeZerrenda')
     def taldeZerrenda():
-        talde_zerrenda = service.taldeak_kargatu("test_user")
+        erabiltzailea = session.get('user')
+        talde_zerrenda = service.taldeak_kargatu(erabiltzailea)
         return render_template('taldeZerrenda.html', taldeak=talde_zerrenda)
 
     return chatbot_bp
