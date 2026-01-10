@@ -322,7 +322,6 @@ class EreduKontroladorea:
     sql_last_id = "SELECT MAX(harrapatuId) as id FROM PokemonTalde WHERE ErabiltzaileIzena = ? AND PokemonPokedexID = ?"
     res_id = self.db.select(sql_last_id, (erabiltzailea, pokemonId))
     harrapatu_id = res_id[0]['id'] if res_id and res_id[0]['id'] else None
-    print(harrapatu_id)
 
     if harrapatu_id:
         # 5. ABILEZIA (DAUKA TAULA)
@@ -448,9 +447,8 @@ class EreduKontroladorea:
         self.abileziak_kargatu()
     if not self.mugimenduak_konprobatu():
         self.mugimenduak_kargatu()
-    if not self.eboluzioak_konprobatu():
-        self.eboluzioak_kargatu()
-    #self.delete_test_team()
+    #if not self.eboluzioak_konprobatu():
+        #self.eboluzioak_kargatu()
 
     sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
     parametroak = []
@@ -839,6 +837,7 @@ class EreduKontroladorea:
           unekoa = itzuli.pop(0)
           if unekoa in bisitatuak: # Jada bisitatuta bada, saltatu
               continue
+          bisitatuak.add(unekoa) # Bestela, bisitatu zerrendara gehitu
 
           # SQL kontsulta prestatu aurreko edo hurrengo eboluzioak lortzeko
           if aurreko:
@@ -870,7 +869,6 @@ class EreduKontroladorea:
               #      """
 
           # SQL exekutatu eta emaitzak prozesatu
-          print(sql)
           for unekoa_info in self.db.select(sql, [unekoa]):
               emaitza.append(unekoa_info)
               # Hurrengo bilaketarako gehitu ID-a
@@ -899,20 +897,18 @@ class EreduKontroladorea:
                  pt.SPE,
                  pd.irudia
           FROM Taldea t
-                  LEFT JOIN PokemonTaldean pta
+                  INNER JOIN PokemonTaldean pta
                         ON pta.taldeIzena = t.taldeIzena
-                  LEFT JOIN PokemonPokedex pd
-                        ON pd.pokeId = pta.pokeId
+                          AND pta.erabiltzaileIzena = t.erabiltzaileIzena
                   LEFT JOIN PokemonTalde pt
+                        ON pt.harrapatuId = pta.harrapatuId
+                          AND pt.erabiltzaileIzena = t.erabiltzaileIzena
+                  LEFT JOIN PokemonPokedex pd
                         ON pt.PokemonPokedexID = pd.pokeId
           WHERE t.taldeIzena = ?
             AND t.erabiltzaileIzena = ?;
           """
-          #He cambiado de left join a inner join porque daba error
-          #Esto iba despues del join de pokemonpokedex
-          #LEFT JOIN PokemonTalde pt
-          # ON pt.PokemonPokedexID = pd.pokeId
-
+    
     pokemon_zerrenda = self.db.select(sql, [taldeIzena, erabiltzaileIzena])
 
     if not pokemon_zerrenda:
