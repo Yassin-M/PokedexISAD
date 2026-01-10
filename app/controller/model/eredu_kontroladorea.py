@@ -1,4 +1,3 @@
-from werkzeug.security import check_password_hash
 from app.database.database import Connection
 import json
 import sqlite3
@@ -15,12 +14,30 @@ class EreduKontroladorea:
       erabiltzailea = emaitza[0] if emaitza else None
       
       if not erabiltzailea:
-         return False, None, None, "Erabiltzailea ez da existitzen"
+         return json.dumps({
+            'ondo': False,
+            'erabiltzaile_izena': None,
+            'rola': None,
+            'mezua': "Erabiltzailea ez da existitzen"
+         }, ensure_ascii=False)
       
-      if erabiltzailea['pasahitza'] == pasahitza:
-         return True, erabiltzailea['izena'], erabiltzailea['rola'], "Saioa hasi da"
+      
+      pasahitza_zuzena = erabiltzailea['pasahitza'] == pasahitza
+
+      if pasahitza_zuzena:
+         return json.dumps({
+            'ondo': True,
+            'erabiltzaile_izena': erabiltzailea['izena'],
+            'rola': erabiltzailea['rola'],
+            'mezua': "Saioa hasi da"
+         }, ensure_ascii=False)
       else:
-         return False, None, None, "Pasahitza okerra"
+         return json.dumps({
+            'ondo': False,
+            'erabiltzaile_izena': None,
+            'rola': None,
+            'mezua': "Pasahitza okerra"
+         }, ensure_ascii=False)
    
    def balioztatu_pasahitza(self, pasahitza, pasahitza_berretsi):
       """Pasahitzak balioztatu: bat etortzea eta karaktere debekatuak"""

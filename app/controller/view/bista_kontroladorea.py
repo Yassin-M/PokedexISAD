@@ -7,21 +7,20 @@ class BistaKontroladorea:
    def __init__(self):
       self.eredu_kontroladorea = EreduKontroladorea()
    
-   def saioHasi(self):
+   def saioHasi(self, erabiltzailea, pasahitza):
       """Saioa hasteko orria"""
       if request.method == 'POST':
-         erabiltzailea = request.form.get('erabiltzailea')
-         pasahitza = request.form.get('password')
-         
-         error = None
-         
+        
          if not erabiltzailea or not pasahitza:
             error = 'Mesedez, bete eremu guztiak'
             return render_template('login.html', error=error)
          
-         ondo, erabiltzaile_izena, rola, mezua = self.eredu_kontroladorea.saioHasi(
-            erabiltzailea, pasahitza
-         )
+         erantzuna_json = self.eredu_kontroladorea.saioHasi(erabiltzailea, pasahitza)
+         erantzuna = json.loads(erantzuna_json or '{}')
+         ondo = erantzuna.get('ondo')
+         erabiltzaile_izena = erantzuna.get('erabiltzaile_izena')
+         rola = erantzuna.get('rola')
+         mezua = erantzuna.get('mezua')
          
          if ondo:
             session['user'] = erabiltzaile_izena
