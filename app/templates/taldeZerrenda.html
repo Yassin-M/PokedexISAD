@@ -33,7 +33,7 @@
             <div class="taldeak-lista">
                 {% if taldeak %}
                     {% for taldea in taldeak %}
-                        <a href="{{ url_for('chatbot.getOnenak', taldeIzena=taldea.izena) }}" class="talde-botoia">
+                        <a href="/chatbot/onenak/{{ taldea.izena }}" class="talde-botoia">
                             {{ taldea.izena }}
                         </a>
                     {% endfor %}

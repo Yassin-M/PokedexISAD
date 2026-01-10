@@ -448,9 +448,9 @@ class EreduKontroladorea:
         self.abileziak_kargatu()
     if not self.mugimenduak_konprobatu():
         self.mugimenduak_kargatu()
-    #if not self.eboluzioak_konprobatu():
-        #self.eboluzioak_kargatu()
-    self.delete_test_team()
+    if not self.eboluzioak_konprobatu():
+        self.eboluzioak_kargatu()
+    #self.delete_test_team()
 
     sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
     parametroak = []
@@ -746,7 +746,7 @@ class EreduKontroladorea:
                   "zehaztasuna": unekoa["zehaztazuna"]
               })
 
-      # Pokémon informazioa eta mugimenduak itzuli
+      # Pokemon informazioa eta mugimenduak itzuli
       pokemon_info = {
           "izena": errenkadak[0]["pokemon_izena"],
           "irudia": errenkadak[0]["pokemon_irudia"],
@@ -837,13 +837,11 @@ class EreduKontroladorea:
 
       while itzuli:
           unekoa = itzuli.pop(0)
-          if unekoa in bisitatuak:
+          if unekoa in bisitatuak: # Jada bisitatuta bada, saltatu
               continue
-          bisitatuak.add(unekoa)
 
           # SQL kontsulta prestatu aurreko edo hurrengo eboluzioak lortzeko
-#He cambiado las consultas para hacerse con el atributo de preeboluzioId del pokemonpokedex
-          if aurreko: 
+          if aurreko:
               sql = """
                     SELECT P1.pokeId, P1.izena, P1.irudia
                     FROM PokemonPokedex P1
@@ -891,24 +889,24 @@ class EreduKontroladorea:
     # SQL kontsulta taldeko pokemon guztiak lortzeko
     #He cambiado un poco esta consulta para que funcione con los cambios del id de pokemonatalde
     sql = """
-          SELECT pt.PokemonPokedexID, \
-                  pt.izena, \
-                  pt.HP, \
-                  pt.ATK, \
-                  pt.DEF, \
-                  pt.SPATK, \
-                  pt.SPDEF, \
-                  pt.SPE, \
-                  pd.irudia
+          SELECT pt.PokemonPokedexID,
+                 pt.izena,
+                 pt.HP,
+                 pt.ATK,
+                 pt.DEF,
+                 pt.SPATK,
+                 pt.SPDEF,
+                 pt.SPE,
+                 pd.irudia
           FROM Taldea t
-                  INNER JOIN PokemonTaldean pta
+                  LEFT JOIN PokemonTaldean pta
                         ON pta.taldeIzena = t.taldeIzena
-                  LEFT JOIN PokemonTalde pt
-                        ON pta.harrapatuId = pt.harrapatuId      
                   LEFT JOIN PokemonPokedex pd
-                        ON pd.pokeId = pt.PokemonPokedexID
+                        ON pd.pokeId = pta.pokeId
+                  LEFT JOIN PokemonTalde pt
+                        ON pt.PokemonPokedexID = pd.pokeId
           WHERE t.taldeIzena = ?
-            AND t.erabiltzaileIzena = ?; \
+            AND t.erabiltzaileIzena = ?;
           """
           #He cambiado de left join a inner join porque daba error
           #Esto iba despues del join de pokemonpokedex
@@ -959,179 +957,6 @@ class EreduKontroladorea:
     }
 
     return onena_info
-
-  # =====================================================
-  # CHATBOT PROBARAKO METODOAK, BUKAERARAKO BORRATU
-  # =====================================================
-  def create_simple_test_team(self):
-
-    try:
-        taldeIzena = "MY_TEST_TEAM"
-        erabiltzaileIzena = "test_user"
-        print(f"[INFO] Creating test team '{taldeIzena}' for user '{erabiltzaileIzena}'")
-
-        # 1. 检查用户是否存在，如果不存在则创建
-        sql_check_user = "INSERT OR IGNORE INTO Erabiltzailea (izena) VALUES (?)"
-        self.db.insert(sql_check_user, [erabiltzaileIzena])
-        print(f"✓ User '{erabiltzaileIzena}' created/verified")
-
-        # 2. 删除已存在的测试队伍（避免重复）
-        sql_delete_team = "DELETE FROM Taldea WHERE taldeIzena = ?"
-        self.db.delete(sql_delete_team, [taldeIzena])
-        print(f"✓ Deleted existing team '{taldeIzena}' if it existed")
-
-        # 3. 创建队伍
-        sql_team = "INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
-        self.db.insert(sql_team, [taldeIzena, erabiltzaileIzena])
-        print(f"✓ Created team '{taldeIzena}'")
-
-        # 4. 获取5个宝可梦
-        sql_get_pokemon = "SELECT pokeId, izena FROM PokemonPokedex ORDER BY pokeId LIMIT 5"
-        pokemons = self.db.select(sql_get_pokemon, [])
-
-        if not pokemons:
-          print("[ERROR] No pokemons in PokemonPokedex!")
-          return False
-
-        print(f"✓ Found {len(pokemons)} pokemons in Pokedex")
-
-        # 5. 为每个宝可梦插入数据
-        stat_sets = [
-          (50, 50, 50, 50, 50, 50),  # 总分300
-          (60, 60, 60, 60, 60, 60),  # 总分360
-          (70, 70, 70, 70, 70, 70),  # 总分420
-          (80, 80, 80, 80, 80, 80),  # 总分480
-          (100, 100, 100, 100, 100, 100)  # 总分600
-        ]
-
-        for i, pokemon in enumerate(pokemons):
-          poke_id = pokemon['pokeId']
-          izena = f"{pokemon['izena']}_test_{i + 1}"  # 避免名称冲突
-
-          if i < len(stat_sets):
-              hp, atk, spatk, defense, spdef, spe = stat_sets[i]
-          else:
-              hp, atk, spatk, defense, spdef, spe = stat_sets[-1]
-
-          # 添加其他必需字段
-          maila = 50  # 默认级别
-          adiskidetasun_maila = 70  # 默认亲密度
-          generoa = ['Ar', 'Eme', 'Neutroa'][i % 3]  # 轮流分配性别
-
-          # 5.1 插入统计数据到 PokemonTalde 表
-          sql_stats = """
-                      INSERT INTO PokemonTalde
-                      (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, \
-                        ErabiltzaileIzena)
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \
-                      """
-          params = [
-              izena,  # izena
-              maila,  # maila
-              adiskidetasun_maila,  # adiskidetasun_maila
-              generoa,  # generoa
-              hp,  # HP
-              atk,  # ATK
-              spatk,  # SPATK
-              defense,  # DEF
-              spdef,  # SPDEF
-              spe,  # SPE
-              poke_id,  # PokemonPokedexID
-              erabiltzaileIzena  # ErabiltzaileIzena
-          ]
-
-          self.db.insert(sql_stats, params)
-
-          # 5.2 添加到 PokemonTaldean 表（根据表结构，只有两个字段）
-          sql_add_to_team = """
-                            INSERT INTO PokemonTaldean (taldeIzena, pokeId)
-                            VALUES (?, ?) \
-                            """
-          self.db.insert(sql_add_to_team, [taldeIzena, poke_id])
-
-          total = hp + atk + spatk + defense + spdef + spe
-          print(f"✓ Added {izena} (ID: {poke_id}) - Gender: {generoa} - Score: {total}")
-
-        print(f"[SUCCESS] Team '{taldeIzena}' created successfully")
-        return True
-
-    except Exception as e:
-        print(f"[ERROR] create_simple_test_team failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-  def delete_test_team(self):
-
-    try:
-        taldeIzena = "MY_TEST_TEAM"
-        erabiltzaileIzena = "test_user"
-        print(f"[INFO] Deleting test team '{taldeIzena}' for user '{erabiltzaileIzena}'")
-
-        # 1. 首先获取队伍中的所有宝可梦ID
-        sql_get_pokemon_ids = """
-                              SELECT pt.pokeId \
-                              FROM PokemonTaldean pt
-                              WHERE pt.taldeIzena = ? \
-                              """
-        pokemon_ids = self.db.select(sql_get_pokemon_ids, [taldeIzena])
-
-        # 2. 删除 PokemonTalde 表中的数据
-        sql_delete_pokemon_stats = """
-                                  DELETE \
-                                  FROM PokemonTalde
-                                  WHERE ErabiltzaileIzena = ?
-                                    AND izena IN (SELECT izena \
-                                                  FROM PokemonTalde \
-                                                  WHERE izena LIKE '%_test_%' \
-                                                      OR izena LIKE 'MY_TEST_TEAM%') \
-                                  """
-        stats_deleted = self.db.delete(sql_delete_pokemon_stats, [erabiltzaileIzena])
-        print(f"✓ Deleted {stats_deleted} pokemon stats from PokemonTalde")
-
-        # 3. 删除 PokemonTaldean 表中的关联数据
-        sql_delete_team_assoc = """
-                                DELETE \
-                                FROM PokemonTaldean
-                                WHERE taldeIzena = ? \
-                                """
-        assoc_deleted = self.db.delete(sql_delete_team_assoc, [taldeIzena])
-        print(f"✓ Deleted {assoc_deleted} associations from PokemonTaldean")
-
-        # 4. 删除 Taldea 表中的队伍
-        sql_delete_team = """
-                          DELETE \
-                          FROM Taldea
-                          WHERE taldeIzena = ? \
-                            AND erabiltzaileIzena = ? \
-                          """
-        team_deleted = self.db.delete(sql_delete_team, [taldeIzena, erabiltzaileIzena])
-        print(f"✓ Deleted {team_deleted} team from Taldea")
-
-        # 5. 如果这是该用户的唯一队伍，也可以删除用户（可选）
-        sql_check_other_teams = """
-                                SELECT COUNT(*) as count \
-                                FROM Taldea
-                                WHERE erabiltzaileIzena = ? \
-                                """
-        result = self.db.select(sql_check_other_teams, [erabiltzaileIzena])
-        if result and result[0]['count'] == 0:
-          sql_delete_user = """
-                            DELETE \
-                            FROM Erabiltzailea
-                            WHERE izena = ? \
-                            """
-          user_deleted = self.db.delete(sql_delete_user, [erabiltzaileIzena])
-          print(f"✓ Deleted user '{erabiltzaileIzena}' (no other teams found)")
-
-        print(f"[SUCCESS] Test team '{taldeIzena}' deleted successfully")
-        return True
-
-    except Exception as e:
-        print(f"[ERROR] delete_test_team failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
 
   # =====================================================
   # NOTIFIKAZIOAK

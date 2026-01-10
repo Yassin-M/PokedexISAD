@@ -412,36 +412,51 @@ def chatbot_blueprint(db):
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
+        if 'user' not in session:
+            return redirect(url_for('login'))
         return render_template('chatbot.html')
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
     def getMugimenduIkasgarriak(id):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+
         pokemonMugimenduak = service.getMugimenduIkasgarriak(id)
         return render_template('mugimenduak.html', pokemon=pokemonMugimenduak)
 
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
     def getEboluzioa(id):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+
         pokemonEboluzioa = service.getEboluzioa(id)
         return render_template('eboluzioa.html', pokemon=pokemonEboluzioa)
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
     def getIndarrak(id):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+
         pokemonIndarrak = service.getIndarrak(id)
         return render_template("indarrak.html", pokemon=pokemonIndarrak)
 
-    @chatbot_bp.route('/onenak/<taldeIzena>')
-    def getOnenak(taldeIzena):
-        erabiltzailea = session.get('user')
-        pokemonOnenak = service.getOnenak({
-            "taldeIzena": taldeIzena,
-            "erabiltzaileIzena": erabiltzailea
-        })
-        return render_template('onenak.html', pokemon=pokemonOnenak)
-
     @chatbot_bp.route('/chatbot/taldeZerrenda')
     def taldeZerrenda():
-        erabiltzailea = session.get('user')
-        talde_zerrenda = service.taldeak_kargatu(erabiltzailea)
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        user = session.get('user')
+        talde_zerrenda = service.taldeak_kargatu(user)
         return render_template('taldeZerrenda.html', taldeak=talde_zerrenda)
+
+    @chatbot_bp.route('/chatbot/onenak/<taldeIzena>')
+    def getOnenak(taldeIzena):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        user = session.get('user')
+        pokemonOnenak = service.getOnenak({
+            "taldeIzena": taldeIzena,
+            "erabiltzaileIzena": user
+        })
+        return render_template('onenak.html', pokemon=pokemonOnenak)
 
     return chatbot_bp
