@@ -1,0 +1,257 @@
+.kudeatu-container {
+    background: linear-gradient(red 50%, black 50%, black 52%, white 52%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.kudeatu-wrapper {
+    width: 100%;
+    max-width: 900px;
+    background: #c0c0c0;
+    border: 3px solid #000;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+.kudeatu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.kudeatu-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #000;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    font-size: 1.5rem;
+    color: #333 !important;
+    background: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    text-shadow: none;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+    background: #ffcb05;
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-container label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #000;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #f7f0dd;
+    font-size: 14px;
+    color: #000;
+    box-sizing: border-box;
+}
+
+.search-input::placeholder {
+    color: #999;
+}
+
+.search-input:focus {
+    outline: none;
+    background: #fff;
+    border-color: #333;
+}
+
+.users-list-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #f0f0f0;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 2px solid #ddd;
+    gap: 15px;
+    background: #fff;
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-item:hover {
+    background: #f9f9f9;
+}
+
+.user-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #000;
+    font-size: 14px;
+}
+
+.user-details {
+    font-size: 12px;
+    color: #666;
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 250px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: 2px solid #000;
+    border-radius: 4px;
+    background: #e0e0e0;
+    color: #000;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    background: #d0d0d0;
+}
+
+.action-btn.edit {
+    background: #a8d5ff;
+}
+
+.action-btn.edit:hover {
+    background: #7fc7ff;
+}
+
+.action-btn.admin {
+    background: #fff9a8;
+}
+
+.action-btn.admin:hover {
+    background: #ffed7a;
+}
+
+.action-btn.delete {
+    background: #ffb3b3;
+}
+
+.action-btn.delete:hover {
+    background: #ff9999;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 16px;
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+/* Scrollbar styling */
+.users-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.users-list-container::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 4px;
+}
+
+.users-list-container::-webkit-scrollbar-thumb {
+    background: #999;
+    border-radius: 4px;
+}
+
+.users-list-container::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+.success-message {
+    background: #c6f6d5;
+    color: #2f855a;
+    padding: 12px 16px;
+    border: 2px solid #2f855a;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.error-message {
+    background: #fed7d7;
+    color: #c53030;
+    padding: 12px 16px;
+    border: 2px solid #c53030;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .user-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-actions {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .action-btn {
+        flex: 1;
+        min-width: 60px;
+    }
+}

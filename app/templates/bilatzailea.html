@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilatzailea</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bilatzailea.css') }}">
+</head>
+<body class="bilatzailea-container">
+    <div class="bilatzailea-wrapper">
+        <div class="bilatzailea-header">
+            <a class="nav-btn" href="{{ url_for('lagunak') }}" title="Atzera">↩</a>
+            <h1>ERABILTZAILEAK BILATU</h1>
+            <a class="nav-btn" href="{{ url_for(menu_endpoint) }}" title="Etxea">⌂</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'success' %}
+                        <div class="success-message">{{ message }}</div>
+                    {% else %}
+                        <div class="error-message">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="search-container">
+            <form method="GET" action="{{ url_for('gehituErabiltzailea') }}" class="search-form">
+                <label for="search-users">Bilatu erabiltzailea:</label>
+                <div class="search-input-group">
+                    <input 
+                        type="text" 
+                        id="search-users" 
+                        name="bilaketa"
+                        class="search-input" 
+                        placeholder="Sartu erabiltzailearen izena..."
+                        value="{{ bilaketa }}"
+                        required
+                    >
+                    <button type="submit" class="search-btn">🔍 BILATU</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="users-list-container" id="usersList">
+            {% if bilaketa %}
+                {% if erabiltzaileak %}
+                    {% for erabiltzaile in erabiltzaileak %}
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-name">👤 {{ erabiltzaile.izena }}</div>
+                                <div class="user-details">{{ erabiltzaile.email }}</div>
+                            </div>
+                            <div class="user-actions">
+                                {% if erabiltzaile.jarraitzen %}
+                                    <span class="following-badge">✓ Jarraitzen</span>
+                                {% else %}
+                                    <a href="{{ url_for('gehituErabiltzailea', jarraitua=erabiltzaile.izena, bilaketa=bilaketa) }}" 
+                                       class="action-btn follow" 
+                                       title="Jarraitu">
+                                        ➕ JARRAITU
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>Ez da erabiltzailerik aurkitu</p>
+                        <p class="empty-state-hint">Saiatu beste bilaketa batekin</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p>Hasi bilaketa erabiltzaileak aurkitzeko</p>
+                    <p class="empty-state-hint">Idatzi izena goiko koadroan</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erregistroa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/erregistratu.css') }}">
+</head>
+<body> <div class="form-container"> <div class="login-container">
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            {% if success %}
+            <div class="success-message">
+                {{ success }}
+            </div>
+            {% endif %}
+            
+            <form action="{{ url_for('register') }}" method="POST" class="login-form">
+                <div class="form-group"> <input type="text" 
+                           id="erabiltzailea" 
+                           name="erabiltzailea" 
+                           required 
+                           placeholder="Erabiltzailea:"
+                           autocomplete="username"
+                           minlength="3">
+                </div>
+                
+                <div class="form-group">
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           required 
+                           placeholder="Posta elektronikoa:"
+                           autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <input type="date" 
+                           id="jaiotze_data" 
+                           name="jaiotze_data" 
+                           required>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" 
+                           id="pasahitza" 
+                           name="pasahitza" 
+                           required 
+                           placeholder="Pasahitza:"
+                           autocomplete="new-password">
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" 
+                           id="pasahitza_berretsi" 
+                           name="pasahitza_berretsi" 
+                           required 
+                           placeholder="Pasahitza berretsi:"
+                           autocomplete="new-password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">ERREGISTRATU</button>
+                
+                <div class="form-footer">
+                    <p>Jada kontua baduzu?</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary">SAIOA HASI</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

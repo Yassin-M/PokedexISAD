@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+  <meta charset="UTF-8">
+  <title>Hasiera - Administratzailea</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/menu_admin.css') }}">
+</head>
+<body>
+  <div class="pokemon-window">
+    <div class="content">
+      <div class="left-section">
+        <div class="avatar">👨‍💼</div>
+        <div class="sidebar">
+          <a class="btn" href="{{ url_for('editatu') }}">EDITATU</a>
+          <a class="btn" href="{{ url_for('lagunak') }}">LAGUNAK</a>
+          <a class="btn" href="{{ url_for('login') }}">ATERA</a>
+        </div>
+      </div>
+      <div class="main-section">
+        <a class="btn-main kudeatu" href="{{ url_for('kudeatu') }}">KUDEATU</a>
+        <a class="btn-main" href="{{ url_for('taldeak.taldeak_kargatu') }}">TALDEAK</a>
+        <a class="btn-main" href="{{ url_for('pokedex.pokedex') }}">POKEDEX</a>
+        <a class="btn-main" href="{{ url_for('bista_orokorra.changelog') }}">NOTIF.</a>
+        <a class="btn-main" href="{{ url_for('itemdex.itemdex') }}">ITEMDEX</a>
+        <a class="btn-main full-width" href="{{ url_for('chatbot.chatbot_menu') }}">CHATBOT</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
