@@ -13,7 +13,9 @@
 
     <div class="form-container">
         <form action="/pokedex/bilatu" method="POST" class="pokedex-layout">
-            
+            <!-- mode gorde -->
+            <input type="hidden" name="mode" value="{{ mode }}">
+
             <div class="header-bar">
                 <a href="javascript:history.back()" class="nav-icon">
                     <i class="fa-solid fa-reply fa-flip-horizontal"></i>
@@ -39,8 +41,6 @@
                 {% for pokemon in pokemons %}
                     {% if mode == 'mugimenduak' %}
                         <a href="/chatbot/mugimenduak/{{ pokemon.id }}" class="pokemon-card">
-                    {% elif mode == 'onenak' %}
-                        <a href="/chatbot/onenak/{{ pokemon.id }}" class="pokemon-card">
                     {% elif mode == 'indarrak' %}
                         <a href="/chatbot/indarrak/{{ pokemon.id }}" class="pokemon-card">
                     {% elif mode == 'eboluzioa' %}

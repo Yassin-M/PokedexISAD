@@ -482,141 +482,143 @@ class EreduKontroladorea:
   # CHATBOT
   # =====================================================
   def getMugimenduIkasgarriak(self, pokeId):
-    sql = """
-          SELECT p.izena  AS pokemon_izena,
-                  p.irudia AS pokemon_irudia,
-                  m.izena  AS mugimendu_izena,
-                  m.potentzia,
-                  m.zehaztazuna
-          FROM PokemonPokedex p
-                  LEFT JOIN IkasDezake i ON p.pokeId = i.pokedexId
-                  LEFT JOIN Mugimendua m ON i.mugiIzena = m.izena
-          WHERE p.pokeId = ? \
-          """
+      # SQL kontsulta: Pokémon eta bere ikas daitezkeen mugimenduak lortzeko
+      sql = """
+            SELECT p.izena  AS pokemon_izena,
+                   p.irudia AS pokemon_irudia,
+                   m.izena  AS mugimendu_izena,
+                   m.potentzia,
+                   m.zehaztazuna
+            FROM PokemonPokedex p
+                     LEFT JOIN IkasDezake i ON p.pokeId = i.pokedexId
+                     LEFT JOIN Mugimendua m ON i.mugiIzena = m.izena
+            WHERE p.pokeId = ? \
+            """
 
-    errenkadak = self.db.select(sql, [pokeId])
+      # Kontsulta exekutatu
+      errenkadak = self.db.select(sql, [pokeId])
 
-    if not errenkadak:
-        return None
+      if not errenkadak:
+          return None
 
-    pokemon_info = {
-        "izena": errenkadak[0]["pokemon_izena"],
-        "irudia": errenkadak[0]["pokemon_irudia"]
-    }
+      # Mugimenduak biltzeko zerrenda
+      mugimenduak = []
+      for unekoa in errenkadak:
+          if unekoa["mugimendu_izena"]:
+              mugimenduak.append({
+                  "mugimenduIzena": unekoa["mugimendu_izena"],
+                  "potentzia": unekoa["potentzia"],
+                  "zehaztasuna": unekoa["zehaztazuna"]
+              })
 
-    mugimenduak = []
-    for unekoa in errenkadak:
-        if unekoa["mugimendu_izena"]:
-          mugimenduak.append({
-              "mugimenduIzena": unekoa["mugimendu_izena"],
-              "potentzia": unekoa["potentzia"],
-              "zehaztasuna": unekoa["zehaztazuna"]
-          })
-
-    pokemon_info["mugimenduak"] = mugimenduak
-    return pokemon_info
+      # Pokémon informazioa eta mugimenduak itzuli
+      pokemon_info = {
+          "izena": errenkadak[0]["pokemon_izena"],
+          "irudia": errenkadak[0]["pokemon_irudia"],
+          "mugimenduak": mugimenduak
+      }
+      return pokemon_info
 
   def getIndarrak(self, pokeId):
-    # Lehenik eta behin Pokemon-aren berezko mota guztiak lortu
-    sql_pokemon_motak = """
-                        SELECT t.pokemonMotaIzena AS izena, \
-                                t.irudia           AS irudia
-                        FROM DaMotaPokemon d
-                                JOIN MotaPokemon t ON d.MotaIzena = t.pokemonMotaIzena
-                        WHERE d.pokemonID = ? \
-                        """
+      sql = """
+            SELECT p.izena, \
+                   p.irudia, \
+                   t.pokemonMotaIzena AS mota_izena, \
+                   t.irudia           AS mota_irudia, \
+                   m.pokemonMotaEraso, \
+                   m.multiplikatzailea, \
+                   t2.irudia          AS erasoko_mota_irudia
+            FROM PokemonPokedex p
+                     LEFT JOIN DaMotaPokemon d ON p.pokeId = d.pokemonID
+                     LEFT JOIN MotaPokemon t ON d.MotaIzena = t.pokemonMotaIzena
+                     LEFT JOIN Multiplikatzailea m ON t.pokemonMotaIzena = m.pokemonMotaJaso
+                     LEFT JOIN MotaPokemon t2 ON m.pokemonMotaEraso = t2.pokemonMotaIzena
+            WHERE p.pokeId = ? \
+            """
 
-    pokemon_motak = self.db.select(sql_pokemon_motak, [pokeId])
+      errenkadak = self.db.select(sql, [pokeId])
 
-    if not pokemon_motak:
-        return None
+      if not errenkadak:
+          return None
 
-    # Pokemon-aren oinarrizko informazioa lortu
-    sql_pokemon_info = """
-                        SELECT izena, irudia
-                        FROM PokemonPokedex
-                        WHERE pokeId = ? \
-                        """
+      # Set-ak erabili bikoizketak saihesteko
+      mota_set = set()
+      indarrak_set = set()
+      ahuleziak_set = set()
 
-    pokemon_row = self.db.select(sql_pokemon_info, [pokeId])
+      for row in errenkadak:
+          # Pokemon motak
+          if row["mota_izena"]:
+              mota_set.add((row["mota_izena"], row["mota_irudia"]))
 
-    if not pokemon_row:
-        return None
+          # Indarrak eta ahuleziak
+          if row["pokemonMotaEraso"] and row["multiplikatzailea"]:
+              efektu_key = (row["pokemonMotaEraso"], row["erasoko_mota_irudia"])
+              if row["multiplikatzailea"] > 1:
+                  indarrak_set.add(efektu_key)
+              elif row["multiplikatzailea"] < 1:
+                  ahuleziak_set.add(efektu_key)
 
-    pokemon_info = {
-        "izena": pokemon_row[0]["izena"],
-        "irudia": pokemon_row[0]["irudia"],
-        "pokemon_motak": pokemon_motak  # Pokemon-aren berezko motak gehitu
-    }
+      # Pokemon informazioa azken batean sortu.
+      pokemon_info = {
+          "izena": errenkadak[0]["izena"],
+          "irudia": errenkadak[0]["irudia"],
+          # mota_set bat hiztegi-zerrenda bihurtzen, bakoitza izena eta irudiarekin, eta gehitu pokemon_info barruan
+          "pokemon_motak": [{"izena": izena, "irudia": irudia} for izena, irudia in mota_set],
+          "indarrak": [{"izena": izena, "irudia": irudia} for izena, irudia in indarrak_set],
+          "ahuleziak": [{"izena": izena, "irudia": irudia} for izena, irudia in ahuleziak_set]
+      }
 
-    # Pokemon-aren mota guztien indarrak eta ahuleziak bildu
-    indarrak_set = set()  # Set erabili bikoizketak saihesteko
-    ahuleziak_set = set()
-
-    for pokemon_mota in pokemon_motak:
-        mota_izena = pokemon_mota["izena"]
-
-        # Mota honek beste motak erasotzerakoan duen efektua kontsultatu
-        sql_multiplikatzailea = """
-                                SELECT m.pokemonMotaEraso, \
-                                      m.multiplikatzailea, \
-                                      t.irudia AS erasoko_mota_irudia
-                                FROM Multiplikatzailea m
-                                        JOIN MotaPokemon t ON m.pokemonMotaEraso = t.pokemonMotaIzena
-                                WHERE m.pokemonMotaJaso = ? \
-                                """
-
-        efektuak = self.db.select(sql_multiplikatzailea, [mota_izena])
-
-        for efektua in efektuak:
-          efektu_item = {
-              "izena": efektua["pokemonMotaEraso"],
-              "irudia": efektua["erasoko_mota_irudia"]
-          }
-
-          if efektua["multiplikatzailea"] > 1:
-              # Eraso-efektua >1 bada, hau Pokemon-aren indarra da (zein motarekiko abantaila duen)
-              indarrak_set.add((efektu_item["izena"], efektu_item["irudia"]))
-          elif efektua["multiplikatzailea"] < 1:
-              # Eraso-efektua <1 bada, hau Pokemon-aren ahulezia da (zein motarekiko desabantaila duen)
-              ahuleziak_set.add((efektu_item["izena"], efektu_item["irudia"]))
-
-    # Set-a listara bihurtu
-    pokemon_info["indarrak"] = [{"izena": izena, "irudia": irudia}
-                                for izena, irudia in indarrak_set]
-    pokemon_info["ahuleziak"] = [{"izena": izena, "irudia": irudia}
-                                  for izena, irudia in ahuleziak_set]
-
-    return pokemon_info
+      return pokemon_info
 
   def getEboluzioa(self, poke_id):
+      # Aurreko eta hurrengo eboluzioak lortu
+      aurrekoak = self.bilatu_eboluzioak(poke_id, aurreko=True)
+      hurrengoak = self.bilatu_eboluzioak(poke_id, aurreko=False)
 
-    aurrekoak, hurrengoak = [], []  # Aurreko eta hurrengo eboluzioak gordetzeko
+      # Uneteko Pokemon-aren informazioa
+      unekoa = self.db.select("SELECT izena, irudia FROM PokemonPokedex WHERE pokeId = ?", [poke_id])
 
-    def bilatu_evoluzioak(start_id, aurreko=True):
-        emaitza = []
-        bisitatuak = set()  # Errepikapenak saihesteko, jadanik bisitatu ditugun ID-ak
-        itzuli = [start_id]  # Oraindik bisitatu beharreko ID-ak (BFS algoritmoa)
+      if not unekoa:
+          return None
 
-        while itzuli:  # BFS bilaketa
+      eboluzio_info = {
+          "izena": unekoa[0]["izena"],
+          "irudia": unekoa[0]["irudia"],
+          "aurrekoak": aurrekoak,
+          "hurrengoak": hurrengoak
+      }
+
+      return eboluzio_info
+
+  def bilatu_eboluzioak(self, start_id, aurreko=True):
+      emaitza = []  # [{
+                    #   "pokeId": int,
+                    #   "izena": str,
+                    #   "irudia": str
+                    # }]
+      bisitatuak = set()  # Errepikapenak saihesteko
+      itzuli = [start_id]  # BFS algoritmoa
+
+      while itzuli:
           unekoa = itzuli.pop(0)
-          if unekoa in bisitatuak:  # Jadanik bisitatutakoa bada, jarraitu
+          if unekoa in bisitatuak:
               continue
-          bisitatuak.add(unekoa)  # Markatu bisitatu bezala
+          bisitatuak.add(unekoa)
 
           # SQL kontsulta prestatu aurreko edo hurrengo eboluzioak lortzeko
           if aurreko:
               sql = """
                     SELECT P.pokeId, P.izena, P.irudia
                     FROM Eboluzioa E
-                            JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
+                             JOIN PokemonPokedex P ON E.pokemonPokedexID = P.pokeId
                     WHERE E.eboluzioaPokeId = ? \
                     """
           else:
               sql = """
                     SELECT P.pokeId, P.izena, P.irudia
                     FROM Eboluzioa E
-                            JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
+                             JOIN PokemonPokedex P ON E.eboluzioaPokeId = P.pokeId
                     WHERE E.pokemonPokedexID = ? \
                     """
 
@@ -625,25 +627,9 @@ class EreduKontroladorea:
               emaitza.append(unekoa_info)
               # Hurrengo bilaketarako gehitu ID-a
               if unekoa_info["pokeId"] not in bisitatuak:
-                itzuli.append(unekoa_info["pokeId"])
+                  itzuli.append(unekoa_info["pokeId"])
 
-        return emaitza
-
-    aurrekoak = bilatu_evoluzioak(poke_id, aurreko=True)
-    hurrengoak = bilatu_evoluzioak(poke_id, aurreko=False)
-    unekoa = self.db.select("SELECT izena, irudia FROM PokemonPokedex WHERE pokeId = ?", [poke_id])
-
-    if not unekoa:
-        return None
-
-    eboluzio_info = {
-        "izena": unekoa[0]["izena"],
-        "irudia": unekoa[0]["irudia"],
-        "aurrekoak": aurrekoak,
-        "hurrengoak": hurrengoak
-    }
-
-    return eboluzio_info
+      return emaitza
 
   def getOnenak(self, talde_info):
     taldeIzena = talde_info.get("taldeIzena")
@@ -664,11 +650,11 @@ class EreduKontroladorea:
                   pt.SPE, \
                   pd.irudia
           FROM Taldea t
-                  JOIN PokemonTaldean pta
+                  LEFT JOIN PokemonTaldean pta
                         ON pta.taldeIzena = t.taldeIzena
-                  JOIN PokemonPokedex pd
+                  LEFT JOIN PokemonPokedex pd
                         ON pd.pokeId = pta.pokeId
-                  JOIN PokemonTalde pt
+                  LEFT JOIN PokemonTalde pt
                         ON pt.PokemonPokedexID = pd.pokeId
           WHERE t.taldeIzena = ?
             AND t.erabiltzaileIzena = ?; \
@@ -694,10 +680,6 @@ class EreduKontroladorea:
                 pokemon["SPDEF"] +
                 pokemon["SPE"]
         )
-
-        # Puntuazioa gehitu pokemonaren datuei
-        pokemon["puntuazioa"] = puntuazioa
-
         # Egiaztatu puntuazio maximoa den
         if puntuazioa > puntuazio_maximoa:
           puntuazio_maximoa = puntuazioa
@@ -716,15 +698,11 @@ class EreduKontroladorea:
         "SPATK": onena["SPATK"],
         "SPDEF": onena["SPDEF"],
         "SPE": onena["SPE"],
-        "puntuazioa": onena["puntuazioa"],
+        "puntuazioa": puntuazio_maximoa,
         "taldeIzena": taldeIzena,
         "erabiltzaileIzena": erabiltzaileIzena
     }
-    print("\n=== onena_info ===")
-    print(f"Hiztegia: {onena_info}")
-    for key, value in onena_info.items():
-        print(f"  {key}: {value}")
-    print("=== 结束 ===")
+
     return onena_info
 
   # =====================================================
@@ -899,56 +877,6 @@ class EreduKontroladorea:
         import traceback
         traceback.print_exc()
         return False
-
-  def motak_irudiak_eguneratu(self):
-    mota_irudiak = [
-        ('normal', '/static/icons/normal.svg'),
-        ('fire', '/static/icons/fire.svg'),
-        ('water', '/static/icons/water.svg'),
-        ('electric', '/static/icons/electric.svg'),
-        ('grass', '/static/icons/grass.svg'),
-        ('ice', '/static/icons/ice.svg'),
-        ('fighting', '/static/icons/fighting.svg'),
-        ('poison', '/static/icons/poison.svg'),
-        ('ground', '/static/icons/ground.svg'),
-        ('flying', '/static/icons/flying.svg'),
-        ('psychic', '/static/icons/psychic.svg'),
-        ('bug', '/static/icons/bug.svg'),
-        ('rock', '/static/icons/rock.svg'),
-        ('ghost', '/static/icons/ghost.svg'),
-        ('dark', '/static/icons/dark.svg'),
-        ('dragon', '/static/icons/dragon.svg'),
-        ('steel', '/static/icons/steel.svg'),
-        ('fairy', '/static/icons/fairy.svg')
-    ]
-
-    sql = "UPDATE MotaPokemon SET irudia = ? WHERE pokemonMotaIzena = ?"
-
-    for mota_izena, irudia in mota_irudiak:
-        try:
-          self.db.insert(sql, [irudia, mota_izena])
-        except Exception as e:
-          print(f"UPDATE {mota_izena} error: {e}")
-
-  def ikasdezake_mugimenduak(self):
-    sql = """
-          UPDATE IkasDezake
-          SET mugiIzena = (SELECT izena \
-                            FROM Mugimendua \
-                            WHERE LOWER(Mugimendua.izena) = LOWER(IkasDezake.mugiIzena)
-              LIMIT 1
-              )
-          WHERE EXISTS (
-              SELECT 1
-              FROM Mugimendua
-              WHERE LOWER (Mugimendua.izena) = LOWER (IkasDezake.mugiIzena)
-              ) \
-          """
-    try:
-        self.db.insert(sql, [])
-        print("IkasDezake 所有技能名已统一修正为 Mugimendua 标准名字")
-    except Exception as e:
-        print("批量更新 IkasDezake 错误:", e)
 
   # =====================================================
   # NOTIFIKAZIOAK

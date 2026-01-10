@@ -245,7 +245,7 @@ def chatbot_blueprint(db):
         })
         return render_template('onenak.html', pokemon=pokemonOnenak)
 
-    @chatbot_bp.route('/taldeZerrenda')
+    @chatbot_bp.route('/chatbot/taldeZerrenda')
     def taldeZerrenda():
         #erabiltzaileIzena = session.get('username')
         taldeZerrenda = service.taldeak_kargatu("test_user")
