@@ -26,8 +26,8 @@ class BistaKontroladorea:
             session['user'] = erabiltzaile_izena
             session['role'] = rola or 'usuario'
             if (rola or '').lower() == 'admin':
-               return render_template('menu_admin.html')
-            return render_template('menu.html')
+               return redirect('menu_admin.html')
+            return redirect('menu.html')
          else:
             error = mezua
             return render_template('login.html', error=error)
