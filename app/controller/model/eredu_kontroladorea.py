@@ -1,3 +1,5 @@
+from datetime import datetime
+from urllib.response import addinfo
 from app.database.database import Connection
 import json
 import sqlite3
@@ -83,7 +85,10 @@ class EreduKontroladorea:
       emaitza = self.db.select(query, (izena_zaharra,))
       erabiltzailea_zaharra = emaitza[0] if emaitza else None
       if not erabiltzailea_zaharra:
-        return False, "Erabiltzailea ez da existitzen"
+        return json.dumps({
+          'ondo': False,
+          'mezua': "Erabiltzailea ez da existitzen"
+        }, ensure_ascii=False)
       
       if not izena_berria or izena_berria == "":
         izena_berria = izena_zaharra
@@ -100,7 +105,10 @@ class EreduKontroladorea:
           query = "SELECT izena FROM Erabiltzailea WHERE izena = ?"
           dagoen_berria = self.db.select(query, (izena_berria,))
           if dagoen_berria:
-            return False, "Izen hori hartuta dago"
+            return json.dumps({
+              'ondo': False,
+              'mezua': "Izen hori hartuta dago"
+            }, ensure_ascii=False)
       
       if pasahitza and pasahitza != "":
         query = "UPDATE Erabiltzailea SET izena = ?, email = ?, jaiotze_data = ?, pasahitza = ? WHERE izena = ?"
@@ -109,9 +117,15 @@ class EreduKontroladorea:
         query = "UPDATE Erabiltzailea SET izena = ?, email = ?, jaiotze_data = ? WHERE izena = ?"
         self.db.update(query, (izena_berria, email, jaiotze_data, izena_zaharra))
       
-      return True, "Datuak behar bezala eguneratu dira"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Datuak behar bezala eguneratu dira"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea datuak eguneratzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea datuak eguneratzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def erabiltzaileakKargatu(self):
     """Datu-baseko erabiltzaile guztiak lortu JSON formatuan"""
@@ -147,9 +161,15 @@ class EreduKontroladorea:
     query = "DELETE FROM Erabiltzailea WHERE izena = ?"
     try:
       self.db.delete(query, (erabiltzaile_izena,))
-      return True, "Erabiltzailea behar bezala ezabatu da"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Erabiltzailea behar bezala ezabatu da"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea erabiltzailea ezabatzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea erabiltzailea ezabatzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def baimendu(self, erabiltzaile_izena, admin_egin):
     """Erabiltzaile bati admin rola eman edo kendu"""
@@ -158,14 +178,20 @@ class EreduKontroladorea:
     try:
       self.db.update(query, (rola_berria, erabiltzaile_izena))
       mezua = "Erabiltzailea admin bihurtu da" if admin_egin else "Admin rola kendu da"
-      return True, mezua
+      return json.dumps({
+        'ondo': True,
+        'mezua': mezua
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea rola aldatzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea rola aldatzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def lagunakKargatu(self, erabiltzaile_izena):
     """Erabiltzaile batek jarraitzen dituen pertsonak lortu"""
     query = """
-      SELECT JarraituIzena, Notifikazioak
+      SELECT JarraituIzena, Notifikatu
       FROM JarraitzenDu 
       WHERE JarraitzaileIzena = ?
       ORDER BY JarraituIzena
@@ -176,7 +202,7 @@ class EreduKontroladorea:
       for jarraitua in emaitza:
         jarraitutakoak.append({
           'izena': jarraitua['JarraituIzena'],
-          'notifikazioak': bool(jarraitua['Notifikazioak'])
+          'notifikazioak': bool(jarraitua['Notifikatu'])
         })
       return json.dumps(jarraitutakoak, ensure_ascii=False)
     except Exception as e:
@@ -188,9 +214,18 @@ class EreduKontroladorea:
     query = "DELETE FROM JarraitzenDu WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
     try:
       self.db.delete(query, (jarraitzailea, jarraitua))
-      return True, "Jarraitzea eten da"
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(jarraitzailea, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen uzti du.")
+      self.notifikazioBerria(jarraitua, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen utzi du.")
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Jarraitzea eten da"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea jarraitzea eteterakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea jarraitzea eteterakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def gehituErabiltzailea(self, jarraitzailea, jarraitua):
     """Erabiltzaile bat jarraitzen hastea"""
@@ -198,17 +233,32 @@ class EreduKontroladorea:
     emaitza = self.db.select(query, (jarraitzailea, jarraitua))
     
     if emaitza:
-      return False, "Jada jarraitzen duzu erabiltzaile hau"
+      return json.dumps({
+        'ondo': False,
+        'mezua': "Jada jarraitzen duzu erabiltzaile hau"
+      }, ensure_ascii=False)
     
     if jarraitzailea == jarraitua:
-      return False, "Ezin duzu zure burua jarraitu"
+      return json.dumps({
+        'ondo': False,
+        'mezua': "Ezin duzu zure burua jarraitu"
+      }, ensure_ascii=False)
     
     query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
     try:
       self.db.insert(query, (jarraitzailea, jarraitua))
-      return True, "Orain jarraitzen duzu erabiltzaile hau"
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(jarraitzailea, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen hasi da.")
+      self.notifikazioBerria(jarraitua, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen hasi da.")
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Orain jarraitzen duzu erabiltzaile hau"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea jarraitzen hastean: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea jarraitzen hastean: {str(e)}"
+      }, ensure_ascii=False)
 
   def bilatu_erabiltzaileak(self, bilaketa, current_user):
     """Erabiltzaileak bilatu izenaren arabera - LAGUNAK GEHITU ATALERAKO"""
@@ -236,12 +286,18 @@ class EreduKontroladorea:
 
   def eguneratu_notifikazioak(self, jarraitzailea, jarraitua, notifikazioak):
     """Notifikazio baten egoera aldatu (aktibatu/desgaitu)"""
-    query = "UPDATE JarraitzenDu SET Notifikazioak = ? WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
+    query = "UPDATE JarraitzenDu SET Notifikatu = ? WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
     try:
       self.db.update(query, (notifikazioak, jarraitzailea, jarraitua))
-      return True, "Notifikazioak eguneratuta daude"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Notifikazioak eguneratuta daude"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea notifikazioak eguneratzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea notifikazioak eguneratzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def taldeak_kargatu(self, erabiltzailea):
     sql1 = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
@@ -273,6 +329,8 @@ class EreduKontroladorea:
       taldeIzena = f"Talde {i}"
       sql2 = " INSERT INTO taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
       self.db.insert(sql2, (taldeIzena, erabiltzailea))
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(erabiltzailea, dataOrdua, f"{erabiltzailea} talde berria sortu du: {taldeIzena}")
       return taldeIzena
     
   def get_taldea(self, taldeIzena, erabiltzailea):
@@ -403,6 +461,8 @@ class EreduKontroladorea:
 
       sql_delete_team = "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
       self.db.delete(sql_delete_team, (taldeIzena, erabiltzailea))
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(erabiltzailea, dataOrdua, f"{erabiltzailea} {taldeIzena} taldea ezabatu du")
     
   def bistaratu_pokemon_taldea(self, pokeId):
     sql2 = "SELECT P.harrapatuId, P.izena, P.HP, P.ATK, P.SPATK, P.DEF, P.SPDEF, P.SPE, PP.irudia, PP.pokeId, PP.pisua, PP.altuera FROM PokemonTalde P, PokemonPokedex PP WHERE P.harrapatuId = ? AND P.PokemonPokedexID = PP.pokeId"
@@ -492,7 +552,10 @@ class EreduKontroladorea:
     for pokemon in pokemon_izenak:
         try:
           parametroak = self.api.pokemon_eskatu(pokemon['name'])
-          self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["preEboluzioId"]])
+          if parametroak:
+            self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["pre_eboluzioa"]])
+          else:
+             print(f"Saltando {pokemon['name']}")
         except Exception as e:
           print(f"Error {e}")
 
@@ -515,8 +578,8 @@ class EreduKontroladorea:
         return json3
 
   def motak_kargatu(self):
-    sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
-    sql2 = "INSERT INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
+    sql1 = "INSERT OR IGNORE INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
+    sql2 = "INSERT OR IGNORE INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
     mota_izenak = self.api.mota_izenak_eskatu()
     for mota in mota_izenak:
         try:
@@ -526,41 +589,48 @@ class EreduKontroladorea:
           tipo = self.api.mota_eskatu(mota['name'])
           for pokemon in tipo["pokemonak"]:
               try:
-                pokemon_id = int(pokemon.pokemon.url.split('/')[-2])
+                pokemon_id = int(pokemon["pokemon"]["url"].split('/')[-2])
                 self.db.insert(sql2, [mota['name'].capitalize(), pokemon_id])
               except Exception as e:
                 print(f"Error {e}")
         except Exception as e:
           print(f"Error {e}")
 
-    sql3 = "INSERT INTO Multiplikatzailea(pokemonMotaJaso, pokemonMotaEraso, multiplikatzailea) VALUES (?, ?, ?)"
+    sql3 = "INSERT OR IGNORE INTO Multiplikatzailea(pokemonMotaJaso, pokemonMotaEraso, multiplikatzailea) VALUES (?, ?, ?)"
     for mota in mota_izenak:
         tipo = self.api.mota_eskatu(mota['name'])
-        dobles = tipo["erlazioak"].double_damage_to
-        mitades = tipo["erlazioak"].half_damage_to
-        zeros = tipo["erlazioak"].no_damage_to
+        dobles = tipo["erlazioak"]["double_damage_to"]
+        mitades = tipo["erlazioak"]["half_damage_to"]
+        zeros = tipo["erlazioak"]["no_damage_to"]
         for doble in dobles:
-          parametroak = [doble.name.capitalize(), mota["name"].capitalize(), 2.0]
+          parametroak = [doble["name"].capitalize(), mota["name"].capitalize(), 2.0]
           self.db.insert(sql3, parametroak)
         for mitad in mitades:
-          parametroak = [mitad.name.capitalize(), mota['name'].capitalize(), 0.5]
+          parametroak = [mitad["name"].capitalize(), mota['name'].capitalize(), 0.5]
           self.db.insert(sql3, parametroak)
         for zero in zeros:
-          parametroak = [zero.name.capitalize(), mota['name'].capitalize(), 0.0]
+          parametroak = [zero["name"].capitalize(), mota['name'].capitalize(), 0.0]
           self.db.insert(sql3, parametroak)
-        #esta parte habra que ver como acortarla un poco
-    pass
 
   def abileziak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
     sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
     abilezi_izenak = self.api.abilezi_izenak_eskatu()
     for abileziak in abilezi_izenak:
-        abilezia = self.api.abilezia_eskatu(abileziak['name'])
-        self.db.insert(sql1, [abilezia["izena"], abilezia["deskripzioa"]])
-        for pokemon in abilezia["pokemonak"]:
-          poke_id = int(pokemon.pokemon.url.split('/')[-2])
-          self.db.insert(sql2, [poke_id, abilezia["izena"], pokemon.is_hidden])
+        try:
+          abilezia = self.api.abilezia_eskatu(abileziak['name'])
+          if abilezia is not None:
+            self.db.insert(sql1, [abilezia["izena"], abilezia["deskripzioa"]])
+            for pokemon in abilezia["pokemonak"]:
+              try:
+                poke_id = int(pokemon["pokemon"]["url"].split('/')[-2])
+                self.db.insert(sql2, [poke_id, abilezia["izena"], pokemon["is_hidden"]])
+              except Exception as e:
+                print()
+          else:
+             print('Error en habilidad')            
+        except Exception as e:
+           print(f"Error procesando habilidad {addinfo['name']}: {e}")
 
   def mugimenduak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
@@ -570,20 +640,8 @@ class EreduKontroladorea:
         mugimendua = self.api.mugimendua_eskatu(izena['name'])
         self.db.insert(sql1, [mugimendua["izena"], mugimendua["potentzia"], mugimendua["zehaztazuna"], mugimendua["PP"], mugimendua["efektua"], mugimendua["pokemonMotaIzena"]])
         for pokemon in mugimendua["pokemonak"]:
-          pokemon_id = int(pokemon.url.split('/')[-2])
+          pokemon_id = int(pokemon["url"].split('/')[-2])
           self.db.insert(sql2, [pokemon_id, mugimendua["izena"]])
-
-  def __lortu_deskripzioa(self, objektua):
-    for sarrera in objektua.flavor_text_entries:
-        if sarrera.language.name == 'es':
-          return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
-    return 'Ez dago deskripziorik gaztelaniaz'
-
-  def __lortu_izena(self, objektua):
-    for sarrera in objektua.names:
-        if sarrera.language.name == 'es':
-          return sarrera.name.replace('\n', ' ').replace('\f', ' ')
-    return objektua.name
 
   def eboluzioak_kargatu(self):
     sql = """
@@ -959,10 +1017,10 @@ class EreduKontroladorea:
   # =====================================================
 
   def notifikazioenInformazioaLortu(self, erabiltzaile_izena, bilatutako_izena):
-    query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ?"
+    query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ? AND J.Notifikatu = 1 "
 
     if bilatutako_izena != None and bilatutako_izena != '':
-        query += "AND J.JarraituIzena LIKE ?"
+        query += "AND J.JarraituIzena LIKE ? "
 
     query += "ORDER BY N.DataOrdua DESC;"
 
@@ -971,22 +1029,21 @@ class EreduKontroladorea:
     else:
         notifikazioZerrenda = self.db.select(query, (erabiltzaile_izena,))
 
+      
     notifikazioJSON = []
     for notifikazio in notifikazioZerrenda:
         notifikazioJSON.append({
-          'JarraituIzena': notifikazio[0],
-          'DataOrdua': notifikazio[1],
-          'deskripzioa': notifikazio[2]
+          'JarraituIzena': notifikazio['JarraituIzena'], 
+          'DataOrdua': notifikazio['DataOrdua'],
+          'deskripzioa': notifikazio['deskripzioa']
         })
 
     return notifikazioJSON
 
   def notifikazioBerria(self, ErabiltzaileIzena, DataOrdua, deskripzioa):
-    query = "INSERT INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
-    self.db.insert(query, (ErabiltzaileIzena, deskripzioa, DataOrdua))
-    return
-
-  def jarraitzaileBerria (JarraitzaileIzena, JarraituIzena):
-    query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
-    db.insert(query, (JarraitzaileIzena, JarraituIzena))
-    return
+      query = "INSERT OR IGNORE INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
+      try:
+          self.db.insert(query, (ErabiltzaileIzena, deskripzioa, DataOrdua))
+      except Exception as e:
+          print(f"Errorea notifikazioa sortzean: {e}")
+      return

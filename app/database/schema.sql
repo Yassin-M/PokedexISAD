@@ -166,3 +166,7 @@ CREATE TABLE IF NOT EXISTS PokemonTaldean (
     FOREIGN KEY (taldeIzena, erabiltzaileIzena) REFERENCES Taldea(taldeIzena, erabiltzaileIzena),
     FOREIGN KEY (harrapatuId) REFERENCES PokemonTalde(harrapatuId)
 );
+
+-- Admin erabiltzaile lehenetsia
+INSERT OR IGNORE INTO Erabiltzailea (izena, pasahitza, email, jaiotze_data, rola)
+VALUES ('admin', '123', 'admin@example.com', NULL, 'admin');

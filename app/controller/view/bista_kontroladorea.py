@@ -99,9 +99,12 @@ class BistaKontroladorea:
                     return render_template('editatu.html', home_endpoint=home_endpoint,
                                         erabiltzailea=emaitza, error=mezua)
           
-            ondo, mezua = self.eredu_kontroladorea.eguneratu_erabiltzailea(
+            eguneratu_json = self.eredu_kontroladorea.eguneratu_erabiltzailea(
                 erabiltzaile_izena, izena, email, jaiotze_data, pasahitza
             )
+            eguneratu = json.loads(eguneratu_json or '{}')
+            ondo = eguneratu.get('ondo')
+            mezua = eguneratu.get('mezua')
           
             if ondo:
                 if izena and not user_id:
@@ -157,7 +160,10 @@ class BistaKontroladorea:
             flash('Ezin duzu zure burua ezabatu', 'error')
             return redirect(url_for('kudeatu'))
         
-        ondo, mezua = self.eredu_kontroladorea.ezabatu(user_id)
+        emaitza_json = self.eredu_kontroladorea.ezabatu(user_id)
+        emaitza = json.loads(emaitza_json or '{}')
+        ondo = emaitza.get('ondo')
+        mezua = emaitza.get('mezua')
         if ondo:
             flash(mezua, 'success')
         else:
@@ -173,7 +179,10 @@ class BistaKontroladorea:
             flash('Ez duzu baimenik', 'error')
             return redirect(url_for('menu'))
         
-        ondo, mezua = self.eredu_kontroladorea.baimendu(user_id, True)
+        emaitza_json = self.eredu_kontroladorea.baimendu(user_id, True)
+        emaitza = json.loads(emaitza_json or '{}')
+        ondo = emaitza.get('ondo')
+        mezua = emaitza.get('mezua')
         if ondo:
             flash(mezua, 'success')
         else:
@@ -202,7 +211,10 @@ class BistaKontroladorea:
             return redirect(url_for('login'))
         
         current_user = session.get('user')
-        ondo, mezua = self.eredu_kontroladorea.utzi_jarraitzen(current_user, jarraitua)
+        emaitza_json = self.eredu_kontroladorea.utzi_jarraitzen(current_user, jarraitua)
+        emaitza = json.loads(emaitza_json or '{}')
+        ondo = emaitza.get('ondo')
+        mezua = emaitza.get('mezua')
         if ondo:
             flash(mezua, 'success')
         else:
@@ -216,7 +228,10 @@ class BistaKontroladorea:
         
         current_user = session.get('user')
         if jarraitua:
-            ondo, mezua = self.eredu_kontroladorea.gehituErabiltzailea(current_user, jarraitua)
+            emaitza_json = self.eredu_kontroladorea.gehituErabiltzailea(current_user, jarraitua)
+            emaitza = json.loads(emaitza_json or '{}')
+            ondo = emaitza.get('ondo')
+            mezua = emaitza.get('mezua')
             if ondo:
                 flash(mezua, 'success')
             else:
@@ -244,7 +259,11 @@ class BistaKontroladorea:
         
         current_user = session.get('user')
         isilarazi = request.args.get('isilarazi', 'False').lower() == 'true'
-        self.eredu_kontroladorea.eguneratu_notifikazioak(current_user, jarraitua, isilarazi)
+        emaitza_json = self.eredu_kontroladorea.eguneratu_notifikazioak(current_user, jarraitua, isilarazi)
+        emaitza = json.loads(emaitza_json or '{}')
+        mezua = emaitza.get('mezua')
+        if mezua:
+            flash(mezua, 'success' if emaitza.get('ondo') else 'error')
         return redirect(url_for('lagunak'))
 
 
@@ -399,10 +418,12 @@ def bista_blueprint(db):
     @bista_bp.route('/changelog')
     def changelog():
         current_user = session.get('user')
+        user_role = session.get('role', 'usuario')
         bilatutakoIzena = request.args.get('bilatutako_erabiltzaile_izena')
         service = EreduKontroladorea(db)
         lista_notificaciones = service.notifikazioenInformazioaLortu(current_user, bilatutakoIzena)
-        return render_template('changelog.html', notificaciones=lista_notificaciones)
+        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        return render_template('changelog.html', notificaciones=lista_notificaciones, menu_endpoint=menu_endpoint)
     
     return bista_bp
 
