@@ -959,7 +959,7 @@ class EreduKontroladorea:
   # =====================================================
 
   def notifikazioenInformazioaLortu(self, erabiltzaile_izena, bilatutako_izena):
-    query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ? AND J.Notifikatu = 1"
+    query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ? AND J.Notifikatu = 1 "
 
     if bilatutako_izena != None and bilatutako_izena != '':
         query += "AND J.JarraituIzena LIKE ?"
