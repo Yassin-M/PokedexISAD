@@ -845,9 +845,9 @@ class EreduKontroladorea:
           # Indarrak eta ahuleziak
           if row["pokemonMotaEraso"] and row["multiplikatzailea"]:
               efektu_key = (row["pokemonMotaEraso"], row["erasoko_mota_irudia"])
-              if row["multiplikatzailea"] > 1:
+              if row["multiplikatzailea"] < 1:
                   indarrak_set.add(efektu_key)
-              elif row["multiplikatzailea"] < 1:
+              elif row["multiplikatzailea"] > 1:
                   ahuleziak_set.add(efektu_key)
 
       # Pokemon informazioa azken batean sortu.
