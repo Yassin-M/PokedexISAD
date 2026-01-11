@@ -11,10 +11,11 @@
 
     <div class="form-container">
         <div class="nav-bar">
-            <a href="{{ url_for('taldeak.taldeak_kargatu') }}">
-                <i class="fas fa-reply nav-icon" title="Atzera"></i>
+            <i class="fas fa-reply nav-icon" onclick="window.history.back()" title="Atzera"></i>
+
+            <a href="{{ url_for(menu_endpoint) }}" class="icon-btn">
+                <i class="fas fa-home nav-icon" title="Hasiera"></i>
             </a>
-            <i class="fas fa-home nav-icon" title="Hasiera"></i>
         </div>
     
         <!-- Taldea Name Section -->

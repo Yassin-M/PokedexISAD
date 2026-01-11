@@ -279,8 +279,10 @@ def taldeak_blueprint(db):
     def taldeak_kargatu():
         session.pop('editatzen_ari_den_taldea', None)
         erabiltzailea = session.get('user')
+        user_role = session.get('role', 'usuario')
         talde_zerrenda = service.taldeak_kargatu(erabiltzailea)
-        return render_template('taldeak.html', taldeak=talde_zerrenda)
+        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        return render_template('taldeak.html', taldeak=talde_zerrenda, menu_endpoint=menu_endpoint)
     
     @taldeak_bp.route('/taldea', methods=['GET', 'POST'])
     def taldea_dago():
@@ -298,8 +300,10 @@ def taldeak_blueprint(db):
             return redirect(url_for('taldeak.taldeak_kargatu'))
         session['editatzen_ari_den_taldea'] = talde_izena
         erabiltzailea = session.get('user')
+        user_role = session.get('role', 'usuario')
         talde_datuak = service.get_taldea(talde_izena, erabiltzailea)
-        return render_template('taldea.html', pokemons=talde_datuak)
+        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        return render_template('taldea.html', pokemons=talde_datuak, menu_endpoint=menu_endpoint, taldea_izena=talde_izena)
 
     @taldeak_bp.route('/taldea_berria', methods=['POST'])
     def sortu_taldea():
