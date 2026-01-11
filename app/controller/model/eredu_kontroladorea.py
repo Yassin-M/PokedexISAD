@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.database.database import Connection
 import json
 import sqlite3
@@ -188,6 +189,9 @@ class EreduKontroladorea:
     query = "DELETE FROM JarraitzenDu WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
     try:
       self.db.delete(query, (jarraitzailea, jarraitua))
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(jarraitzailea, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen uzti du.")
+      self.notifikazioBerria(jarraitua, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen utzi du.")
       return True, "Jarraitzea eten da"
     except Exception as e:
       return False, f"Errorea jarraitzea eteterakoan: {str(e)}"
@@ -206,6 +210,9 @@ class EreduKontroladorea:
     query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
     try:
       self.db.insert(query, (jarraitzailea, jarraitua))
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(jarraitzailea, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen hasi da.")
+      self.notifikazioBerria(jarraitua, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen hasi da.")
       return True, "Orain jarraitzen duzu erabiltzaile hau"
     except Exception as e:
       return False, f"Errorea jarraitzen hastean: {str(e)}"
@@ -273,6 +280,8 @@ class EreduKontroladorea:
       taldeIzena = f"Talde {i}"
       sql2 = " INSERT INTO taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
       self.db.insert(sql2, (taldeIzena, erabiltzailea))
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(erabiltzailea, dataOrdua, f"{erabiltzailea} talde berria sortu du: {taldeIzena}")
       return taldeIzena
     
   def get_taldea(self, taldeIzena, erabiltzailea):
@@ -403,6 +412,8 @@ class EreduKontroladorea:
 
       sql_delete_team = "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
       self.db.delete(sql_delete_team, (taldeIzena, erabiltzailea))
+      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      self.notifikazioBerria(erabiltzailea, dataOrdua, f"{erabiltzailea} {taldeIzena} taldea ezabatu du")
     
   def bistaratu_pokemon_taldea(self, pokeId):
     sql2 = "SELECT P.harrapatuId, P.izena, P.HP, P.ATK, P.SPATK, P.DEF, P.SPDEF, P.SPE, PP.irudia, PP.pokeId, PP.pisua, PP.altuera FROM PokemonTalde P, PokemonPokedex PP WHERE P.harrapatuId = ? AND P.PokemonPokedexID = PP.pokeId"
@@ -962,7 +973,7 @@ class EreduKontroladorea:
     query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ? AND J.Notifikatu = 1 "
 
     if bilatutako_izena != None and bilatutako_izena != '':
-        query += "AND J.JarraituIzena LIKE ?"
+        query += "AND J.JarraituIzena LIKE ? "
 
     query += "ORDER BY N.DataOrdua DESC;"
 
@@ -975,19 +986,17 @@ class EreduKontroladorea:
     notifikazioJSON = []
     for notifikazio in notifikazioZerrenda:
         notifikazioJSON.append({
-          'JarraituIzena': notifikazio[0],
-          'DataOrdua': notifikazio[1],
-          'deskripzioa': notifikazio[2]
+          'JarraituIzena': notifikazio['JarraituIzena'], 
+          'DataOrdua': notifikazio['DataOrdua'],
+          'deskripzioa': notifikazio['deskripzioa']
         })
 
     return notifikazioJSON
 
   def notifikazioBerria(self, ErabiltzaileIzena, DataOrdua, deskripzioa):
-    query = "INSERT INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
-    self.db.insert(query, (ErabiltzaileIzena, deskripzioa, DataOrdua))
-    return
-
-  def jarraitzaileBerria (JarraitzaileIzena, JarraituIzena):
-    query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
-    db.insert(query, (JarraitzaileIzena, JarraituIzena))
-    return
+      query = "INSERT OR IGNORE INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
+      try:
+          self.db.insert(query, (ErabiltzaileIzena, deskripzioa, DataOrdua))
+      except Exception as e:
+          print(f"Errorea notifikazioa sortzean: {e}")
+      return
