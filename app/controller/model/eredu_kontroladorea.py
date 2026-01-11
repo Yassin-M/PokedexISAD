@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib.response import addinfo
 from app.database.database import Connection
 import json
 import sqlite3
@@ -503,7 +504,10 @@ class EreduKontroladorea:
     for pokemon in pokemon_izenak:
         try:
           parametroak = self.api.pokemon_eskatu(pokemon['name'])
-          self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["preEboluzioId"]])
+          if parametroak:
+            self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["pre_eboluzioa"]])
+          else:
+             print(f"Saltando {pokemon['name']}")
         except Exception as e:
           print(f"Error {e}")
 
@@ -526,8 +530,8 @@ class EreduKontroladorea:
         return json3
 
   def motak_kargatu(self):
-    sql1 = "INSERT INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
-    sql2 = "INSERT INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
+    sql1 = "INSERT OR IGNORE INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
+    sql2 = "INSERT OR IGNORE INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
     mota_izenak = self.api.mota_izenak_eskatu()
     for mota in mota_izenak:
         try:
@@ -537,41 +541,48 @@ class EreduKontroladorea:
           tipo = self.api.mota_eskatu(mota['name'])
           for pokemon in tipo["pokemonak"]:
               try:
-                pokemon_id = int(pokemon.pokemon.url.split('/')[-2])
+                pokemon_id = int(pokemon["pokemon"]["url"].split('/')[-2])
                 self.db.insert(sql2, [mota['name'].capitalize(), pokemon_id])
               except Exception as e:
                 print(f"Error {e}")
         except Exception as e:
           print(f"Error {e}")
 
-    sql3 = "INSERT INTO Multiplikatzailea(pokemonMotaJaso, pokemonMotaEraso, multiplikatzailea) VALUES (?, ?, ?)"
+    sql3 = "INSERT OR IGNORE INTO Multiplikatzailea(pokemonMotaJaso, pokemonMotaEraso, multiplikatzailea) VALUES (?, ?, ?)"
     for mota in mota_izenak:
         tipo = self.api.mota_eskatu(mota['name'])
-        dobles = tipo["erlazioak"].double_damage_to
-        mitades = tipo["erlazioak"].half_damage_to
-        zeros = tipo["erlazioak"].no_damage_to
+        dobles = tipo["erlazioak"]["double_damage_to"]
+        mitades = tipo["erlazioak"]["half_damage_to"]
+        zeros = tipo["erlazioak"]["no_damage_to"]
         for doble in dobles:
-          parametroak = [doble.name.capitalize(), mota["name"].capitalize(), 2.0]
+          parametroak = [doble["name"].capitalize(), mota["name"].capitalize(), 2.0]
           self.db.insert(sql3, parametroak)
         for mitad in mitades:
-          parametroak = [mitad.name.capitalize(), mota['name'].capitalize(), 0.5]
+          parametroak = [mitad["name"].capitalize(), mota['name'].capitalize(), 0.5]
           self.db.insert(sql3, parametroak)
         for zero in zeros:
-          parametroak = [zero.name.capitalize(), mota['name'].capitalize(), 0.0]
+          parametroak = [zero["name"].capitalize(), mota['name'].capitalize(), 0.0]
           self.db.insert(sql3, parametroak)
-        #esta parte habra que ver como acortarla un poco
-    pass
 
   def abileziak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
     sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
     abilezi_izenak = self.api.abilezi_izenak_eskatu()
     for abileziak in abilezi_izenak:
-        abilezia = self.api.abilezia_eskatu(abileziak['name'])
-        self.db.insert(sql1, [abilezia["izena"], abilezia["deskripzioa"]])
-        for pokemon in abilezia["pokemonak"]:
-          poke_id = int(pokemon.pokemon.url.split('/')[-2])
-          self.db.insert(sql2, [poke_id, abilezia["izena"], pokemon.is_hidden])
+        try:
+          abilezia = self.api.abilezia_eskatu(abileziak['name'])
+          if abilezia is not None:
+            self.db.insert(sql1, [abilezia["izena"], abilezia["deskripzioa"]])
+            for pokemon in abilezia["pokemonak"]:
+              try:
+                poke_id = int(pokemon["pokemon"]["url"].split('/')[-2])
+                self.db.insert(sql2, [poke_id, abilezia["izena"], pokemon["is_hidden"]])
+              except Exception as e:
+                print()
+          else:
+             print('Error en habilidad')            
+        except Exception as e:
+           print(f"Error procesando habilidad {addinfo['name']}: {e}")
 
   def mugimenduak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
@@ -581,20 +592,8 @@ class EreduKontroladorea:
         mugimendua = self.api.mugimendua_eskatu(izena['name'])
         self.db.insert(sql1, [mugimendua["izena"], mugimendua["potentzia"], mugimendua["zehaztazuna"], mugimendua["PP"], mugimendua["efektua"], mugimendua["pokemonMotaIzena"]])
         for pokemon in mugimendua["pokemonak"]:
-          pokemon_id = int(pokemon.url.split('/')[-2])
+          pokemon_id = int(pokemon["url"].split('/')[-2])
           self.db.insert(sql2, [pokemon_id, mugimendua["izena"]])
-
-  def __lortu_deskripzioa(self, objektua):
-    for sarrera in objektua.flavor_text_entries:
-        if sarrera.language.name == 'es':
-          return sarrera.flavor_text.replace('\n', ' ').replace('\f', ' ')
-    return 'Ez dago deskripziorik gaztelaniaz'
-
-  def __lortu_izena(self, objektua):
-    for sarrera in objektua.names:
-        if sarrera.language.name == 'es':
-          return sarrera.name.replace('\n', ' ').replace('\f', ' ')
-    return objektua.name
 
   def eboluzioak_kargatu(self):
     sql = """
