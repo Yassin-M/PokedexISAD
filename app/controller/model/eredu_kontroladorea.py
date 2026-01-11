@@ -165,7 +165,7 @@ class EreduKontroladorea:
   def lagunakKargatu(self, erabiltzaile_izena):
     """Erabiltzaile batek jarraitzen dituen pertsonak lortu"""
     query = """
-      SELECT JarraituIzena, Notifikazioak
+      SELECT JarraituIzena, Notifikatu
       FROM JarraitzenDu 
       WHERE JarraitzaileIzena = ?
       ORDER BY JarraituIzena
@@ -176,7 +176,7 @@ class EreduKontroladorea:
       for jarraitua in emaitza:
         jarraitutakoak.append({
           'izena': jarraitua['JarraituIzena'],
-          'notifikazioak': bool(jarraitua['Notifikazioak'])
+          'notifikazioak': bool(jarraitua['Notifikatu'])
         })
       return json.dumps(jarraitutakoak, ensure_ascii=False)
     except Exception as e:
@@ -236,7 +236,7 @@ class EreduKontroladorea:
 
   def eguneratu_notifikazioak(self, jarraitzailea, jarraitua, notifikazioak):
     """Notifikazio baten egoera aldatu (aktibatu/desgaitu)"""
-    query = "UPDATE JarraitzenDu SET Notifikazioak = ? WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
+    query = "UPDATE JarraitzenDu SET Notifikatu = ? WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
     try:
       self.db.update(query, (notifikazioak, jarraitzailea, jarraitua))
       return True, "Notifikazioak eguneratuta daude"
