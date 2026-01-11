@@ -1,11 +1,12 @@
 import pokebase as pb
+import requests
 
 class APIKontroladorea:
 
    def __init__(self):
-      self.erromatarrak = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9}
-
-      self.traducciones_tipos = {
+    self.erromatarrak = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7, 'viii': 8, 'ix': 9}
+    self.base_url = "https://pokeapi.co/api/v2/"
+    self.traducciones_tipos = {
             "standard-balls": "Poké Balls estándar",
             "special-balls": "Poké Balls especiales",
             "apricorn-balls": "Poké Balls de Bayas",
@@ -66,88 +67,158 @@ class APIKontroladorea:
         }
 
    def pokemon_izenak_eskatu(self):
-      return pb.APIResourceList('pokemon')
+      try:
+         response = requests.get(f"{self.base_url}pokemon?limit=1500", timeout=10)
+         if response.status_code == 200:
+            return response.json()['results']
+         return []
+      except Exception as e:
+         print(f"Error en la lista de nombres: {e}")
+         return []
    
    def pokemon_eskatu(self, izena):
-      uneko_pokemon = pb.pokemon(izena)
-      izen_erreala = uneko_pokemon.species.name
-      espeziea = pb.pokemon_species(izen_erreala)
-      
-      #########################Para cargar preevoluciones#########################
-      pre_eboluzioa = 0
-      if espeziea.evolves_from_species and espeziea.id < 10000:
-            url = espeziea.evolves_from_species.url
-            pre_eboluzioa = int(url.rstrip('/').split('/')[-1])
-      #########################Para cargar preevoluciones#########################
-
-      generoa_rate = espeziea.gender_rate
-      generoa = 'Neutroa' if generoa_rate == -1 else 'Ar' if generoa_rate == 0 else 'Eme' if generoa_rate == 8 else 'Ar/Eme'
-      irudia = uneko_pokemon.sprites.other.official_artwork.front_default
-      if not irudia:
-         irudia = uneko_pokemon.sprites.front_default
-      base_parametroak = {"pokeId": uneko_pokemon.id,
-                           "izena": uneko_pokemon.name.capitalize(),
-                           "altuera": uneko_pokemon.height,
-                           "pisua": uneko_pokemon.weight,
-                           "generoa": generoa,
-                           "deskripzioa": self.__lortu_deskripzioa(espeziea),
-                           "irudia": irudia,
-                           "generazioa": self.erromatarrak.get(espeziea.generation.name.split('-')[1], 0),
-                           "preEboluzioId": pre_eboluzioa}
-      return base_parametroak
+    try:
+        res_data = requests.get(f"{self.base_url}pokemon/{izena}", timeout=10)
+        res_species = requests.get(f"{self.base_url}pokemon-species/{izena}", timeout=10)
+        
+        if res_data.status_code == 200 and res_species.status_code == 200:
+            uneko_pokemon = res_data.json()
+            espeziea = res_species.json()
+            
+            pre_eboluzioa = 0
+            if espeziea.get("evolves_from_species") and espeziea.get("id", 0) < 10000:
+                url = espeziea["evolves_from_species"]["url"]
+                pre_eboluzioa = int(url.split('/')[-2])
+                
+            rate = espeziea.get('gender_rate', -1)
+            generoa = 'Neutroa' if rate == -1 else 'Ar' if rate == 0 else 'Eme' if rate == 8 else 'Ar/Eme'
+            
+            irudia = uneko_pokemon['sprites']['other']['official-artwork']['front_default'] or uneko_pokemon['sprites']['front_default']
+            
+            gen_name = espeziea['generation']['name'].split('-')[1]
+            generazioa = self.erromatarrak.get(gen_name, 0)
+            
+            return {
+                "pokeId": uneko_pokemon['id'],
+                "izena": uneko_pokemon['name'].capitalize(),
+                "altuera": uneko_pokemon['height'],
+                "pisua": uneko_pokemon['weight'],
+                "generoa": generoa,
+                "deskripzioa": self.__lortu_deskripzioa(espeziea),
+                "irudia": irudia,
+                "generazioa": generazioa,
+                "pre_eboluzioa": pre_eboluzioa
+            }
+        return None
+    except Exception as e:
+        print(f"Error cargando pokemon {izena}: {e}")
+        return None
+   
    def mota_izenak_eskatu(self):
-      return pb.APIResourceList('type')
+        try:
+            response = requests.get(f"{self.base_url}type", timeout=10)
+            if response.status_code == 200:
+                return response.json()['results']
+            return []
+        except Exception as e:
+            print(f"Error obteniendo nombres de tipos: {e}")
+            return []
      
    def mota_eskatu(self, izena):
-      mota = pb.type_(izena)
-      return {"izena": izena, "pokemonak": mota.pokemon, "erlazioak": mota.damage_relations}
+        try:
+            response = requests.get(f"{self.base_url}type/{izena}", timeout=10)  
+            if response.status_code == 200:
+                mota = response.json()
+                return {
+                    "izena": izena,
+                    "pokemonak": mota.get('pokemon', []),
+                    "erlazioak": mota.get('damage_relations', {})
+                }
+            return None
+        except Exception as e:
+            print(f"Error cargando tipo {izena}: {e}")
+            return None
 
    def mugimendu_izenak_eskatu(self):
-      return pb.APIResourceList('move')
+        try:
+            response = requests.get(f"{self.base_url}move?limit=1000", timeout=10)
+            if response.status_code == 200:
+                return response.json()['results']
+            return []
+        except Exception as e:
+            print(f"Error obteniendo nombres de movimientos: {e}")
+            return []
    
    def mugimendua_eskatu(self, izena):
-      mugimendua = pb.move(izena)
-      mugimendu_izena = self.__lortu_izena(mugimendua)
-      mugimendu_efektua = self.__lortu_deskripzioa(mugimendua)
-      parametroak = {"izena": mugimendu_izena.capitalize(), 
-                     "potentzia": mugimendua.power, 
-                     "zehaztazuna":mugimendua.accuracy, 
-                     "PP": mugimendua.pp, 
-                     "efektua": mugimendu_efektua, 
-                     "pokemonMotaIzena":mugimendua.type.name.capitalize(),
-                     "pokemonak": mugimendua.learned_by_pokemon
-                  }
-      return parametroak
+        try:
+            response = requests.get(f"{self.base_url}move/{izena}", timeout=10)
+            if response.status_code == 200:
+                mugimendua = response.json()
+                return {
+                    "izena": self.__lortu_izena(mugimendua).capitalize(),
+                    "potentzia": mugimendua.get('power', 0),
+                    "zehaztazuna": mugimendua.get('accuracy', 0),
+                    "PP": mugimendua.get('pp', 0),
+                    "efektua": self.__lortu_deskripzioa(mugimendua),
+                    "pokemonMotaIzena": mugimendua['type']['name'].capitalize(),
+                    "pokemonak": mugimendua.get('learned_by_pokemon', [])
+                }
+            return None
+        except Exception as e:
+            print(f"Error cargando movimiento {izena}: {e}")
+            return None
    
    def abilezi_izenak_eskatu(self):
-      return pb.APIResourceList('ability')
+        try:
+            response = requests.get(f"{self.base_url}ability?limit=500", timeout=10)
+            if response.status_code == 200:
+                return response.json()['results']
+            return []
+        except Exception as e:
+            print(f"Error obteniendo nombres de habilidades: {e}")
+            return []
    
    def abilezia_eskatu(self, izena):
-      abilezia = pb.ability(izena)
-      abilezi_izena = abilezia.name
-      for izena in abilezia.names:
-            if izena.language.name == "es":
-               abilezi_izena = izena.name
-      deskripzioa = self.__lortu_deskripzioa(abilezia)
-      parametroak = {"izena": abilezi_izena, "deskripzioa": deskripzioa, "pokemonak": abilezia.pokemon}
-      return parametroak
+        try:
+            response = requests.get(f"{self.base_url}ability/{izena}", timeout=10)
+            if response.status_code == 200:
+                abilezia = response.json()
+                return {
+                    "izena": self.__lortu_izena(abilezia),
+                    "deskripzioa": self.__lortu_deskripzioa(abilezia),
+                    "pokemonak": abilezia.get('pokemon', [])
+                }
+            return None
+        except Exception as e:
+            print(f"Error cargando habilidad {izena}: {e}")
+            return None
 
    def __lortu_izena(self, objektua):
-      for sarrera in objektua.names:
-         if sarrera.language.name == 'es':
-            return sarrera.name.replace('\n', ' ').replace('\f', ' ')
-      return objektua.name
+        """Busca el nombre en español ('es') en la lista 'names'."""
+        for sarrera in objektua.get('names', []):
+            if sarrera['language']['name'] == 'es':
+                return sarrera['name'].replace('\n', ' ').replace('\f', ' ')
+        return objektua.get('name', '???')
    
 
    def __lortu_deskripzioa(self, objektua):
-      """Busca descripción en español adaptándose a si es Item o Pokémon"""
-      if hasattr(objektua, 'flavor_text_entries'):
-         for sarrera in objektua.flavor_text_entries:
-            if sarrera.language.name == 'es':
-               # Pokémon usa .flavor_text, los Items usan .text
-               texto = getattr(sarrera, 'flavor_text', getattr(sarrera, 'text', ''))
-               return texto.replace('\n', ' ').replace('\f', ' ')
-      return 'Descripción no disponible en español'
+        """Filtra descripciones buscando el idioma español ('es')."""
+        # 1. Comprobar flavor_text_entries (Pokémon, Species, Items)
+        if 'flavor_text_entries' in objektua:
+            for sarrera in objektua['flavor_text_entries']:
+                if sarrera['language']['name'] == 'es':
+                    # Algunos recursos usan 'flavor_text' y otros 'text'
+                    texto = sarrera.get('flavor_text', sarrera.get('text', ''))
+                    return texto.replace('\n', ' ').replace('\f', ' ')
+        
+        # 2. Comprobar effect_entries (Habilidades y Movimientos)
+        if 'effect_entries' in objektua:
+            for sarrera in objektua['effect_entries']:
+                if sarrera['language']['name'] == 'es':
+                    # Algunos recursos usan 'effect'
+                    return sarrera.get('effect', '').replace('\n', ' ').replace('\f', ' ')
+
+        return 'Descripción no disponible en español'
    
    #itemdex
 
