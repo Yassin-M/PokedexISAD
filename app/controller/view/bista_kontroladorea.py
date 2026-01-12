@@ -404,8 +404,16 @@ def itemdex_blueprint(db):
     bp = Blueprint("itemdex", __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
 
+    @bp.context_processor
+    def inject_menu_endpoint():
+        user_role = session.get('role', 'usuario')
+        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        return dict(menu_endpoint=menu_endpoint)
+
     @bp.route("/itemdex", methods=["GET", "POST"])
     def itemdex():
+        if 'user' not in session:
+            return redirect(url_for('login'))
         iragazkiak = {"izena": "", "motak": [], "alfabetikokiAlderantziz": False}
         if request.method == "POST":
             iragazkiak["izena"] = request.form.get("izena", "")
@@ -417,6 +425,8 @@ def itemdex_blueprint(db):
 
     @bp.route("/itemdex/item/<int:id>")
     def item(id):
+        if 'user' not in session:
+            return redirect(url_for('login'))
         item = service.bistaratu_item(id)
         return render_template("item.html", item=item)
     return bp
