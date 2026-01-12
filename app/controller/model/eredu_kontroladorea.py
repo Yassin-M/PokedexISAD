@@ -85,7 +85,10 @@ class EreduKontroladorea:
       emaitza = self.db.select(query, (izena_zaharra,))
       erabiltzailea_zaharra = emaitza[0] if emaitza else None
       if not erabiltzailea_zaharra:
-        return False, "Erabiltzailea ez da existitzen"
+        return json.dumps({
+          'ondo': False,
+          'mezua': "Erabiltzailea ez da existitzen"
+        }, ensure_ascii=False)
       
       if not izena_berria or izena_berria == "":
         izena_berria = izena_zaharra
@@ -102,7 +105,10 @@ class EreduKontroladorea:
           query = "SELECT izena FROM Erabiltzailea WHERE izena = ?"
           dagoen_berria = self.db.select(query, (izena_berria,))
           if dagoen_berria:
-            return False, "Izen hori hartuta dago"
+            return json.dumps({
+              'ondo': False,
+              'mezua': "Izen hori hartuta dago"
+            }, ensure_ascii=False)
       
       if pasahitza and pasahitza != "":
         query = "UPDATE Erabiltzailea SET izena = ?, email = ?, jaiotze_data = ?, pasahitza = ? WHERE izena = ?"
@@ -111,9 +117,15 @@ class EreduKontroladorea:
         query = "UPDATE Erabiltzailea SET izena = ?, email = ?, jaiotze_data = ? WHERE izena = ?"
         self.db.update(query, (izena_berria, email, jaiotze_data, izena_zaharra))
       
-      return True, "Datuak behar bezala eguneratu dira"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Datuak behar bezala eguneratu dira"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea datuak eguneratzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea datuak eguneratzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def erabiltzaileakKargatu(self):
     """Datu-baseko erabiltzaile guztiak lortu JSON formatuan"""
@@ -149,9 +161,15 @@ class EreduKontroladorea:
     query = "DELETE FROM Erabiltzailea WHERE izena = ?"
     try:
       self.db.delete(query, (erabiltzaile_izena,))
-      return True, "Erabiltzailea behar bezala ezabatu da"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Erabiltzailea behar bezala ezabatu da"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea erabiltzailea ezabatzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea erabiltzailea ezabatzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def baimendu(self, erabiltzaile_izena, admin_egin):
     """Erabiltzaile bati admin rola eman edo kendu"""
@@ -160,9 +178,15 @@ class EreduKontroladorea:
     try:
       self.db.update(query, (rola_berria, erabiltzaile_izena))
       mezua = "Erabiltzailea admin bihurtu da" if admin_egin else "Admin rola kendu da"
-      return True, mezua
+      return json.dumps({
+        'ondo': True,
+        'mezua': mezua
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea rola aldatzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea rola aldatzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def lagunakKargatu(self, erabiltzaile_izena):
     """Erabiltzaile batek jarraitzen dituen pertsonak lortu"""
@@ -193,9 +217,15 @@ class EreduKontroladorea:
       dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
       self.notifikazioBerria(jarraitzailea, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen uzti du.")
       self.notifikazioBerria(jarraitua, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen utzi du.")
-      return True, "Jarraitzea eten da"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Jarraitzea eten da"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea jarraitzea eteterakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea jarraitzea eteterakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def gehituErabiltzailea(self, jarraitzailea, jarraitua):
     """Erabiltzaile bat jarraitzen hastea"""
@@ -203,10 +233,16 @@ class EreduKontroladorea:
     emaitza = self.db.select(query, (jarraitzailea, jarraitua))
     
     if emaitza:
-      return False, "Jada jarraitzen duzu erabiltzaile hau"
+      return json.dumps({
+        'ondo': False,
+        'mezua': "Jada jarraitzen duzu erabiltzaile hau"
+      }, ensure_ascii=False)
     
     if jarraitzailea == jarraitua:
-      return False, "Ezin duzu zure burua jarraitu"
+      return json.dumps({
+        'ondo': False,
+        'mezua': "Ezin duzu zure burua jarraitu"
+      }, ensure_ascii=False)
     
     query = "INSERT INTO JarraitzenDu (JarraitzaileIzena, JarraituIzena) VALUES (?, ?)"
     try:
@@ -214,9 +250,15 @@ class EreduKontroladorea:
       dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
       self.notifikazioBerria(jarraitzailea, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen hasi da.")
       self.notifikazioBerria(jarraitua, dataOrdua, f"{jarraitzailea} erabiltzaileak {jarraitua} jarraitzen hasi da.")
-      return True, "Orain jarraitzen duzu erabiltzaile hau"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Orain jarraitzen duzu erabiltzaile hau"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea jarraitzen hastean: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea jarraitzen hastean: {str(e)}"
+      }, ensure_ascii=False)
 
   def bilatu_erabiltzaileak(self, bilaketa, current_user):
     """Erabiltzaileak bilatu izenaren arabera - LAGUNAK GEHITU ATALERAKO"""
@@ -247,9 +289,15 @@ class EreduKontroladorea:
     query = "UPDATE JarraitzenDu SET Notifikatu = ? WHERE JarraitzaileIzena = ? AND JarraituIzena = ?"
     try:
       self.db.update(query, (notifikazioak, jarraitzailea, jarraitua))
-      return True, "Notifikazioak eguneratuta daude"
+      return json.dumps({
+        'ondo': True,
+        'mezua': "Notifikazioak eguneratuta daude"
+      }, ensure_ascii=False)
     except Exception as e:
-      return False, f"Errorea notifikazioak eguneratzerakoan: {str(e)}"
+      return json.dumps({
+        'ondo': False,
+        'mezua': f"Errorea notifikazioak eguneratzerakoan: {str(e)}"
+      }, ensure_ascii=False)
 
   def taldeak_kargatu(self, erabiltzailea):
     sql1 = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
@@ -797,9 +845,9 @@ class EreduKontroladorea:
           # Indarrak eta ahuleziak
           if row["pokemonMotaEraso"] and row["multiplikatzailea"]:
               efektu_key = (row["pokemonMotaEraso"], row["erasoko_mota_irudia"])
-              if row["multiplikatzailea"] > 1:
+              if row["multiplikatzailea"] < 1:
                   indarrak_set.add(efektu_key)
-              elif row["multiplikatzailea"] < 1:
+              elif row["multiplikatzailea"] > 1:
                   ahuleziak_set.add(efektu_key)
 
       # Pokemon informazioa azken batean sortu.

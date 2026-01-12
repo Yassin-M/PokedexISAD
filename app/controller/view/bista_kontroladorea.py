@@ -99,9 +99,12 @@ class BistaKontroladorea:
                     return render_template('editatu.html', home_endpoint=home_endpoint,
                                         erabiltzailea=emaitza, error=mezua)
           
-            ondo, mezua = self.eredu_kontroladorea.eguneratu_erabiltzailea(
+            eguneratu_json = self.eredu_kontroladorea.eguneratu_erabiltzailea(
                 erabiltzaile_izena, izena, email, jaiotze_data, pasahitza
             )
+            eguneratu = json.loads(eguneratu_json or '{}')
+            ondo = eguneratu.get('ondo')
+            mezua = eguneratu.get('mezua')
           
             if ondo:
                 if izena and not user_id:
@@ -157,7 +160,10 @@ class BistaKontroladorea:
             flash('Ezin duzu zure burua ezabatu', 'error')
             return redirect(url_for('kudeatu'))
         
-        ondo, mezua = self.eredu_kontroladorea.ezabatu(user_id)
+        emaitza_json = self.eredu_kontroladorea.ezabatu(user_id)
+        emaitza = json.loads(emaitza_json or '{}')
+        ondo = emaitza.get('ondo')
+        mezua = emaitza.get('mezua')
         if ondo:
             flash(mezua, 'success')
         else:
@@ -173,7 +179,10 @@ class BistaKontroladorea:
             flash('Ez duzu baimenik', 'error')
             return redirect(url_for('menu'))
         
-        ondo, mezua = self.eredu_kontroladorea.baimendu(user_id, True)
+        emaitza_json = self.eredu_kontroladorea.baimendu(user_id, True)
+        emaitza = json.loads(emaitza_json or '{}')
+        ondo = emaitza.get('ondo')
+        mezua = emaitza.get('mezua')
         if ondo:
             flash(mezua, 'success')
         else:
@@ -202,7 +211,10 @@ class BistaKontroladorea:
             return redirect(url_for('login'))
         
         current_user = session.get('user')
-        ondo, mezua = self.eredu_kontroladorea.utzi_jarraitzen(current_user, jarraitua)
+        emaitza_json = self.eredu_kontroladorea.utzi_jarraitzen(current_user, jarraitua)
+        emaitza = json.loads(emaitza_json or '{}')
+        ondo = emaitza.get('ondo')
+        mezua = emaitza.get('mezua')
         if ondo:
             flash(mezua, 'success')
         else:
@@ -216,7 +228,10 @@ class BistaKontroladorea:
         
         current_user = session.get('user')
         if jarraitua:
-            ondo, mezua = self.eredu_kontroladorea.gehituErabiltzailea(current_user, jarraitua)
+            emaitza_json = self.eredu_kontroladorea.gehituErabiltzailea(current_user, jarraitua)
+            emaitza = json.loads(emaitza_json or '{}')
+            ondo = emaitza.get('ondo')
+            mezua = emaitza.get('mezua')
             if ondo:
                 flash(mezua, 'success')
             else:
@@ -244,7 +259,11 @@ class BistaKontroladorea:
         
         current_user = session.get('user')
         isilarazi = request.args.get('isilarazi', 'False').lower() == 'true'
-        self.eredu_kontroladorea.eguneratu_notifikazioak(current_user, jarraitua, isilarazi)
+        emaitza_json = self.eredu_kontroladorea.eguneratu_notifikazioak(current_user, jarraitua, isilarazi)
+        emaitza = json.loads(emaitza_json or '{}')
+        mezua = emaitza.get('mezua')
+        if mezua:
+            flash(mezua, 'success' if emaitza.get('ondo') else 'error')
         return redirect(url_for('lagunak'))
 
 
@@ -260,8 +279,10 @@ def taldeak_blueprint(db):
     def taldeak_kargatu():
         session.pop('editatzen_ari_den_taldea', None)
         erabiltzailea = session.get('user')
+        user_role = session.get('role', 'usuario')
         talde_zerrenda = service.taldeak_kargatu(erabiltzailea)
-        return render_template('taldeak.html', taldeak=talde_zerrenda)
+        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        return render_template('taldeak.html', taldeak=talde_zerrenda, menu_endpoint=menu_endpoint)
     
     @taldeak_bp.route('/taldea', methods=['GET', 'POST'])
     def taldea_dago():
@@ -279,8 +300,10 @@ def taldeak_blueprint(db):
             return redirect(url_for('taldeak.taldeak_kargatu'))
         session['editatzen_ari_den_taldea'] = talde_izena
         erabiltzailea = session.get('user')
+        user_role = session.get('role', 'usuario')
         talde_datuak = service.get_taldea(talde_izena, erabiltzailea)
-        return render_template('taldea.html', pokemons=talde_datuak)
+        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        return render_template('taldea.html', pokemons=talde_datuak, menu_endpoint=menu_endpoint, taldea_izena=talde_izena)
 
     @taldeak_bp.route('/taldea_berria', methods=['POST'])
     def sortu_taldea():
@@ -335,6 +358,14 @@ def taldeak_blueprint(db):
 def pokedex_blueprint(db):
     pokedex_bp = Blueprint('pokedex', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
+    @pokedex_bp.context_processor
+    def inject_menu_endpoint():
+        if 'user' in session:
+            user_role = session.get('role', 'usuario')
+            menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        else:
+            menu_endpoint = 'login'
+        return dict(menu_endpoint=menu_endpoint)
 
     @pokedex_bp.route('/pokedex', methods=['GET', 'POST'])
     @pokedex_bp.route('/pokedex/bilatu', methods=['GET', 'POST'])
@@ -411,6 +442,15 @@ def bista_blueprint(db):
 def chatbot_blueprint(db):
     chatbot_bp = Blueprint('chatbot', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
+
+    @chatbot_bp.context_processor
+    def inject_menu_endpoint():
+        if 'user' in session:
+            user_role = session.get('role', 'usuario')
+            menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        else:
+            menu_endpoint = 'login'
+        return dict(menu_endpoint=menu_endpoint)
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
