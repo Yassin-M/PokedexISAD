@@ -241,6 +241,21 @@ body {
 .changelog-item:nth-child(3) { animation-delay: 0.3s; }
 .changelog-item:nth-child(4) { animation-delay: 0.4s; }
 .changelog-item:nth-child(5) { animation-delay: 0.5s; }
+.changelog-item:nth-child(6) { animation-delay: 0.6s; }
+.changelog-item:nth-child(7) { animation-delay: 0.7s; }
+.changelog-item:nth-child(8) { animation-delay: 0.8s; }
+.changelog-item:nth-child(9) { animation-delay: 0.9s; }
+.changelog-item:nth-child(10) { animation-delay: 1s; }
+.changelog-item:nth-child(11) { animation-delay: 1.1s; }
+.changelog-item:nth-child(12) { animation-delay: 1.2s; }
+.changelog-item:nth-child(13) { animation-delay: 1.3s; }
+.changelog-item:nth-child(14) { animation-delay: 1.4s; }
+.changelog-item:nth-child(15) { animation-delay: 1.5s; }
+.changelog-item:nth-child(16) { animation-delay: 1.6s; }
+.changelog-item:nth-child(17) { animation-delay: 1.7s; }
+.changelog-item:nth-child(18) { animation-delay: 1.8s; }
+.changelog-item:nth-child(19) { animation-delay: 1.9s; }
+.changelog-item:nth-child(20) { animation-delay: 2s; }
 
 .sprite {
     margin-right: 10px;

@@ -398,13 +398,13 @@ def bista_blueprint(db):
 
     @bista_bp.route('/changelog')
     def changelog():
-        current_user = session.get('user')
-        user_role = session.get('role', 'usuario')
+        erabiltzailea = session.get('user')
+        erabiltzaile_rola = session.get('role', 'usuario')
         bilatutakoIzena = request.args.get('bilatutako_erabiltzaile_izena')
         service = EreduKontroladorea(db)
-        lista_notificaciones = service.notifikazioenInformazioaLortu(current_user, bilatutakoIzena)
-        menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
-        return render_template('changelog.html', notificaciones=lista_notificaciones, menu_endpoint=menu_endpoint)
+        notifikazio_zerrenda = service.notifikazioenInformazioaLortu(erabiltzailea, bilatutakoIzena)
+        menu_endpoint = 'menu_admin' if erabiltzaile_rola.lower() == 'admin' else 'menu'
+        return render_template('changelog.html', notifikazioak=notifikazio_zerrenda, menu_endpoint=menu_endpoint)
     
     return bista_bp
 

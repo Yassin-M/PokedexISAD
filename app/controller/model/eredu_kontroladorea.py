@@ -977,7 +977,7 @@ class EreduKontroladorea:
     query += "ORDER BY N.DataOrdua DESC;"
 
     if bilatutako_izena != None and bilatutako_izena != '':
-        notifikazioZerrenda = self.db.select(query, (erabiltzaile_izena, bilatutako_izena))
+        notifikazioZerrenda = self.db.select(query, (erabiltzaile_izena, f"%{bilatutako_izena}%"))
     else:
         notifikazioZerrenda = self.db.select(query, (erabiltzaile_izena,))
 
