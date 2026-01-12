@@ -1006,8 +1006,7 @@ class EreduKontroladorea:
         "SPDEF": onena["SPDEF"],
         "SPE": onena["SPE"],
         "puntuazioa": puntuazio_maximoa,
-        "taldeIzena": taldeIzena,
-        "erabiltzaileIzena": erabiltzaileIzena
+        "taldeIzena": taldeIzena
     }
 
     return onena_info
