@@ -71,26 +71,6 @@
                     this.style.transform = 'translateY(0)';
                 });
             });
-
-            // Egiaztatu zein orrialde dauden eskuragarri
-            const pages = ['mugimenduak', 'onenak', 'eboluzioa', 'indarrak'];
-            pages.forEach(page => {
-                fetch(`/${page}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            const link = document.querySelector(`[href="/${page}"]`);
-                            if (link) {
-                                link.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    alert(`${page.toUpperCase()} orria garatzen ari da!`);
-                                });
-                            }
-                        }
-                    })
-                    .catch(() => {
-                        // Ez ikusi erroreak
-                    });
-            });
         });
     </script>
 </body>
