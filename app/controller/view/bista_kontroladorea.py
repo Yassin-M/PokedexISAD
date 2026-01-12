@@ -358,6 +358,14 @@ def taldeak_blueprint(db):
 def pokedex_blueprint(db):
     pokedex_bp = Blueprint('pokedex', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
+    @pokedex_bp.context_processor
+    def inject_menu_endpoint():
+        if 'user' in session:
+            user_role = session.get('role', 'usuario')
+            menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        else:
+            menu_endpoint = 'login'
+        return dict(menu_endpoint=menu_endpoint)
 
     @pokedex_bp.route('/pokedex', methods=['GET', 'POST'])
     @pokedex_bp.route('/pokedex/bilatu', methods=['GET', 'POST'])
@@ -434,6 +442,15 @@ def bista_blueprint(db):
 def chatbot_blueprint(db):
     chatbot_bp = Blueprint('chatbot', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
+
+    @chatbot_bp.context_processor
+    def inject_menu_endpoint():
+        if 'user' in session:
+            user_role = session.get('role', 'usuario')
+            menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+        else:
+            menu_endpoint = 'login'
+        return dict(menu_endpoint=menu_endpoint)
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
