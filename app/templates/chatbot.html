@@ -10,7 +10,7 @@
 <body class="chatbot-body">
     <!-- ChatBot nabigazio barra -->
     <div class="chatbot-nav">
-        <button onclick="safeGoBack()" class="chatbot-nav-btn chatbot-btn-back">
+        <button onclick="javascript:history.back()" class="chatbot-nav-btn chatbot-btn-back">
             ⇦ Itzuli
         </button>
         <button onclick="window.location.href='{{ url_for(menu_endpoint) }}'" class="chatbot-nav-btn chatbot-btn-home">
@@ -72,24 +72,6 @@
                 });
             });
         });
-
-        function safeGoBack() {
-            const referrer = document.referrer;
-            const currentPath = window.location.pathname;
-
-            // Saioa hasierako orria bada, menura joan
-            if (referrer && referrer.includes('/login')) {
-                window.location.href = "{{ url_for(menu_endpoint) }}";
-            }
-            // Historia badago eta oraingo orria ez bada
-            else if (window.history.length > 1 && referrer &&
-                     !referrer.includes(currentPath)) {
-                window.history.back();
-            } else {
-                // Lehenetsitakoa: menura itzuli
-                window.location.href = "{{ url_for(menu_endpoint) }}";
-            }
-        }
     </script>
 </body>
 </html>
