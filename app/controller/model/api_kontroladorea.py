@@ -223,58 +223,49 @@ class APIKontroladorea:
    #itemdex
 
    def item_izenak_eskatu(self):
-      return pb.APIResourceList("item")
-   
-   def itema_eskatu(self, izena_api):
-        """Procesa un item: traduce nombre, descripción y categoría."""
-        api_item = pb.item(izena_api)
+       try:
+           response = requests.get(f"{self.base_url}item?limit=4000", timeout=10)
+           if response.status_code == 200:
+               return response.json()['results']
+           return []
+       except Exception as e:
+           print(f"Error obteniendo nombres de items: {e}")
+           return []
 
-        # 1. Nombre en español
-        izena = None
-        for n in api_item.names:
-            if n.language.name == "es":
-                izena = n.name
-                break
-        if not izena:
-            izena = api_item.name.replace("-", " ").title()
+   def itema_eskatu(self, izena):
+       try:
+           response = requests.get(f"{self.base_url}item/{izena}", timeout=10)
+           if response.status_code != 200:
+               return None
 
-        # 2. Descripción en español
-        deskr = None
-        for entry in api_item.flavor_text_entries:
-            if entry.language.name == "es":
-                deskr = entry.text.replace("\n", " ").replace("\f", " ")
-                break
-        if not deskr:
-         deskr = "Descripción no disponible en español"
+           item = response.json()
 
-        # 3. Categoría (Tipo) en español
-        mota_api = api_item.category.name
-        mota = mota_api
+           # Nombre en español
+           izena_es = self.__lortu_izena(item)
 
-        # Intento 1: Traducción oficial API
-        for name in api_item.category.names:
-            if name.language.name == "es":
-                mota = name.name
-                break
+           # Descripción en español
+           deskr = self.__lortu_deskripzioa(item)
 
-        # Intento 2: Fallback con diccionario propio si la API falla o devuelve inglés
-        if mota == mota_api or mota.lower() == mota_api.lower():
-            mota_limpia = mota_api.lower().strip()
-            if mota_limpia in self.traducciones_tipos:
-                mota = self.traducciones_tipos[mota_limpia]
-            else:
-                mota = mota_api.replace("-", " ").title()
+           # Categoría
+           mota_api = item.get('category', {}).get('name', 'other')
+           mota = mota_api.replace("-", " ").title()
 
-        if not mota or mota.strip() == "":
-            mota = "Otros"
+           # Traducción con diccionario propio
+           mota_limpia = mota_api.lower().strip()
+           if mota_limpia in self.traducciones_tipos:
+               mota = self.traducciones_tipos[mota_limpia]
 
-        return {
-            "id": api_item.id,
-            "izena": izena,
-            "deskripzioa": deskr,
-            "argazkia": api_item.sprites.default,
-            "mota": mota
-        }
+           return {
+               "id": item.get('id'),
+               "izena": izena_es,
+               "deskripzioa": deskr,
+               "argazkia": item.get('sprites', {}).get('default'),
+               "mota": mota
+           }
+
+       except Exception as e:
+           print(f"Error cargando item {izena}: {e}")
+           return None
 
    def eboluzioak_eskatu(self):
 
