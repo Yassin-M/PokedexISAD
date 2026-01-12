@@ -12,8 +12,8 @@ class BistaKontroladorea:
       if request.method == 'POST':
         
          if not erabiltzailea or not pasahitza:
-            error = 'Mesedez, bete eremu guztiak'
-            return render_template('login.html', error=error)
+            flash('Mesedez, bete eremu guztiak', 'error')
+            return redirect(url_for('login'))
          
          erantzuna_json = self.eredu_kontroladorea.saioHasi(erabiltzailea, pasahitza)
          erantzuna = json.loads(erantzuna_json or '{}')
@@ -26,11 +26,11 @@ class BistaKontroladorea:
             session['user'] = erabiltzaile_izena
             session['role'] = rola or 'usuario'
             if (rola or '').lower() == 'admin':
-               return render_template('menu_admin.html')
-            return render_template('menu.html')
+               return redirect(url_for('menu_admin'))
+            return redirect(url_for('menu'))
          else:
-            error = mezua
-            return render_template('login.html', error=error)
+            flash(mezua, 'error')
+            return redirect(url_for('login'))
       
       return render_template('login.html')
    
@@ -48,18 +48,19 @@ class BistaKontroladorea:
                 error = 'Mesedez, bete eremu guztiak'
             
             if error:
-                return render_template('register.html', error=error)
+                flash(error, 'error')
+                return redirect(url_for('register'))
             
             ondo, mensaje = self.eredu_kontroladorea.erregistratu(
                 erabiltzailea, email, jaiotze_data, pasahitza, pasahitza2
             )
             
             if ondo:
-                success = mensaje + ' Saioa hasi dezakezu orain.'
-                return render_template('register.html', success=success)
+                flash(mensaje + ' Saioa hasi dezakezu orain.', 'success')
+                return redirect(url_for('login'))
             else:
-                error = mensaje
-                return render_template('register.html', error=error)
+                flash(mensaje, 'error')
+                return redirect(url_for('register'))
         
         return render_template('register.html')
     
@@ -91,13 +92,13 @@ class BistaKontroladorea:
             
             if pasahitza or pasahitza2:
                 if pasahitza != pasahitza2:
-                    return render_template('editatu.html', home_endpoint=home_endpoint, 
-                                        erabiltzailea=emaitza, error='Pasahitzak ez datoz bat')
+                    flash('Pasahitzak ez datoz bat', 'error')
+                    return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
                 
                 baliozko, mezua = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
                 if not baliozko:
-                    return render_template('editatu.html', home_endpoint=home_endpoint,
-                                        erabiltzailea=emaitza, error=mezua)
+                    flash(mezua, 'error')
+                    return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
           
             eguneratu_json = self.eredu_kontroladorea.eguneratu_erabiltzailea(
                 erabiltzaile_izena, izena, email, jaiotze_data, pasahitza
@@ -109,16 +110,13 @@ class BistaKontroladorea:
             if ondo:
                 if izena and not user_id:
                     session['user'] = izena
+                flash(mezua, 'success')
                 if user_id:
                     return redirect(url_for('kudeatu'))
-                berria = izena if izena else erabiltzaile_izena
-                emaitza_lista = self.eredu_kontroladorea.db.select(query, (berria,))
-                emaitza = emaitza_lista[0] if emaitza_lista else None
-                return render_template('editatu.html', home_endpoint=home_endpoint,
-                                     erabiltzailea=emaitza, success=mezua)
+                return redirect(url_for('editatu'))
             else:
-                return render_template('editatu.html', home_endpoint=home_endpoint,
-                                     erabiltzailea=emaitza, error=mezua)
+                flash(mezua, 'error')
+                return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
       
         return render_template('editatu.html', home_endpoint=home_endpoint, erabiltzailea=emaitza)
     
