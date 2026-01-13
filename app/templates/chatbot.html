@@ -10,7 +10,7 @@
 <body class="chatbot-body">
     <!-- ChatBot nabigazio barra -->
     <div class="chatbot-nav">
-        <button onclick="window.history.back()" class="chatbot-nav-btn chatbot-btn-back">
+        <button onclick="javascript:history.back()" class="chatbot-nav-btn chatbot-btn-back">
             ⇦ Itzuli
         </button>
         <button onclick="window.location.href='{{ url_for(menu_endpoint) }}'" class="chatbot-nav-btn chatbot-btn-home">
@@ -70,26 +70,6 @@
                 card.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                 });
-            });
-
-            // Egiaztatu zein orrialde dauden eskuragarri
-            const pages = ['mugimenduak', 'onenak', 'eboluzioa', 'indarrak'];
-            pages.forEach(page => {
-                fetch(`/${page}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            const link = document.querySelector(`[href="/${page}"]`);
-                            if (link) {
-                                link.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    alert(`${page.toUpperCase()} orria garatzen ari da!`);
-                                });
-                            }
-                        }
-                    })
-                    .catch(() => {
-                        // Ez ikusi erroreak
-                    });
             });
         });
     </script>
