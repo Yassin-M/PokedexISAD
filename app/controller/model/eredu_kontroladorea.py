@@ -1016,19 +1016,23 @@ class EreduKontroladorea:
   # =====================================================
 
   def notifikazioenInformazioaLortu(self, erabiltzaile_izena, bilatutako_izena):
+    # SQL kontsulta prestatu
     query = "SELECT J.JarraituIzena, N.DataOrdua, N.deskripzioa FROM JarraitzenDu J JOIN Notifikatu N ON J.JarraituIzena = N.ErabiltzaileIzena WHERE J.JarraitzaileIzena = ? AND J.Notifikatu = 1 "
 
+    # Bilaketa izena gehitu erabiltzailea zeozer idatzi baldin badu bestela zati hau salto egiten da
     if bilatutako_izena != None and bilatutako_izena != '':
         query += "AND J.JarraituIzena LIKE ? "
-
+    
+    # Ordenatu data eta orduaren arabera jaitsi egiten
     query += "ORDER BY N.DataOrdua DESC;"
 
+    # Kontsulta exekutatu Query-an gehitu diren parametroekin (zeozer bilatu bada ala ez)
     if bilatutako_izena != None and bilatutako_izena != '':
         notifikazioZerrenda = self.db.select(query, (erabiltzaile_izena, f"%{bilatutako_izena}%"))
     else:
         notifikazioZerrenda = self.db.select(query, (erabiltzaile_izena,))
 
-      
+    # Notifikazioen JSON formatua prestatu eta metodotik itzuli
     notifikazioJSON = []
     for notifikazio in notifikazioZerrenda:
         notifikazioJSON.append({
@@ -1040,6 +1044,7 @@ class EreduKontroladorea:
     return notifikazioJSON
 
   def notifikazioBerria(self, ErabiltzaileIzena, DataOrdua, deskripzioa):
+      # Insert query prestatu eta exekutatu
       query = "INSERT OR IGNORE INTO Notifikatu (ErabiltzaileIzena, deskripzioa, DataOrdua) VALUES (?, ?, ?)"
       try:
           self.db.insert(query, (ErabiltzaileIzena, deskripzioa, DataOrdua))

@@ -434,12 +434,16 @@ def bista_blueprint(db):
 
     @bista_bp.route('/changelog')
     def changelog():
+        # Erabiltzailearen informazio hartu (rola, izena eta zeozer bilatu baldin badu ala ez)
         erabiltzailea = session.get('user')
         erabiltzaile_rola = session.get('role', 'usuario')
         bilatutakoIzena = request.args.get('bilatutako_erabiltzaile_izena')
+        # Eredu kontroladorearen metodoa erabili notifikazioak lortzeko
         service = EreduKontroladorea(db)
         notifikazio_zerrenda = service.notifikazioenInformazioaLortu(erabiltzailea, bilatutakoIzena)
+        # HTML-ari pasatu erabiltzailearen rolaren informazioa menu egokia erakusteko atzera egiterakoan
         menu_endpoint = 'menu_admin' if erabiltzaile_rola.lower() == 'admin' else 'menu'
+        # Lortu den informazio guztia changelog.html-ra pasatu eta orria erakutsi
         return render_template('changelog.html', notifikazioak=notifikazio_zerrenda, menu_endpoint=menu_endpoint)
     
     return bista_bp

@@ -12,7 +12,7 @@
     <body>
         <div class="form-container changelog-mode">
     <div class="login-container">
-
+        <!-- Atzera eta etxeko ikonoak eta Changelog-a tituluan goiko aldean -->
         <div class="top-bar">
             <button class="icon-btn" onclick="history.back()">
                 <i class="fa-solid fa-chevron-left"></i>
@@ -22,16 +22,17 @@
                 <i class="fa-solid fa-house"></i>
             </a>
         </div>
-
+        <!--Changelog-aren notifikazioen lista-->
         <div class="changelog-list">
 
             {% for noti in notifikazioak %}
             
             <div class="changelog-item">
+                <!--Rojo-ren gif-a -->
                 <span class="sprite">
                     <img src="{{ url_for('static', filename='../static/img/rojo.gif') }}" alt="Sprite">
                 </span>
-                
+                <!--Notifikazioaren edukia-->
                 <span class="changelog-text">
                     <strong>{{ noti['JarraituIzena'] }}:</strong> 
                     
