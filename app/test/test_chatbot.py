@@ -1,3 +1,4 @@
+# pytest app/test/test_chatbot.py -s -v
 def test_chatbotMenua(logged_in_client):
     """
     3.5.1: Chatbot botoia sakatu eta pantaila irekitzen da
@@ -217,3 +218,61 @@ def test_eboluzioa_general(logged_in_client):
             assert 'ez dago' in h_atala
 
         assert '<img' in html and 'src="' in html
+
+
+def test_3_5_3_onenak_mocked(logged_in_client, mocker):
+    """
+    3.5.3: Mock datuekin probatu (taldea sortu gabe)
+    """
+    # 1. Mock talde zerrenda
+    mock_taldeak = [
+        {'izena': 'TEST_TALDEA_1'},
+        {'izena': 'TEST_TALDEA_2'}
+    ]
+
+    # Zure controller-a mock egin
+    from app.controller.model.eredu_kontroladorea import EreduKontroladorea
+
+    # Mock egin taldeak_kargatu metodoa
+    mocker.patch.object(EreduKontroladorea, 'taldeak_kargatu',
+                        return_value=mock_taldeak)
+
+    # 2. Talde zerrenda ikusi
+    resp1 = logged_in_client.get('/chatbot/taldeZerrenda')
+    assert resp1.status_code == 200
+
+    html1 = resp1.data.decode('utf-8')
+    assert 'TEST_TALDEA_1' in html1
+    assert 'TEST_TALDEA_2' in html1
+
+    # 3. Mock onena informazioa
+    mock_onena = {
+        "PokemonPokedexID": 25,
+        "izena": "Pikachu",
+        "irudia": "https://example.com/pikachu.png",
+        "HP": 35,
+        "ATK": 55,
+        "DEF": 40,
+        "SPATK": 50,
+        "SPDEF": 50,
+        "SPE": 90,
+        "puntuazioa": 320,  # HP+ATK+DEF+SPATK+SPDEF+SPE
+        "taldeIzena": "TEST_TALDEA_1"
+    }
+
+    # Mock egin onena lortzeko metodoa
+    mocker.patch.object(EreduKontroladorea, 'getOnenak',
+                        return_value=mock_onena)
+
+    # 4. Onena ikusi
+    resp2 = logged_in_client.get('/chatbot/onenak/TEST_TALDEA_1')
+    assert resp2.status_code == 200
+
+    html2 = resp2.data.decode('utf-8')
+
+    # Egiaztatu datuak
+    assert 'Pikachu' in html2
+    assert 'TEST_TALDEA_1' in html2.upper()
+    assert '35' in html2  # HP
+    assert '320' in html2 or 'PUNTUAZIO TOTALA' in html2
+
