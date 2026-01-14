@@ -10,7 +10,7 @@ from config import Config
 from app import create_app
 from app.database.database import Connection
 
-#Probak egiteko ingurunearen sortzea
+# Probak egiteko ingurunearen sortzea
 @pytest.fixture()
 def ingurumenaSortu(tmp_path, monkeypatch):
     # Datu base bat sortu probak egiteko (programa amaitzean ezabatzen dena)
@@ -67,7 +67,7 @@ def ingurumenaSortu(tmp_path, monkeypatch):
             session["role"] = "usuario"
         yield client
 
-#3.3.1 Proba: Menutik Changelog-era joatea notifikazioak botoia sakatuz
+# 3.3.1 Proba: Menutik Changelog-era joatea notifikazioak botoia sakatuz
 
     # Lehenik eta behin, konprobatu ea menu orrialdean changelog-era joateko botoia dagoen ala ez
 def test_badago_botoia(ingurumenaSortu):
