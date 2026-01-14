@@ -313,8 +313,8 @@ class EreduKontroladorea:
     taldeak = self.db.select(sql_taldeak, (erabiltzailea,))
 
     # Taldeen izena gorde eta bueltatu JSON formatuan
-    json4 = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
-    return json4
+    json_izenak = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
+    return json_izenak
   
   def sortu_taldea_hutsa(self, erabiltzailea):
     # Erabiltzaileak dituen taldeak lortu
@@ -496,7 +496,7 @@ class EreduKontroladorea:
       
     # Informazioa JSON formatuan prestatu
     for pokemons in pokemon:
-      json3 = {
+      json_pokeinfo = {
           'harrapatuId': pokemons['harrapatuId'],
           'izena': pokemons['izena'],         
           'argazkia': pokemons['irudia'],
@@ -516,14 +516,14 @@ class EreduKontroladorea:
     }
 
     # Abileziak eta mugimenduak lortu
-    json3['stats'] = stats
-    abilezia = self.db.select("SELECT abileziIzena FROM Dauka WHERE harrapatuId = ?", [json3['harrapatuId']])
+    json_pokeinfo['stats'] = stats
+    abilezia = self.db.select("SELECT abileziIzena FROM Dauka WHERE harrapatuId = ?", [json_pokeinfo['harrapatuId']])
     abIzena = [abi['abileziIzena'] for abi in abilezia]
-    json3['abileziak'] = abIzena
-    mugimenduak = self.db.select("SELECT mugimenduIzena FROM MugimenduIzanTalde WHERE harrapatuId = ?", [json3['harrapatuId']])
+    json_pokeinfo['abileziak'] = abIzena
+    mugimenduak = self.db.select("SELECT mugimenduIzena FROM MugimenduIzanTalde WHERE harrapatuId = ?", [json_pokeinfo['harrapatuId']])
     mugiIzenak = [mugi['mugimenduIzena'] for mugi in mugimenduak]
-    json3['mugimenduak'] = mugiIzenak
-    return json3 
+    json_pokeinfo['mugimenduak'] = mugiIzenak
+    return json_pokeinfo 
 
   # =====================================================
   # POKEDEX
