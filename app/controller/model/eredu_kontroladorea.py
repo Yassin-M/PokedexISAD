@@ -444,8 +444,8 @@ class EreduKontroladorea:
     self.db.insert(sql_taldera, (taldeIzena, harrapatu_id, erabiltzailea))
 
     # Pokemon-aren izena bueltatu, notifikazioan sartzeko
-    sql_ezabatuIzena = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
-    izena = self.db.select(sql_ezabatuIzena, (harrapatu_id,))
+    sql_izena = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
+    izena = self.db.select(sql_izena, (harrapatu_id,))
     return izena[0]['izena']
 
   def ezabatu_taldetik(self, taldeIzena, erabiltzailea, pokemonId):
@@ -476,8 +476,8 @@ class EreduKontroladorea:
 
   def ezabatu_taldea(self, taldeIzena, erabiltzailea):
       # Taldeko pokemon guztiak lortu
-      sql_get_pokemon_ids = "SELECT harrapatuId FROM PokemonTaldean WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
-      pokemon_ids = self.db.select(sql_get_pokemon_ids, (taldeIzena, erabiltzailea))
+      sql_pokemonguztiak = "SELECT harrapatuId FROM PokemonTaldean WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
+      pokemon_ids = self.db.select(sql_pokemonguztiak, (taldeIzena, erabiltzailea))
 
       # Taldean dauden pokemon bakoitzarentzat, ezabatu taldetik
       for pokemon in pokemon_ids:
