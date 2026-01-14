@@ -7,6 +7,9 @@ class BistaKontroladorea:
     def __init__(self, db):
         self.eredu_kontroladorea = EreduKontroladorea(db)
     
+# =====================================================
+# BLUEPRINTS (Nivel global de archivo)
+# =====================================================    
     def saioHasi(self, erabiltzailea, pasahitza):
       """Saioa hasteko orria"""
       if request.method == 'POST':
@@ -265,90 +268,145 @@ class BistaKontroladorea:
         return redirect(url_for('lagunak'))
 
 
-# =====================================================
-# BLUEPRINTS (Nivel global de archivo)
-# =====================================================
-
 def taldeak_blueprint(db):
     taldeak_bp = Blueprint('taldeak', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
 
     @taldeak_bp.route('/taldeak', methods=['GET', 'POST'])
     def taldeak_kargatu():
+        # Aurretik talde bat bazegoen editatzen, atera. 
         session.pop('editatzen_ari_den_taldea', None)
+        
+        # Erabiltzailea eta rola hartu saioatik
         erabiltzailea = session.get('user')
         user_role = session.get('role', 'usuario')
+
+        # Taldeak kargatu
         talde_zerrenda = service.taldeak_kargatu(erabiltzailea)
+
+        # Menu egokia aukeratu rolaren arabera
         menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+
+        # Taldeen zerrenda erakutsi
         return render_template('taldeak.html', taldeak=talde_zerrenda, menu_endpoint=menu_endpoint)
     
     @taldeak_bp.route('/taldea', methods=['GET', 'POST'])
     def taldea_dago():
+        # Talde izena hartu form-etik edo saioatik
         talde_izena = request.form.get('talde_izena') or session.get('editatzen_ari_den_taldea')
+
+        # Taldea badago, berreraman taldea ikustera
         if talde_izena:
             return redirect(url_for('taldeak.taldea', izena=talde_izena))
+        # Bestela taldeen zerrendara eramango gaitu
         flash("Ez da talderik zehaztu", "error")
         return redirect(url_for('taldeak.taldeak_kargatu'))
 
     @taldeak_bp.route('/taldea/<string:izena>', methods=['GET', 'POST'])
     def taldea(izena=None):
+        # Talde izena hartu form-etik, parametroetatik edo saioatik
         talde_izena = izena or request.form.get('talde_izena') or session.get('editatzen_ari_den_taldea')
+
+        # Taldea ez badago, taldeen zerrendara eramango gaitu
         if not talde_izena:
             flash("Ez da talderik zehaztu", "error")
             return redirect(url_for('taldeak.taldeak_kargatu'))
+        
+        # Taldea saioan sartu
         session['editatzen_ari_den_taldea'] = talde_izena
+
+        # Erabiltzailea eta rola hartu saioatik
         erabiltzailea = session.get('user')
         user_role = session.get('role', 'usuario')
+
+        # Talde datuak kargatu
         talde_datuak = service.get_taldea(talde_izena, erabiltzailea)
+
+        # Menu egokia aukeratu rolaren arabera
         menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+
+        # Talde orria erakutsi
         return render_template('taldea.html', pokemons=talde_datuak, menu_endpoint=menu_endpoint, taldea_izena=talde_izena)
 
     @taldeak_bp.route('/taldea_berria', methods=['POST'])
     def sortu_taldea():
         try:
+            # Erabiltzailea hartu saiotik
             erabiltzailea = session.get('user')
-            print(erabiltzailea)
+
+            # Talde huts bat sortu eta saioan gorde editatzen ari den taldea bezala
             taldea_id = service.sortu_taldea_hutsa(erabiltzailea)  
             session['editatzen_ari_den_taldea'] = taldea_id
+
+            # Notifikazioa sortu
             deskripzioa = f"Talde berria sortu du: {taldea_id}."
             service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), deskripzioa)
+
+            # Taldea erakutsi
             return redirect(url_for('taldeak.taldea', izena=taldea_id))
         except ValueError as e:
+            # Errorea eman bada, talde zerrendara bueltatu eta errorea erakutsi
             flash(str(e), "error")
             return redirect(url_for('taldeak.taldeak_kargatu'))
     
     @taldeak_bp.route('/pokemon_taldea', methods=['POST'])
     def sartu_taldera():
+        # Talde izena eta pokemon ID hartu saiotik
         talde_izena = session.get('editatzen_ari_den_taldea')
         pokemon_id = session.get('pokemon_datuak')
         try:
+            # Erabiltzailea hartu saiotik
             erabiltzailea = session.get('user')
+
+            # Pokemon-a taldean sartu
             pokeIzena = service.sartu_taldera(talde_izena, erabiltzailea, pokemon_id)
+
+            # Notifikazioa sortu
             service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{pokeIzena} bat gehitu du {talde_izena} taldean.")
+
+            # Taldea erakutsi
             return redirect(url_for('taldeak.taldea_dago'))
         except ValueError as e:
+            # Errorea eman bada, talde orrira bueltatu eta errorea erakutsi
             flash(str(e), "error")
             return redirect(url_for('taldeak.taldea_dago'))
     
     @taldeak_bp.route('/pokemon_taldea/ezabatu', methods=['GET', 'POST'])
     def ezabatu_taldetik():
+        # Erabiltzailea, talde izena eta pokemon ID hartu saiotik
         erabiltzailea = session.get('user')
         talde_izena = session.get('editatzen_ari_den_taldea')
         pokemon_id = session.get('pokemon_datuak')
+
+        # Pokemon-a taldeatik ezabatu
         pokeIzena = service.ezabatu_taldetik(talde_izena, erabiltzailea, pokemon_id)
+
+        # Notifikazioa sortu
         service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{pokeIzena} bat ezabatu du {talde_izena} taldean.")
+
+        # Akzioaren arabera birbideratu
         akzioa = request.args.get('akzioa')
+
+        # Pokemon berri bat hautatu behar bada, pokedex-era bideratu
         if akzioa == 'hauta_pokemon':
             session['akzioa'] = 'aldatu'
             return redirect(url_for('pokedex.pokedex'))
+        # Bestela, taldea berriro erakutsi
         return redirect(url_for('taldeak.taldea_dago'))
 
     @taldeak_bp.route('/taldea/ezabatu_guztia', methods=['GET', 'POST'])
     def taldea_ezabatu():
+        # Erabiltzailea eta talde izena hartu saiotik
         erabiltzailea = session.get('user')
         talde_izena = session.get('editatzen_ari_den_taldea')
+
+        # Taldea ezabatu
         service.ezabatu_taldea(talde_izena, erabiltzailea)
+
+        # Notifikazioa sortu
         service.notifikazioBerria(erabiltzailea, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), f"{talde_izena} taldea ezabatu du.")
+
+        # Talde zerrendara bueltatu
         return redirect(url_for('taldeak.taldeak_kargatu'))
     
     return taldeak_bp
@@ -388,12 +446,19 @@ def pokedex_blueprint(db):
 
     @pokedex_bp.route('/pokedex/pokemon/<int:id>', methods=['GET'])
     def pokemon(id):
+        # Editatzen ari den taldea saiotik hartu
         taldea = session.get('editatzen_ari_den_taldea')
+
+        # Akzioa hartu parametrotik edo saioatik
         akzioa = request.args.get('akzioa') or session.get('akzioa')
+        # Ez badago akziorik edo hautatu nahi bada, Pokemon-a erakutsi
         if akzioa == 'hauta_pokemon' or akzioa is None:
             datuak = service.bistaratu_pokemon(id)
+        # Bestela, pokemon-a taldearen barruan editatzen bada, taldeko pokemon-a erakutsi (Dituen estatistikak (ATK, SP.ATK, DEF, SP.DEF, SPD, HP), mugimenduak eta abileziak)
         else:
             datuak = service.bistaratu_pokemon_taldea(id)
+
+        # Pokemon ID saioan gorde taldera gehitzeko edo ezabatzeko    
         session['pokemon_datuak'] = id
         return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
     return pokedex_bp

@@ -10,6 +10,7 @@
 <body>
 
     <div class="form-container">
+        <!-- Atzera eta etxeko ikonoak -->
         <div class="nav-bar">
             <i class="fas fa-reply nav-icon" onclick="window.history.back()" title="Atzera"></i>
             
@@ -20,9 +21,10 @@
         </div>
 
         <div class="list-container" id="taldes-list">
-            
+            <!-- Erabiltzaileak dituen taldeen zerrenda -->
             <div class="column">
                 <div class="row">
+                    <!-- Talde berria sortzeko errenkada-->
                     <form action="{{ url_for('taldeak.sortu_taldea') }}" method="post">
                         <button type="submit" class="action-btn add">+</button>
                     </form>                    
@@ -31,6 +33,7 @@
 
                 {% for talde in taldeak %}
                 <div class="row">
+                    <!-- Erabiltzaileak sortu dituen taldeen zerrenda-->
                     <form action="{{ url_for('taldeak.taldea', izena=talde.izena) }}" method="post">
                         <input type="hidden" name="talde_izena" value="{{ talde.izena }}">
                         <button type="submit" class="action-btn add">EDIT</button>

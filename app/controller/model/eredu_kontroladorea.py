@@ -12,7 +12,11 @@ class EreduKontroladorea:
   def __init__(self, db):
     self.db = db
     self.api = APIKontroladorea()
-    
+
+  # =====================================================
+  # ERABILTZAILEA
+  # =====================================================
+
   def saioHasi(self, erabiltzaile_izena, pasahitza):
       """Kredentzialak egiaztatu datu-basean"""
       query = "SELECT izena, pasahitza, rola FROM Erabiltzailea WHERE izena = ?"
@@ -299,17 +303,25 @@ class EreduKontroladorea:
         'mezua': f"Errorea notifikazioak eguneratzerakoan: {str(e)}"
       }, ensure_ascii=False)
 
-  def taldeak_kargatu(self, erabiltzailea):
-    sql1 = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
-    taldeak = self.db.select(sql1, (erabiltzailea,))
+  # =====================================================
+  # TALDEAK
+  # =====================================================
 
+  def taldeak_kargatu(self, erabiltzailea):
+    # Erabiltzaileak dituen taldeak lortu
+    sql_taldeak = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
+    taldeak = self.db.select(sql_taldeak, (erabiltzailea,))
+
+    # Taldeen izena gorde eta bueltatu JSON formatuan
     json4 = [izena for taldea in taldeak for izena in [{'izena': taldea[0]}]]
     return json4
   
   def sortu_taldea_hutsa(self, erabiltzailea):
-    sql = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
-    taldeKop = self.db.select(sql, (erabiltzailea,))
+    # Erabiltzaileak dituen taldeak lortu
+    sql_taldeak = "SELECT taldeIzena FROM Taldea WHERE erabiltzaileIzena = ?"
+    taldeKop = self.db.select(sql_taldeak, (erabiltzailea,))
 
+    # Erabiltzaileak dituen taldeak kontatu eta izen egokia bilatu
     zenbakiak = set()
     for (izena,) in taldeKop:
       if izena.startswith("Talde "):
@@ -319,36 +331,44 @@ class EreduKontroladorea:
             except ValueError:
                 pass
 
+    # 10 talde baditu erabiltzaileak, errorea jaurtitu
     if len(zenbakiak) >= 10:      
-      raise ValueError("Ezin dira 10 talde baino gehiago eduki")
+      raise ValueError("Ezin dira 10 talde baino gehiago eduki.")
+    # Bestela kontatu zenbat talde dituen, izen aproposa bilatzeko
     else:
       i = 1
       while i in zenbakiak:
         i += 1
 
+      # Taldearen izena ezarri eta insert query-a prestatu
       taldeIzena = f"Talde {i}"
-      sql2 = " INSERT INTO taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
-      self.db.insert(sql2, (taldeIzena, erabiltzailea))
-      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-      self.notifikazioBerria(erabiltzailea, dataOrdua, f"{erabiltzailea} talde berria sortu du: {taldeIzena}")
+      sql_sortu = " INSERT INTO taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)"
+      self.db.insert(sql_sortu, (taldeIzena, erabiltzailea))
+      # Taldearen izena bueltatu notifikazioa sortu aurretik
       return taldeIzena
     
   def get_taldea(self, taldeIzena, erabiltzailea):
-    sql2 = "SELECT PT.harrapatuId, PP.irudia FROM Taldea T JOIN PokemonTaldean PT  ON T.taldeIzena = PT.taldeIzena JOIN PokemonTalde PKT ON PT.harrapatuId = PKT.harrapatuId JOIN PokemonPokedex PP ON PKT.PokemonPokedexID = PP.pokeId WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
-    taldea = self.db.select(sql2, (erabiltzailea, taldeIzena))
+    # Taldearen pokémon guztiak lortu
+    sql_poketalde = "SELECT PT.harrapatuId, PP.irudia FROM Taldea T JOIN PokemonTaldean PT  ON T.taldeIzena = PT.taldeIzena JOIN PokemonTalde PKT ON PT.harrapatuId = PKT.harrapatuId JOIN PokemonPokedex PP ON PKT.PokemonPokedexID = PP.pokeId WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
+    taldea = self.db.select(sql_poketalde, (erabiltzailea, taldeIzena))
 
-    json5 = [ {'pokeID': pokeID, 'argazkia': irudia} for (pokeID, irudia) in taldea ]
-    return json5
+    # Pokémonen ID-ak eta irudiak gorde eta bueltatu JSON formatuan
+    json_poketalde = [ {'pokeID': pokeID, 'argazkia': irudia} for (pokeID, irudia) in taldea ]
+    return json_poketalde
   
   def sartu_taldera(self, taldeIzena, erabiltzailea, pokemonId):
-    sql3 = "SELECT COUNT(*) as count FROM PokemonTaldean PT JOIN Taldea T ON PT.taldeIzena = T.taldeIzena WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
-    count_result = self.db.select(sql3, (erabiltzailea, taldeIzena))
+    # Taldearen tamaina kontrolatu
+    sql_tamaina = "SELECT COUNT(*) as count FROM PokemonTaldean PT JOIN Taldea T ON PT.taldeIzena = T.taldeIzena WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
+    count_result = self.db.select(sql_tamaina, (erabiltzailea, taldeIzena))
+    # 6 pokemon baino gehiago badaude taldean, errorea jaurtitu
     if count_result and count_result[0]['count'] >= 6:
         raise ValueError("Ezin dira 6 pokémon baino gehiago sartu talde batean")
 
     try:
+        # Pokemon-ak dituen estatistikak lortu API-tik
         stats = self.api.hartu_stats(pokemonId)
 
+        # Izango dituen estatistikak kalkulatu
         hp = int(stats.get('hp', 40) * 2)
         atk = int(stats.get('attack', 40) * 1.5)
         spatk = int(stats.get('special-attack', 40) * 1.5)
@@ -357,117 +377,124 @@ class EreduKontroladorea:
         spe = int(stats.get('speed', 40) * 1.5)
         izena = self.api.pokemon_izena_lortu(pokemonId)
         
-        sql_gen = "SELECT generoa FROM PokemonPokedex WHERE pokeId = ?"
-        gen_result = self.db.select(sql_gen, (pokemonId,))
-        aukerak = gen_result[0]['generoa'].split('/')
-        
-        generoa = random.choice(aukerak)
-        sql_insert_instance = """
+        # Harrapatutako pokemon-a izango duen generoa aukeratu
+        sql_generoa = "SELECT generoa FROM PokemonPokedex WHERE pokeId = ?"
+        aukerak = self.db.select(sql_generoa, (pokemonId,))
+        generoak = aukerak[0]['generoa'].split('/')
+        generoa = random.choice(generoak)
+
+        # Pokemon-a PokemonTalde taulan sartu
+        sql_harrapatu = """
               INSERT INTO PokemonTalde 
               (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, ErabiltzaileIzena) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           """
           # Defektuz maila 50 eta adiskidetasuna 0
-        self.db.insert(sql_insert_instance, (izena, 50, 0, generoa, hp, atk, spatk, def_, spdef, spe, pokemonId, erabiltzailea))
+        self.db.insert(sql_harrapatu, (izena, 50, 0, generoa, hp, atk, spatk, def_, spdef, spe, pokemonId, erabiltzailea))
 
     except Exception as e:
         print(f"Errorea API deian edo txertatzean: {e}")
-        sql_fallback = "INSERT INTO PokemonTalde (izena, maila, PokemonPokedexID, ErabiltzaileIzena) VALUES (?, 50, ?, ?)"
-        self.db.insert(sql_fallback, ("Pokemon", pokemonId, erabiltzailea))
 
-      # 4. ID-A LORTU (Auto Increment)
-      # Azken harrapatuId-a lortu behar dugu abileziak eta mugimenduak lotzeko
-    sql_last_id = "SELECT MAX(harrapatuId) as id FROM PokemonTalde WHERE ErabiltzaileIzena = ? AND PokemonPokedexID = ?"
-    res_id = self.db.select(sql_last_id, (erabiltzailea, pokemonId))
+    # Azken harrapatuId-a lortu behar dugu abileziak eta mugimenduak lortzeko
+    sql_azkenharrapatu = "SELECT MAX(harrapatuId) as id FROM PokemonTalde WHERE ErabiltzaileIzena = ? AND PokemonPokedexID = ?"
+    res_id = self.db.select(sql_azkenharrapatu, (erabiltzailea, pokemonId))
     harrapatu_id = res_id[0]['id'] if res_id and res_id[0]['id'] else None
 
+    # Azken harrapatuId-a badago, abileziak eta mugimenduak gehitu
     if harrapatu_id:
-        # 5. ABILEZIA (DAUKA TAULA)
-        # Pokemon horrek izan ditzakeen abileziak lortu
-        sql_abis = "SELECT izena FROM IzanDezake WHERE pokemonPokedexID = ?"
-        posibleak = self.db.select(sql_abis, (pokemonId,))
+        # Pokemon-ak izan ditzakeen abileziak lortu
+        sql_abilezi = "SELECT izena FROM IzanDezake WHERE pokemonPokedexID = ?"
+        posibleak = self.db.select(sql_abilezi, (pokemonId,))
         
         if posibleak:
-            # Bat ausaz aukeratu
+            # Abilezi bat ausaz aukeratu
             aukeratua = random.choice(posibleak)
             if isinstance(aukeratua, dict): 
                 aukeratua_izena = aukeratua['izena']
             else:
                 aukeratua_izena = aukeratua[0]
 
+            # Abilezia harrapatutako Pokemon-ari ezarri
             sql_dauka = "INSERT INTO Dauka (abileziIzena, harrapatuId) VALUES (?, ?)"
             self.db.insert(sql_dauka, (aukeratua_izena, harrapatu_id))
 
-        # 6. MUGIMENDUAK (MUGIMENDUIZANTALDE TAULA)
-        # Pokemon horrek ikas ditzakeen mugimenduak lortu
-        sql_moves = "SELECT mugiIzena FROM IkasDezake WHERE pokedexId = ?"
-        moves_posibleak = self.db.select(sql_moves, (pokemonId,))
+        # Pokemon-ak ikas ditzakeen mugimenduak lortu
+        sql_mugi = "SELECT mugiIzena FROM IkasDezake WHERE pokedexId = ?"
+        mugi_posibleak = self.db.select(sql_mugi, (pokemonId,))
         
-        move_list = []
-        for m in moves_posibleak:
+        # Mugimendu izenak zerrenda batera pasatu
+        mugi_zerrenda = []
+        for m in mugi_posibleak:
               if isinstance(m, dict):
-                  move_list.append(m['mugiIzena'])
+                  mugi_zerrenda.append(m['mugiIzena'])
               else:
-                  move_list.append(m[0])
+                  mugi_zerrenda.append(m[0])
 
-        # 4 ausaz aukeratu (edo gutxiago badaude, denak)
-        num_moves = min(len(move_list), 4)
-        chosen_moves = random.sample(move_list, num_moves)
+        # 4 mugimendu ausaz aukeratu (edo gutxiago badaude, denak)
+        mugi_kop = min(len(mugi_zerrenda), 4)
+        aukeratu_mugi = random.sample(mugi_zerrenda, mugi_kop)
 
-        sql_move_insert = "INSERT INTO MugimenduIzanTalde (harrapatuId, mugimenduIzena) VALUES (?, ?)"
-        for move in chosen_moves:
-            self.db.insert(sql_move_insert, (harrapatu_id, move))
+        # Lortutako mugimenduak harrapatutako Pokemon-ari ezarri
+        sql_mugimenduak = "INSERT INTO MugimenduIzanTalde (harrapatuId, mugimenduIzena) VALUES (?, ?)"
+        for move in aukeratu_mugi:
+            self.db.insert(sql_mugimenduak, (harrapatu_id, move))
     
-    sql4 = "INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena) VALUES (?, ?, ?)"
-    self.db.insert(sql4, (taldeIzena, harrapatu_id, erabiltzailea))
+    # Pokemon-a taldean sartu
+    sql_taldera = "INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena) VALUES (?, ?, ?)"
+    self.db.insert(sql_taldera, (taldeIzena, harrapatu_id, erabiltzailea))
 
-    sql6 = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
-    izena = self.db.select(sql6, (harrapatu_id,))
+    # Pokemon-aren izena bueltatu, notifikazioan sartzeko
+    sql_ezabatuIzena = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
+    izena = self.db.select(sql_ezabatuIzena, (harrapatu_id,))
     return izena[0]['izena']
 
-
-
   def ezabatu_taldetik(self, taldeIzena, erabiltzailea, pokemonId):
-      
-      sql6 = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
-      izena = self.db.select(sql6, (pokemonId,))
+      # Ezabatuko den Pokemon-aren izena lortu, notifikazioan sartzeko
+      sql_ezabatuIzena = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
+      izena = self.db.select(sql_ezabatuIzena, (pokemonId,))
       pokeIzena = izena[0]['izena']
       
-      sql_delete_moves = "DELETE FROM MugimenduIzanTalde WHERE harrapatuId = ?"
-      self.db.delete(sql_delete_moves, (pokemonId,))
+      # Pokemon-aren datuak ezabatu hainbat taulatik
+      # Mugimenduak ezabatu
+      sql_mugiezabatu = "DELETE FROM MugimenduIzanTalde WHERE harrapatuId = ?"
+      self.db.delete(sql_mugiezabatu, (pokemonId,))
 
-      sql_delete_ability = "DELETE FROM Dauka WHERE harrapatuId = ?"
-      self.db.delete(sql_delete_ability, (pokemonId,))
+      # Abilezia ezabatu
+      sql_abilezabatu = "DELETE FROM Dauka WHERE harrapatuId = ?"
+      self.db.delete(sql_abilezabatu, (pokemonId,))
 
-      sql_delete_pokemon_team = "DELETE FROM PokemonTaldean WHERE harrapatuId = ? AND taldeIzena = ? AND erabiltzaileIzena = ?"
-      self.db.delete(sql_delete_pokemon_team, (pokemonId, taldeIzena, erabiltzailea))
+      # Pokemon-a taldetik atera
+      sql_taldekanpo = "DELETE FROM PokemonTaldean WHERE harrapatuId = ? AND taldeIzena = ? AND erabiltzaileIzena = ?"
+      self.db.delete(sql_taldekanpo, (pokemonId, taldeIzena, erabiltzailea))
 
-      sql_delete_pokemon = "DELETE FROM PokemonTalde WHERE harrapatuId = ?"
-      self.db.delete(sql_delete_pokemon, (pokemonId,))
+      # Pokemon-a ezabatu (askatu)
+      sql_askatu = "DELETE FROM PokemonTalde WHERE harrapatuId = ?"
+      self.db.delete(sql_askatu, (pokemonId,))
 
       return pokeIzena
 
 
   def ezabatu_taldea(self, taldeIzena, erabiltzailea):
+      # Taldeko pokemon guztiak lortu
       sql_get_pokemon_ids = "SELECT harrapatuId FROM PokemonTaldean WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
       pokemon_ids = self.db.select(sql_get_pokemon_ids, (taldeIzena, erabiltzailea))
 
+      # Taldean dauden pokemon bakoitzarentzat, ezabatu taldetik
       for pokemon in pokemon_ids:
           pokemonId = pokemon['harrapatuId']
           self.ezabatu_taldetik(taldeIzena, erabiltzailea, pokemonId)
 
-      sql_delete_pokemon_team = "DELETE FROM PokemonTaldean WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
-      self.db.delete(sql_delete_pokemon_team, (taldeIzena, erabiltzailea))
+      # Taldea bera ezabatu
+      sql_taldeaezabatu = "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
+      self.db.delete(sql_taldeaezabatu, (taldeIzena, erabiltzailea))
 
-      sql_delete_team = "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?"
-      self.db.delete(sql_delete_team, (taldeIzena, erabiltzailea))
-      dataOrdua = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-      self.notifikazioBerria(erabiltzailea, dataOrdua, f"{erabiltzailea} {taldeIzena} taldea ezabatu du")
     
   def bistaratu_pokemon_taldea(self, pokeId):
-    sql2 = "SELECT P.harrapatuId, P.izena, P.HP, P.ATK, P.SPATK, P.DEF, P.SPDEF, P.SPE, PP.irudia, PP.pokeId, PP.pisua, PP.altuera FROM PokemonTalde P, PokemonPokedex PP WHERE P.harrapatuId = ? AND P.PokemonPokedexID = PP.pokeId"
-    pokemon = self.db.select(sql2, (pokeId,))
+    # Pokemon-aren informazioa lortu
+    sql_pokeinfo = "SELECT P.harrapatuId, P.izena, P.HP, P.ATK, P.SPATK, P.DEF, P.SPDEF, P.SPE, PP.irudia, PP.pokeId, PP.pisua, PP.altuera FROM PokemonTalde P, PokemonPokedex PP WHERE P.harrapatuId = ? AND P.PokemonPokedexID = PP.pokeId"
+    pokemon = self.db.select(sql_pokeinfo, (pokeId,))
       
+    # Informazioa JSON formatuan prestatu
     for pokemons in pokemon:
       json3 = {
           'harrapatuId': pokemons['harrapatuId'],
@@ -478,6 +505,7 @@ class EreduKontroladorea:
           'altuera': pokemons['pisua']
       }
 
+    # Pokemon-aren estatistikak prestatu
     stats = {
       'hp': pokemons['HP'],
       'atk': pokemons['ATK'],
@@ -487,6 +515,7 @@ class EreduKontroladorea:
       'spe': pokemons['SPE'],
     }
 
+    # Abileziak eta mugimenduak lortu
     json3['stats'] = stats
     abilezia = self.db.select("SELECT abileziIzena FROM Dauka WHERE harrapatuId = ?", [json3['harrapatuId']])
     abIzena = [abi['abileziIzena'] for abi in abilezia]
@@ -496,7 +525,9 @@ class EreduKontroladorea:
     json3['mugimenduak'] = mugiIzenak
     return json3 
 
-
+  # =====================================================
+  # POKEDEX
+  # =====================================================
 
   def pokedex_kargatu(self, JSON2):
     if not self.pokemonak_konprobatu():
@@ -547,13 +578,13 @@ class EreduKontroladorea:
     return json1
 
   def pokemonak_kargatu(self):
-    sql2 = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    sql_pokeinfo = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     pokemon_izenak = self.api.pokemon_izenak_eskatu()
     for pokemon in pokemon_izenak:
         try:
           parametroak = self.api.pokemon_eskatu(pokemon['name'])
           if parametroak:
-            self.db.insert(sql2, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["pre_eboluzioa"]])
+            self.db.insert(sql_pokeinfo, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["pre_eboluzioa"]])
           else:
              print(f"Saltando {pokemon['name']}")
         except Exception as e:
@@ -579,7 +610,7 @@ class EreduKontroladorea:
 
   def motak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
-    sql2 = "INSERT OR IGNORE INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
+    sql_pokeinfo = "INSERT OR IGNORE INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
     mota_izenak = self.api.mota_izenak_eskatu()
     for mota in mota_izenak:
         try:
@@ -590,7 +621,7 @@ class EreduKontroladorea:
           for pokemon in tipo["pokemonak"]:
               try:
                 pokemon_id = int(pokemon["pokemon"]["url"].split('/')[-2])
-                self.db.insert(sql2, [mota['name'].capitalize(), pokemon_id])
+                self.db.insert(sql_pokeinfo, [mota['name'].capitalize(), pokemon_id])
               except Exception as e:
                 print(f"Error {e}")
         except Exception as e:
@@ -614,7 +645,7 @@ class EreduKontroladorea:
 
   def abileziak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
-    sql2 = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
+    sql_pokeinfo = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
     abilezi_izenak = self.api.abilezi_izenak_eskatu()
     for abileziak in abilezi_izenak:
         try:
@@ -624,7 +655,7 @@ class EreduKontroladorea:
             for pokemon in abilezia["pokemonak"]:
               try:
                 poke_id = int(pokemon["pokemon"]["url"].split('/')[-2])
-                self.db.insert(sql2, [poke_id, abilezia["izena"], pokemon["is_hidden"]])
+                self.db.insert(sql_pokeinfo, [poke_id, abilezia["izena"], pokemon["is_hidden"]])
               except Exception as e:
                 print()
           else:
@@ -634,14 +665,14 @@ class EreduKontroladorea:
 
   def mugimenduak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
-    sql2 = "INSERT OR IGNORE INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
+    sql_pokeinfo = "INSERT OR IGNORE INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
     mugimendu_izenak = self.api.mugimendu_izenak_eskatu()
     for izena in mugimendu_izenak:
         mugimendua = self.api.mugimendua_eskatu(izena['name'])
         self.db.insert(sql1, [mugimendua["izena"], mugimendua["potentzia"], mugimendua["zehaztazuna"], mugimendua["PP"], mugimendua["efektua"], mugimendua["pokemonMotaIzena"]])
         for pokemon in mugimendua["pokemonak"]:
           pokemon_id = int(pokemon["url"].split('/')[-2])
-          self.db.insert(sql2, [pokemon_id, mugimendua["izena"]])
+          self.db.insert(sql_pokeinfo, [pokemon_id, mugimendua["izena"]])
 
   def eboluzioak_kargatu(self):
     sql = """

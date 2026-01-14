@@ -10,6 +10,7 @@
 <body>
 
     <div class="form-container">
+        <!-- Atzera eta etxeko ikonoak -->
         <div class="nav-bar">
             <i class="fas fa-reply nav-icon" onclick="window.history.back()" title="Atzera"></i>
 
@@ -18,22 +19,25 @@
             </a>
         </div>
     
-        <!-- Taldea Name Section -->
+        <!-- Taldearen izena -->
         <div class="taldea-name-container">
             <h1 class="taldea-name">{{ session.get('editatzen_ari_den_taldea') }}</h1>
         </div>
     
         <div class="main-content">
+            <!-- Taldea gorde edo ezabatzeko botoiak -->
             <div class="sidebar-actions">
                 <a href="{{ url_for('taldeak.taldeak_kargatu') }}">
                     <button class="action-btn large-text">GORDE</button>
                 </a>
+                <!-- Ezabatu nahi bada, abisu bat agertuko da -->
                 <a href="{{ url_for('taldeak.taldea_ezabatu') }}" onclick="return confirm('Ziur zaude talde hau ezabatu nahi duzula?');">
                     <button class="action-btn large-text">EZABATU</button>
                 </a>
             </div>
     
             <div class="pokemon-grid">
+                <!-- Pokemon-en argazkia erakutsi, taldean dauden pokemon bakoitzarentzat -->
                 {% for pokemon in pokemons %}
                     <a href="{{ url_for('pokedex.pokemon', id=pokemon['pokeID'], akzioa='aldatu_pokemon') }}" class="pokemon-card">
                         <img src="{{ pokemon['argazkia'] }}" 
@@ -42,6 +46,7 @@
                     </a>
                 {% endfor %}
                 
+                <!-- 6 Pokemon baino gutxiago badaude, Pokemon bat gehitzeko aukera mantendu -->
                 {% if pokemons|length < 6 %}
                 <div class="pokemon-card add-card">
                     <form action="{{ url_for('pokedex.pokedex') }}" method="post">
