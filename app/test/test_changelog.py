@@ -202,5 +202,5 @@ def test_home_botoia_ondo_doa(ingurumenaSortu):
     assert respuesta.status_code == 200
     html = respuesta.data.decode("utf-8").lower()
 
-    assert "menu" in html 
+    assert "menu" in html
 
