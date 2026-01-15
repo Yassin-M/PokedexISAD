@@ -219,9 +219,13 @@ class APIKontroladorea:
                     return sarrera.get('effect', '').replace('\n', ' ').replace('\f', ' ')
 
         return 'Descripción no disponible en español'
-   
-   #itemdex
 
+   # =====================================================
+   # ITEMDEX
+   # =====================================================
+
+   # PokeAPI-tik item guztien izenak lortu
+   # Zerrenda sinple bat bueltatu
    def item_izenak_eskatu(self):
        try:
            response = requests.get(f"{self.base_url}item?limit=4000", timeout=10)
@@ -229,9 +233,11 @@ class APIKontroladorea:
                return response.json()['results']
            return []
        except Exception as e:
-           print(f"Error obteniendo nombres de items: {e}")
+           print(f"Errorea lortzen itemaren izena: {e}")
            return []
 
+   # Item baten datu osoak PokeAPI-tik lortu
+   # Izena, deskripzioa eta mota bueltatu
    def itema_eskatu(self, izena):
        try:
            response = requests.get(f"{self.base_url}item/{izena}", timeout=10)
@@ -240,17 +246,17 @@ class APIKontroladorea:
 
            item = response.json()
 
-           # Nombre en español
+           # Izenak gaztelaniaz
            izena_es = self.__lortu_izena(item)
 
-           # Descripción en español
+           # Deskripzioa gaztelaniaz
            deskr = self.__lortu_deskripzioa(item)
 
-           # Categoría
+           # Mota
            mota_api = item.get('category', {}).get('name', 'other')
            mota = mota_api.replace("-", " ").title()
 
-           # Traducción con diccionario propio
+           # Itzulpena hiztegi propioarekin
            mota_limpia = mota_api.lower().strip()
            if mota_limpia in self.traducciones_tipos:
                mota = self.traducciones_tipos[mota_limpia]
@@ -264,7 +270,7 @@ class APIKontroladorea:
            }
 
        except Exception as e:
-           print(f"Error cargando item {izena}: {e}")
+           print(f"Errorea itema kargatzen {izena}: {e}")
            return None
 
    def eboluzioak_eskatu(self):

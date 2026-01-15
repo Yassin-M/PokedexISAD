@@ -715,6 +715,9 @@ class EreduKontroladorea:
   # =====================================================
   # ITEMDEX
   # =====================================================
+
+  # Itemak DB-tik iragazkiekin lortu
+  # Izena, mota eta ordena kontuan hartu
   def itemdex_kargatu(self, JSON2):
     if not self.itemak_konprobatu():
         self.itemak_kargatu()
@@ -726,33 +729,31 @@ class EreduKontroladorea:
     """
     params = []
 
-    # Filtro por nombre
+    # Iragazketa izenaz
     if JSON2.get("izena"):
         sql += " AND I.izena LIKE ?"
         params.append(f"%{JSON2['izena']}%")
 
-    # Filtro por tipos - Usando MotaIzena directa de Item
+    # Iragazketa motaz
     if JSON2.get("motak") and len(JSON2["motak"]) > 0:
         signos = ",".join(["?"] * len(JSON2["motak"]))
         sql += f" AND I.MotaIzena IN ({signos})"
         params.extend(JSON2["motak"])
 
-    # Orden alfabético
+    # Alfabetikoki ordenatu
     orden = "DESC" if JSON2.get("alfabetikokiAlderantziz", False) else "ASC"
     sql += f" ORDER BY I.izena {orden}"
 
     return self.db.select(sql, params)
 
-  # =====================================================
-  # TIPOS DE ITEM (PARA FILTROS)
-  # =====================================================
+  # Item mota guztiak lortu
+  # Alfabetikoki ordenatuta bueltatu
   def lortu_motak(self):
     sql = "SELECT ItemMotaIzena FROM MotaItem ORDER BY ItemMotaIzena ASC"
     return self.db.select(sql)
 
-  # =====================================================
-  # ITEM DETALLE - CORREGIDO para incluir MotaIzena
-  # =====================================================
+  # Item baten informazio osoa lortu
+  # ID bidez bilatu eta bueltatu
   def bistaratu_item(self, id):
     sql = """
           SELECT itemID, izena, deskripzioa, argazkia, MotaIzena
@@ -763,24 +764,22 @@ class EreduKontroladorea:
     resultado = self.db.select(sql, [id])
     return resultado[0] if resultado else None
 
-  # =====================================================
-  # COMPROBAR ITEMS
-  # =====================================================
+  # DB-an itemak badauden egiaztatu
+  # Gutxienez bat badago, True bueltatu
   def itemak_konprobatu(self):
     resultado = self.db.select("SELECT * FROM Item LIMIT 1")
     return len(resultado) > 0
 
-  # =====================================================
-  # CARGAR ITEMS DESDE POKEAPI
-  # =====================================================
+  # PokeAPI-tik item guztiak kargatu
+  # Motak eta itemak DB-an gorde
+  # Errepikapenak saihestu
   def itemak_kargatu(self):
-    print("Cargando Items...")
     sql_mota = "INSERT OR IGNORE INTO MotaItem (ItemMotaIzena) VALUES (?)"
     sql_item = "INSERT OR IGNORE INTO Item (itemID, izena, deskripzioa, argazkia, MotaIzena) VALUES (?, ?, ?, ?, ?)"
 
     for item in self.api.item_izenak_eskatu():
         try:
-              # Usamos el API Controller para procesar datos
+              # API datuak prozesatzeko
               datuak = self.api.itema_eskatu(item['name'])
 
               self.db.insert(sql_mota, [datuak["mota"]])
@@ -793,12 +792,6 @@ class EreduKontroladorea:
               ])
         except Exception as e:
               print(f"Error item {item['name']}: {e}")
-
-    print("=== CARGA DE ITEMS COMPLETADA ===")
-    print("Tipos únicos cargados:")
-    tipos = self.db.select("SELECT DISTINCT ItemMotaIzena FROM MotaItem ORDER BY ItemMotaIzena")
-    for tipo in tipos:
-        print(f"  - {tipo[0]}")
 
   # =====================================================
   # CHATBOT

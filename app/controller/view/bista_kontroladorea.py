@@ -462,35 +462,56 @@ def pokedex_blueprint(db):
         session['pokemon_datuak'] = id
         return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
     return pokedex_bp
+# =====================================================
+# ITEMDEX
+# =====================================================
 
+# Itemdex-erako blueprint-a sortu
 def itemdex_blueprint(db):
     bp = Blueprint("itemdex", __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
 
+    # Menu egokia automatikoki injektatu rolaren arabera
     @bp.context_processor
     def inject_menu_endpoint():
         user_role = session.get('role', 'usuario')
         menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
         return dict(menu_endpoint=menu_endpoint)
 
+    # Itemdex orria kargatu eta iragazkiak aplikatu
     @bp.route("/itemdex", methods=["GET", "POST"])
     def itemdex():
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
+
+        # Iragazki lehenetsiak
         iragazkiak = {"izena": "", "motak": [], "alfabetikokiAlderantziz": False}
+
+        # Form-eko iragazkiak jaso
         if request.method == "POST":
             iragazkiak["izena"] = request.form.get("izena", "")
             iragazkiak["motak"] = request.form.getlist("motak")
             iragazkiak["alfabetikokiAlderantziz"] = (request.form.get("orden") == "desc")
+
+        # Itemak eta motak kargatu
         items = list(service.itemdex_kargatu(iragazkiak))
         motak = service.lortu_motak()
+
+        # Itemdex orria erakutsi
         return render_template("itemdex.html", items=items, motak=motak, service=service)
 
+    # Item baten xehetasunak erakutsi
     @bp.route("/itemdex/item/<int:id>")
     def item(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
+
+        # Itemaren informazioa lortu
         item = service.bistaratu_item(id)
+
+        # Item orria erakutsi
         return render_template("item.html", item=item)
     return bp
 
