@@ -66,7 +66,7 @@ class APIKontroladorea:
             "catching-bonus": "Bonus captura",
         }
 
-   def pokemon_izenak_eskatu(self):
+   def pokemon_izenak_eskatu(self): # Pokemon-en izenak eta id-a bueltatzen ditu
       try:
          response = requests.get(f"{self.base_url}pokemon?limit=1500", timeout=10)
          if response.status_code == 200:
@@ -76,27 +76,29 @@ class APIKontroladorea:
          print(f"Error en la lista de nombres: {e}")
          return []
    
-   def pokemon_eskatu(self, izena):
+   def pokemon_eskatu(self, izena): # Pokemon izen bat emanda bere JSON-a bueltatzen du.
     try:
         res_data = requests.get(f"{self.base_url}pokemon/{izena}", timeout=10)
-        res_species = requests.get(f"{self.base_url}pokemon-species/{izena}", timeout=10)
+        res_species = requests.get(f"{self.base_url}pokemon-species/{izena}", timeout=10) 
         
-        if res_data.status_code == 200 and res_species.status_code == 200:
+        if res_data.status_code == 200 and res_species.status_code == 200: # PokeAPI-aren JSON-ak
             uneko_pokemon = res_data.json()
             espeziea = res_species.json()
             
+            #Pokemon-aren eboluzioak
             pre_eboluzioa = 0
             if espeziea.get("evolves_from_species") and espeziea.get("id", 0) < 10000:
                 url = espeziea["evolves_from_species"]["url"]
                 pre_eboluzioa = int(url.split('/')[-2])
                 
+            
             rate = espeziea.get('gender_rate', -1)
-            generoa = 'Neutroa' if rate == -1 else 'Ar' if rate == 0 else 'Eme' if rate == 8 else 'Ar/Eme'
+            generoa = 'Neutroa' if rate == -1 else 'Ar' if rate == 0 else 'Eme' if rate == 8 else 'Ar/Eme' # Jakiteko zenbat genero dituen pokemon-ak
             
             irudia = uneko_pokemon['sprites']['other']['official-artwork']['front_default'] or uneko_pokemon['sprites']['front_default']
             
-            gen_name = espeziea['generation']['name'].split('-')[1]
-            generazioa = self.erromatarrak.get(gen_name, 0)
+            gen_name = espeziea['generation']['name'].split('-')[1] # Pokemon-aren generazioa jakiteko
+            generazioa = self.erromatarrak.get(gen_name, 0) # Pokemon-aren generazioa jakiteko, PokeAPI-ak erromatar zenbaki bat bueltatzen du
             
             return {
                 "pokeId": uneko_pokemon['id'],
@@ -114,7 +116,7 @@ class APIKontroladorea:
         print(f"Error cargando pokemon {izena}: {e}")
         return None
    
-   def mota_izenak_eskatu(self):
+   def mota_izenak_eskatu(self): # Pokemon-en izenak eta id-a bueltatzen ditu
         try:
             response = requests.get(f"{self.base_url}type", timeout=10)
             if response.status_code == 200:
@@ -128,12 +130,12 @@ class APIKontroladorea:
         try:
             response = requests.get(f"{self.base_url}type/{izena}", timeout=10)  
             if response.status_code == 200:
-                mota = response.json()
+                mota = response.json() # PokeAPI-aren JSON-ak
                 return {
                     "izena": izena,
                     "pokemonak": mota.get('pokemon', []),
                     "erlazioak": mota.get('damage_relations', {})
-                }
+                } # Bueltatuko den JSON-a
             return None
         except Exception as e:
             print(f"Error cargando tipo {izena}: {e}")
@@ -143,7 +145,7 @@ class APIKontroladorea:
         try:
             response = requests.get(f"{self.base_url}move?limit=1000", timeout=10)
             if response.status_code == 200:
-                return response.json()['results']
+                return response.json()['results'] 
             return []
         except Exception as e:
             print(f"Error obteniendo nombres de movimientos: {e}")
@@ -153,7 +155,7 @@ class APIKontroladorea:
         try:
             response = requests.get(f"{self.base_url}move/{izena}", timeout=10)
             if response.status_code == 200:
-                mugimendua = response.json()
+                mugimendua = response.json() # PokeAPI-aren JSON-ak
                 return {
                     "izena": self.__lortu_izena(mugimendua).capitalize(),
                     "potentzia": mugimendua.get('power', 0),
@@ -162,7 +164,7 @@ class APIKontroladorea:
                     "efektua": self.__lortu_deskripzioa(mugimendua),
                     "pokemonMotaIzena": mugimendua['type']['name'].capitalize(),
                     "pokemonak": mugimendua.get('learned_by_pokemon', [])
-                }
+                } # Bueltatuko den JSON-a
             return None
         except Exception as e:
             print(f"Error cargando movimiento {izena}: {e}")
@@ -182,12 +184,12 @@ class APIKontroladorea:
         try:
             response = requests.get(f"{self.base_url}ability/{izena}", timeout=10)
             if response.status_code == 200:
-                abilezia = response.json()
+                abilezia = response.json() # PokeAPI-aren JSON-ak
                 return {
                     "izena": self.__lortu_izena(abilezia),
                     "deskripzioa": self.__lortu_deskripzioa(abilezia),
                     "pokemonak": abilezia.get('pokemon', [])
-                }
+                } # Bueltatuko den JSON-a
             return None
         except Exception as e:
             print(f"Error cargando habilidad {izena}: {e}")
