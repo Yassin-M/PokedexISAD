@@ -3,6 +3,7 @@ import pytest
 
 @pytest.fixture()
 def app():
+    # Flask aplikazioa test moduan sortu
     from app import create_app
     app = create_app()
     app.config["TESTING"] = True
@@ -10,13 +11,15 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    # Testetarako bezeroa sortu
     return app.test_client()
 
 
 @pytest.fixture()
 def logged_in_client(client):
-    """Saioa hasita dagoen bezeroa"""
-    # Erabiltzailea erregistratu
+    # Saioa hasita duen bezeroa prestatu
+
+    # Erabiltzailearen datuak
     username = "test_user"
     test_data = {
         'erabiltzailea': username,
@@ -26,6 +29,7 @@ def logged_in_client(client):
         'pasahitza_berretsi': 'TestPass123!'
     }
 
+    # Erabiltzailea erregistratu
     client.post('/register', data=test_data, follow_redirects=True)
 
     # Saioa hasi
@@ -39,7 +43,7 @@ def logged_in_client(client):
 @pytest.fixture()
 def onenak_test_data(app):
     """
-    Probako erabiltzailea, taldea eta Pokémon datuak sortzen ditu
+    Probako erabiltzailea, taldea eta Pokemon datuak sortzen ditu
     /chatbot/onenak probetarako.
     Proba amaitu ondoren, datuak automatikoki garbitzen dira.
     """
@@ -49,7 +53,7 @@ def onenak_test_data(app):
     erabiltzaileIzena = "test_user"
     taldeIzena = "MY_TEST_TEAM"
 
-    # --- 1. Erabiltzailea sortu edo existitzen bada ezabatzea ---
+    # --- 1. Erabiltzailea sortu  ---
     conn.insert(
         "INSERT OR IGNORE INTO Erabiltzailea (izena) VALUES (?)",
         (erabiltzaileIzena,)
@@ -61,7 +65,7 @@ def onenak_test_data(app):
         (taldeIzena, erabiltzaileIzena)
     )
 
-    # --- 3. 4 Pokémon Pokedex aukeratu ---
+    # --- 3. 4 Pokemon Pokedex aukeratu ---
     pokemons = conn.select(
         "SELECT pokeId, izena FROM PokemonPokedex ORDER BY pokeId LIMIT 5",
         ()
