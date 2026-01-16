@@ -317,12 +317,28 @@ class APIKontroladorea:
        return eboluzioKateak
 
    def hartu_stats(self, id):
-        uneko_pokemon = pb.pokemon(int(id))
-        stats = {}
-        for stat in uneko_pokemon.stats:
-            stats[stat.stat.name] = stat.base_stat
-        return stats
+        # APIra deia egin
+        response = requests.get(f"{self.base_url}{id}", timeout=5)
+        
+        # Erantzuna ondo badago (200 OK)
+        if response.status_code == 200:
+            data = response.json()
+            stats = {}
+            # APIko datuetan 'stats' zerrenda zeharkatu
+            for stat in data['stats']:
+                stat_name = stat['stat']['name']
+                base_val = stat['base_stat']
+                stats[stat_name] = base_val
+            return stats
+        else:
+            return None
   
    def pokemon_izena_lortu(self, id):
-        uneko_pokemon = pb.pokemon(int(id))
-        return uneko_pokemon.name.capitalize()
+        response = requests.get(f"{self.base_url}{id}", timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            # Izena lortu eta lehen letra maiuskulaz jarri
+            return data['name'].capitalize()
+        else:
+            return "Ezezaguna"
