@@ -5,6 +5,7 @@ import json
 import sqlite3
 import os
 import random
+import unicodedata
 from .api_kontroladorea import APIKontroladorea
 from app.database import db
 
@@ -738,35 +739,41 @@ class EreduKontroladorea:
   # ITEMDEX
   # =====================================================
 
+  # Testua normalizatu azentuak eta maiuskulak kontuan hartu gabe bilatzeko
+  @staticmethod
+  def kendu_azentuak(testua):
+      if not testua:
+          return ""
+      testua = testua.lower()
+      return ''.join(
+          c for c in unicodedata.normalize('NFD', testua)
+          if unicodedata.category(c) != 'Mn'
+      )
+
   # Itemak DB-tik iragazkiekin lortu
   # Izena, mota eta ordena kontuan hartu
   def itemdex_kargatu(self, JSON2):
-    if not self.itemak_konprobatu():
-        self.itemak_kargatu()
+      if not self.itemak_konprobatu():
+          self.itemak_kargatu()
 
-    sql = """
-          SELECT I.itemID as ID, I.izena, I.argazkia
-          FROM Item I
-          WHERE 1=1
-    """
-    params = []
+      # Lortu guztiak
+      items = self.db.select("SELECT itemID as ID, izena, argazkia, MotaIzena FROM Item")
 
-    # Iragazketa izenaz
-    if JSON2.get("izena"):
-        sql += " AND I.izena LIKE ?"
-        params.append(f"%{JSON2['izena']}%")
+      # Filtraketa motaz
+      if JSON2.get("motak"):
+          tipos = set(JSON2["motak"])
+          items = [i for i in items if i['MotaIzena'] in tipos]
 
-    # Iragazketa motaz
-    if JSON2.get("motak") and len(JSON2["motak"]) > 0:
-        signos = ",".join(["?"] * len(JSON2["motak"]))
-        sql += f" AND I.MotaIzena IN ({signos})"
-        params.extend(JSON2["motak"])
+      # Filtraketa izenaz
+      if JSON2.get("izena"):
+          buscar = self.kendu_azentuak(JSON2['izena'])
+          items = [i for i in items if buscar in self.kendu_azentuak(i['izena'])]
 
-    # Alfabetikoki ordenatu
-    orden = "DESC" if JSON2.get("alfabetikokiAlderantziz", False) else "ASC"
-    sql += f" ORDER BY I.izena {orden}"
+      # Ordenatu alfabetikoki
+      items.sort(key=lambda x: x['izena'].lower(),
+                 reverse=JSON2.get("alfabetikokiAlderantziz", False))
 
-    return self.db.select(sql, params)
+      return [{'ID': i['ID'], 'izena': i['izena'], 'argazkia': i['argazkia']} for i in items]
 
   # Item mota guztiak lortu
   # Alfabetikoki ordenatuta bueltatu
