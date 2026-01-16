@@ -359,7 +359,7 @@ class EreduKontroladorea:
     
   def get_taldea(self, taldeIzena, erabiltzailea):
     # Taldearen pokémon guztiak lortu
-    sql_poketalde = "SELECT PT.harrapatuId, PP.irudia FROM Taldea T JOIN PokemonTaldean PT  ON T.taldeIzena = PT.taldeIzena JOIN PokemonTalde PKT ON PT.harrapatuId = PKT.harrapatuId JOIN PokemonPokedex PP ON PKT.PokemonPokedexID = PP.pokeId WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
+    sql_poketalde = "SELECT PT.harrapatuId, PP.irudia FROM Taldea T JOIN PokemonTaldean PT ON T.taldeIzena = PT.taldeIzena AND T.erabiltzaileIzena = PT.erabiltzaileIzena JOIN PokemonTalde PKT ON PT.harrapatuId = PKT.harrapatuId JOIN PokemonPokedex PP ON PKT.PokemonPokedexID = PP.pokeId WHERE T.erabiltzaileIzena = ? AND T.taldeIzena = ?"
     taldea = self.db.select(sql_poketalde, (erabiltzailea, taldeIzena))
 
     # Pokémonen ID-ak eta irudiak gorde eta bueltatu JSON formatuan
@@ -456,7 +456,13 @@ class EreduKontroladorea:
     # Pokemon-aren izena bueltatu, notifikazioan sartzeko
     sql_izena = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
     izena = self.db.select(sql_izena, (harrapatu_id,))
-    return izena[0]['izena']
+
+    pokeIzena = ""
+
+    if izena and len(izena) > 0:
+       pokeIzena = izena[0]['izena']
+
+    return pokeIzena
 
   def ezabatu_taldetik(self, taldeIzena, erabiltzailea, pokemonId):
       # Ezabatuko den Pokemon-aren izena lortu, notifikazioan sartzeko

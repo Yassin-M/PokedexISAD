@@ -339,7 +339,7 @@ class APIKontroladorea:
             return None
   
    def pokemon_izena_lortu(self, id):
-        response = requests.get(f"{self.base_url}{id}", timeout=5)
+        response = requests.get(f"{self.base_url}/pokemon/{id}", timeout=5)
         
         if response.status_code == 200:
             data = response.json()
