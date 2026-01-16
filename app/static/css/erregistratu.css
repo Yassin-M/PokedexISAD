@@ -195,7 +195,9 @@ body {
 }
 
 .form-container .login-container input[type="text"],
-.form-container .login-container input[type="password"] {
+.form-container .login-container input[type="password"],
+.form-container .login-container input[type="email"],
+.form-container .login-container input[type="date"] {
     display: block;
     width: 100%;
     box-sizing: border-box;
