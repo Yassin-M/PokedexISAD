@@ -95,9 +95,7 @@ def test_jaiotze_data_baliogabea(register_client):
 
     assert response.status_code == 200
     assert response.request.path == "/register"
-
-
-# 3.1.10: Eremu bat hutsik
+    assert "Jaiotze-data baliogabea da" in html
 def test_eremu_bat_hutsik(register_client):
     response = register_client.post(
         "/register",

@@ -50,6 +50,18 @@ class BistaKontroladorea:
             if not all([erabiltzailea, email, jaiotze_data, pasahitza, pasahitza2]):
                 error = 'Mesedez, bete eremu guztiak'
             
+            # Validar estructura de email
+            if not error and '@' not in email:
+                error = 'Posta elektronikoa baliogabea da'
+            
+            # Validar estructura de fecha (YYYY-MM-DD)
+            if not error:
+                try:
+                    from datetime import datetime
+                    datetime.strptime(jaiotze_data, '%Y-%m-%d')
+                except ValueError:
+                    error = 'Jaiotze-data baliogabea da'
+            
             if error:
                 flash(error, 'error')
                 return redirect(url_for('register'))
