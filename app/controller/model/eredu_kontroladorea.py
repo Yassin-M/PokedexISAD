@@ -462,7 +462,11 @@ class EreduKontroladorea:
       # Ezabatuko den Pokemon-aren izena lortu, notifikazioan sartzeko
       sql_ezabatuIzena = "SELECT izena FROM PokemonTalde WHERE harrapatuId = ?"
       izena = self.db.select(sql_ezabatuIzena, (pokemonId,))
-      pokeIzena = izena[0]['izena']
+      
+      pokeIzena = ""
+
+      if izena and len(izena) > 0:
+        pokeIzena = izena[0]['izena']
       
       # Pokemon-aren datuak ezabatu hainbat taulatik
       # Mugimenduak ezabatu
