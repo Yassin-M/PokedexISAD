@@ -50,17 +50,26 @@ class EreduKontroladorea:
          }, ensure_ascii=False)
    
   def balioztatu_pasahitza(self, pasahitza, pasahitza_berretsi):
-    """Pasahitzak balioztatu: bat etortzea eta karaktere debekatuak"""
+    """Pasahitzak balioztatu eta JSON itzuli"""
     karaktere_debekatuak = "|'¬£$^;#~=@"
     
     if pasahitza != pasahitza_berretsi:
-      return False, "Pasahitzak ez datoz bat"
+      return json.dumps({
+        'ondo': False,
+        'mezua': "Pasahitzak ez datoz bat"
+      }, ensure_ascii=False)
     
     for karakterea in pasahitza:
       if karakterea in karaktere_debekatuak:
-        return False, f"Pasahitzak ezin du karaktere hau izan: {karakterea}"
+        return json.dumps({
+          'ondo': False,
+          'mezua': f"Pasahitzak ezin du karaktere hau izan: {karakterea}"
+        }, ensure_ascii=False)
     
-    return True, "Pasahitza zuzena"
+    return json.dumps({
+      'ondo': True,
+      'mezua': "Pasahitza zuzena"
+    }, ensure_ascii=False)
 
   def erregistratu(self, izena, email, jaiotze_data, pasahitza, pasahitza_berretsi):
     """Erabiltzaile berria datu-basean erregistratu"""
@@ -69,9 +78,10 @@ class EreduKontroladorea:
     if dagoen_erabiltzaile:
       return False, "Erabiltzailea jada existitzen da"
     
-    baliozko, mezua = self.balioztatu_pasahitza(pasahitza, pasahitza_berretsi)
-    if not baliozko:
-      return False, mezua
+    baliozkotze_json = self.balioztatu_pasahitza(pasahitza, pasahitza_berretsi)
+    baliozkotze = json.loads(baliozkotze_json or '{}')
+    if not baliozkotze.get('ondo'):
+      return False, baliozkotze.get('mezua', "Pasahitza ez da baliozkoa")
     
     query = "INSERT INTO Erabiltzailea (izena, pasahitza, email, jaiotze_data, rola) VALUES (?, ?, ?, ?, ?)"
     try:

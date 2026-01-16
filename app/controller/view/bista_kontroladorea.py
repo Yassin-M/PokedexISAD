@@ -121,9 +121,10 @@ class BistaKontroladorea:
                     else:
                         return redirect(url_for('editatu'))
                 
-                baliozko, mezua = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
-                if not baliozko:
-                    flash(mezua, 'error')
+                baliozkotze_json = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
+                baliozkotze = json.loads(baliozkotze_json or '{}')
+                if not baliozkotze.get('ondo'):
+                    flash(baliozkotze.get('mezua', 'Pasahitza ez da baliozkoa'), 'error')
                     if user_id:
                         return redirect(url_for('editatu_user', user_id=user_id))
                     else:
@@ -530,7 +531,6 @@ def pokedex_blueprint(db):
 # ITEMDEX
 # =====================================================
 
-# Itemdex-erako blueprint-a sortu
 def itemdex_blueprint(db):
     bp = Blueprint("itemdex", __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
@@ -554,7 +554,10 @@ def itemdex_blueprint(db):
 
         # Form-eko iragazkiak jaso
         if request.method == "POST":
-            iragazkiak["izena"] = request.form.get("izena", "")
+            # Trim egiten dugu
+            izena_raw = request.form.get("izena", "")
+            iragazkiak["izena"] = izena_raw.strip()
+
             iragazkiak["motak"] = request.form.getlist("motak")
             iragazkiak["alfabetikokiAlderantziz"] = (request.form.get("orden") == "desc")
 

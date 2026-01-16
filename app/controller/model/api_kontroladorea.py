@@ -1,4 +1,5 @@
 import pokebase as pb
+import time
 import requests
 
 class APIKontroladorea:
@@ -79,7 +80,7 @@ class APIKontroladorea:
    def pokemon_eskatu(self, izena): # Pokemon izen bat emanda bere JSON-a bueltatzen du.
     try:
         res_data = requests.get(f"{self.base_url}pokemon/{izena}", timeout=10)
-        
+        time.sleep(0.1)
         if res_data.status_code == 200: # PokeAPI-aren JSON-ak
             uneko_pokemon = res_data.json()
             res_species = requests.get(f"{self.base_url}pokemon-species/{uneko_pokemon['species']['name']}", timeout=10) 
@@ -130,6 +131,7 @@ class APIKontroladorea:
    def mota_eskatu(self, izena):
         try:
             response = requests.get(f"{self.base_url}type/{izena}", timeout=10)  
+            time.sleep(0.1)
             if response.status_code == 200:
                 mota = response.json() # PokeAPI-aren JSON-ak
                 return {
@@ -155,6 +157,7 @@ class APIKontroladorea:
    def mugimendua_eskatu(self, izena):
         try:
             response = requests.get(f"{self.base_url}move/{izena}", timeout=10)
+            time.sleep(0.1)
             if response.status_code == 200:
                 mugimendua = response.json() # PokeAPI-aren JSON-ak
                 return {
@@ -184,6 +187,7 @@ class APIKontroladorea:
    def abilezia_eskatu(self, izena):
         try:
             response = requests.get(f"{self.base_url}ability/{izena}", timeout=10)
+            time.sleep(0.1)
             if response.status_code == 200:
                 abilezia = response.json() # PokeAPI-aren JSON-ak
                 return {
