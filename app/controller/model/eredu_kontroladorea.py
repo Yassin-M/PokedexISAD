@@ -541,32 +541,32 @@ class EreduKontroladorea:
     #if not self.eboluzioak_konprobatu():
         #self.eboluzioak_kargatu()
 
-    sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P"
+    sql3 = "SELECT P.izena, P.irudia, P.pokeId FROM PokemonPokedex P" # Hasierako kontsulta
     parametroak = []
 
-    if JSON2['motak']:
+    if JSON2['motak']: # Erabiltzaileak, mota(k) aukeratzen baditu
         sql3 += " JOIN DaMotaPokemon DM ON P.pokeId = DM.pokemonID JOIN MotaPokemon M ON DM.motaIzena = M.pokemonMotaIzena"
 
-    if JSON2['izena']:
+    if JSON2['izena']: # Erabiltzaileak, zerbait ipintzen badu bilatzailean
         sql3 += " WHERE P.izena LIKE ?"
         parametroak.append(f"%{JSON2['izena']}%")
 
-    if JSON2['generazioak']:
+    if JSON2['generazioak']: # Erabiltzaileak, generazioa(k) aukeratzen baditu
         signos = ','.join(['?'] * len(JSON2['generazioak']))
         operator = "AND" if "WHERE" in sql3 else "WHERE"
         sql3 += f" {operator} P.generazioa IN ({signos})"
         parametroak.extend(JSON2['generazioak'])
 
-    if JSON2['motak']:
+    if JSON2['motak']: # Erabiltzaileak, mota(k) aukeratzen baditu
         signos_motak = ','.join(['?'] * len(JSON2['motak']))
         operador = "AND" if "WHERE" in sql3 else "WHERE"
         sql3 += f" {operador} M.pokemonMotaIzena IN ({signos_motak})"
         parametroak.extend(JSON2['motak'])
 
-    errenkadak = self.db.select(sql3, parametroak)
+    errenkadak = self.db.select(sql3, parametroak) # Kontsulta egin
 
     json1 = []
-
+    # Pokemon bakoitzeko, JSON bat gehitu
     for pokemon in errenkadak:
         datuak = {
           'izena': pokemon['izena'],
@@ -579,10 +579,10 @@ class EreduKontroladorea:
 
   def pokemonak_kargatu(self):
     sql_pokeinfo = 'INSERT OR IGNORE INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    pokemon_izenak = self.api.pokemon_izenak_eskatu()
+    pokemon_izenak = self.api.pokemon_izenak_eskatu() # Pokemon-en izenak eskatu
     for pokemon in pokemon_izenak:
         try:
-          parametroak = self.api.pokemon_eskatu(pokemon['name'])
+          parametroak = self.api.pokemon_eskatu(pokemon['name']) # Pokemon-aren JSON-a eskatu
           if parametroak:
             self.db.insert(sql_pokeinfo, [parametroak["pokeId"], parametroak["izena"], parametroak["altuera"], parametroak["pisua"], parametroak["generoa"], parametroak["deskripzioa"], parametroak["irudia"], parametroak["generazioa"], parametroak["pre_eboluzioa"]])
           else:
@@ -602,7 +602,7 @@ class EreduKontroladorea:
           'id': errenkada['pokeId'],
           'altuera': errenkada['altuera'],
           'pisua': errenkada['pisua']
-        }
+        } 
         abileziak = self.db.select("SELECT izena FROM IzanDezake WHERE pokemonPokedexID = ?", [errenkada['pokeId']])
         izenak = [abi['izena'] for abi in abileziak]
         json3['abileziak'] = izenak
@@ -611,14 +611,14 @@ class EreduKontroladorea:
   def motak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO MotaPokemon (pokemonMotaIzena, irudia) VALUES (?, ?)"
     sql_pokeinfo = "INSERT OR IGNORE INTO DaMotaPokemon (motaIzena, pokemonID) VALUES (?, ?)"
-    mota_izenak = self.api.mota_izenak_eskatu()
+    mota_izenak = self.api.mota_izenak_eskatu() # Mota izenak eskatu
     for mota in mota_izenak:
         try:
-          if mota['name'] in ['unknown', 'shadow']:
+          if mota['name'] in ['unknown', 'shadow']: # Balio ez duten motak
                 continue
-          self.db.insert(sql1, [mota['name'].capitalize(), f"/static/icons/{mota['name']}.svg" ])
+          self.db.insert(sql1, [mota['name'].capitalize(), f"/static/icons/{mota['name']}.svg" ]) # Mota-ren izena eta irudia txertatu datu basean
           tipo = self.api.mota_eskatu(mota['name'])
-          for pokemon in tipo["pokemonak"]:
+          for pokemon in tipo["pokemonak"]: # Mota hau duten pokemonak
               try:
                 pokemon_id = int(pokemon["pokemon"]["url"].split('/')[-2])
                 self.db.insert(sql_pokeinfo, [mota['name'].capitalize(), pokemon_id])
@@ -627,9 +627,11 @@ class EreduKontroladorea:
         except Exception as e:
           print(f"Error {e}")
 
+    # Mota bakoitzaren multiplikatzaileak
     sql3 = "INSERT OR IGNORE INTO Multiplikatzailea(pokemonMotaJaso, pokemonMotaEraso, multiplikatzailea) VALUES (?, ?, ?)"
     for mota in mota_izenak:
         tipo = self.api.mota_eskatu(mota['name'])
+        # Mota bakoitzak ze nolako efektua duen beste motengan
         dobles = tipo["erlazioak"]["double_damage_to"]
         mitades = tipo["erlazioak"]["half_damage_to"]
         zeros = tipo["erlazioak"]["no_damage_to"]
@@ -646,13 +648,13 @@ class EreduKontroladorea:
   def abileziak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Abilezia (izena, deskripzioa) VALUES (?, ?)"
     sql_pokeinfo = "INSERT OR IGNORE INTO IzanDezake (pokemonPokedexID, izena, ezkutua) VALUES (?, ?, ?)"
-    abilezi_izenak = self.api.abilezi_izenak_eskatu()
+    abilezi_izenak = self.api.abilezi_izenak_eskatu() # Abilezia izenak eskatu
     for abileziak in abilezi_izenak:
         try:
-          abilezia = self.api.abilezia_eskatu(abileziak['name'])
+          abilezia = self.api.abilezia_eskatu(abileziak['name']) # Abileziaren JSON-a eskatu
           if abilezia is not None:
             self.db.insert(sql1, [abilezia["izena"], abilezia["deskripzioa"]])
-            for pokemon in abilezia["pokemonak"]:
+            for pokemon in abilezia["pokemonak"]: # Abilezi hau izan dezaketen pokemonak
               try:
                 poke_id = int(pokemon["pokemon"]["url"].split('/')[-2])
                 self.db.insert(sql_pokeinfo, [poke_id, abilezia["izena"], pokemon["is_hidden"]])
@@ -666,11 +668,11 @@ class EreduKontroladorea:
   def mugimenduak_kargatu(self):
     sql1 = "INSERT OR IGNORE INTO Mugimendua (izena, potentzia, zehaztazuna, PP, efektua, pokemonMotaIzena) VALUES (?, ?, ?, ?, ?, ?)"
     sql_pokeinfo = "INSERT OR IGNORE INTO IkasDezake (pokedexId, mugiIzena) VALUES (?, ?)"
-    mugimendu_izenak = self.api.mugimendu_izenak_eskatu()
+    mugimendu_izenak = self.api.mugimendu_izenak_eskatu() # Mugimendu izenak eskatu
     for izena in mugimendu_izenak:
-        mugimendua = self.api.mugimendua_eskatu(izena['name'])
+        mugimendua = self.api.mugimendua_eskatu(izena['name']) # Mugimendu JSON-a eskatu
         self.db.insert(sql1, [mugimendua["izena"], mugimendua["potentzia"], mugimendua["zehaztazuna"], mugimendua["PP"], mugimendua["efektua"], mugimendua["pokemonMotaIzena"]])
-        for pokemon in mugimendua["pokemonak"]:
+        for pokemon in mugimendua["pokemonak"]: # Mugimendu hau ikasi dezaketenb JSON-ak
           pokemon_id = int(pokemon["url"].split('/')[-2])
           self.db.insert(sql_pokeinfo, [pokemon_id, mugimendua["izena"]])
 
