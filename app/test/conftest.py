@@ -147,3 +147,37 @@ def onenak_test_data(app):
         "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?",
         (taldeIzena, erabiltzaileIzena)
     )
+
+@pytest.fixture()
+def onenak_empty_team_test_data(app):
+    """
+    Talde huts bat sortzen du /chatbot/onenak probetarako.
+    Talde honek ez du Pokemon-ik.
+    """
+    from app.database.database import Connection
+
+    conn = Connection()
+    erabiltzaileIzena = "test_user"
+    taldeIzena = "EMPTY_TEST_TEAM"
+
+    # --- 1. Erabiltzailea sortu ---
+    conn.insert(
+        "INSERT OR IGNORE INTO Erabiltzailea (izena) VALUES (?)",
+        (erabiltzaileIzena,)
+    )
+
+    # --- 2. Talde hutsa sortu (Pokemon-ik gabe) ---
+    conn.insert(
+        "INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)",
+        (taldeIzena, erabiltzaileIzena)
+    )
+
+    # ----------------- Proba exekutatu -----------------
+    yield True
+
+    # ----------------- Proba amaitu, datuak garbitu -----------------
+    # 1. Taldea ezabatu
+    conn.delete(
+        "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?",
+        (taldeIzena, erabiltzaileIzena)
+    )

@@ -260,7 +260,7 @@ def test_eboluzioa_general(logged_in_client):
         assert '<img' in html and 'src="' in html
         print(f"✓ {izena}: irudia agertzen da")
 
-def test_get_onenak_flow(logged_in_client, onenak_test_data):
+def test_get_onenak(logged_in_client, onenak_test_data):
     """
     Erabiltzailearen fluxua probatzeko:
     1. Taldeen zerrenda ireki
@@ -306,7 +306,38 @@ def test_get_onenak_flow(logged_in_client, onenak_test_data):
     assert '600' in html_detail
     print(f"✓ Max puntuazioa aurkitu da -> 600")
 
+def test_get_onenak_talde_hutsa(logged_in_client, onenak_empty_team_test_data):
+    """
+    Talde huts baten Onenak orria probatzeko.
+    Talde honek Pokemon-ik ez duela erakutsi behar du.
+    """
+    taldeIzena = "EMPTY_TEST_TEAM"
+
+    # Taldearen Onenak orrira zuzenean sartu
+    resp = logged_in_client.get(f'/chatbot/onenak/{taldeIzena}')
+    assert resp.status_code == 200
+    print(f"✓ Onenak orria kargatu da (200) -> {taldeIzena}")
+
+    html = resp.data.decode('utf-8', errors='ignore').lower()
+
+    # Mezua egiaztatu: "talde honek ez du pokemonik"
+    assert "talde honek ez du pokemonik" in html
+    print(f"✓ Mezua aurkitu da: talde honek ez du pokemonik")
 
 
+def test_get_onenak_ez_dago_talderik(logged_in_client):
+    """
+    Onenak sakatzen du, baina ez dago talderik sortua
+    """
+    # Talde zerrenda orrira zuzenean sartu
+    resp_list = logged_in_client.get('/chatbot/taldeZerrenda')
+    assert resp_list.status_code == 200
+    print(f"✓ Talde zerrenda orria kargatu da (200)")
+
+    html = resp_list.data.decode('utf-8', errors='ignore').lower()
+
+    # Mezua egiaztatu: "ez duzu talderik sortu"
+    assert "ez duzu talderik sortu" in html
+    print(f"✓ Mezua aurkitu da: ez duzu talderik sortu")
 
 
