@@ -4,7 +4,7 @@ pytest app/test/test_chatbot.py -s -v
 """
 def test_chatbotMenua(logged_in_client):
     """
-    3.5.1: Chatbot botoia sakatu eta pantaila irekitzen da
+    5.2.5.1: Chatbot botoia sakatu eta pantaila irekitzen da
     """
     # Chatbot orrira sartu
     chat_resp = logged_in_client.get('/chatbot', follow_redirects=True)
@@ -21,10 +21,10 @@ def test_chatbotMenua(logged_in_client):
 def test_botoiakSakatu(logged_in_client):
     """
     Pokedex moduak
-    3.5.2: mugimenduak
-    3.5.3: onenak
-    3.5.4: eboluzioa
-    3.5.5: indarrak
+    5.2.5.2: mugimenduak
+    5.2.5.3: onenak
+    5.2.5.4: eboluzioa
+    5.2.5.5: indarrak
     """
     moduak = [
         ('mugimenduak', '/pokedex?mode=mugimenduak'),
@@ -57,7 +57,7 @@ def test_botoiakSakatu(logged_in_client):
 
 def test_home_botoia_from_chatbot(logged_in_client):
     """
-    3.5.6: Home botoia -> menu nagusira bueltatu (chatbot orritik)
+    5.2.5.6: Home botoia -> menu nagusira bueltatu (chatbot orritik)
     """
     orria = '/chatbot'
 
@@ -92,7 +92,7 @@ def test_home_botoia_from_chatbot(logged_in_client):
 
 def test_home_botoia_from_pokedex_mugimenduak(logged_in_client):
     """
-    3.5.2.1: Home botoia -> menu nagusira bueltatu (pokedex mugimenduak orritik)
+    5.2.5.2.1: Home botoia -> menu nagusira bueltatu (pokedex mugimenduak orritik)
     """
     orria = '/pokedex?mode=mugimenduak'
 
@@ -119,7 +119,7 @@ def test_home_botoia_from_pokedex_mugimenduak(logged_in_client):
 
 def test_mugimenduak(logged_in_client):
     """
-    3.5.2.2: Pokemon ikonoa sakatu -> izena, mugimenduak, argazkia
+    5.2.5.2.2: Pokemon ikonoa sakatu -> izena, mugimenduak, argazkia
     """
     import re
 
@@ -185,7 +185,7 @@ def test_mugimenduak(logged_in_client):
 
 def test_home_botoia_from_mugimenduak(logged_in_client):
     """
-    3.5.2.2.1: Home botoia -> menu nagusira bueltatu (mugimenduak orritik)
+    5.2.5.2.2.1: Home botoia -> menu nagusira bueltatu (mugimenduak orritik)
     """
     orria = '/chatbot/mugimenduak/25'
 
@@ -212,7 +212,7 @@ def test_home_botoia_from_mugimenduak(logged_in_client):
 
 def test_get_onenak_ez_dago_talderik(logged_in_client):
     """
-    3.5.3.1: Onenak sakatzen du, baina ez dago talderik sortua
+    5.2.5.3.1: Onenak sakatzen du, baina ez dago talderik sortua
     """
     # Talde zerrenda orrira zuzenean sartu
     resp_list = logged_in_client.get('/chatbot/taldeZerrenda')
@@ -228,7 +228,7 @@ def test_get_onenak_ez_dago_talderik(logged_in_client):
 
 def test_get_onenak_taldea_dago(logged_in_client, onenak_test_data):
     """
-    3.5.3.2: Onenak sakatzen du, taldea dago.
+    5.2.5.3.2: Onenak sakatzen du, taldea dago.
     """
     taldeIzena = "MY_TEST_TEAM"
 
@@ -250,7 +250,7 @@ def test_get_onenak_taldea_dago(logged_in_client, onenak_test_data):
 
 def test_home_botoia_from_taldeZerrenda(logged_in_client):
     """
-    3.5.3.2.1: Home botoia -> menu nagusira bueltatu (taldeZerrenda orritik)
+    5.2.5.3.2.1: Home botoia -> menu nagusira bueltatu (taldeZerrenda orritik)
     """
     orria = '/chatbot/taldeZerrenda'
 
@@ -278,7 +278,7 @@ def test_home_botoia_from_taldeZerrenda(logged_in_client):
 
 def test_get_onenak_talde_hutsa(logged_in_client, onenak_empty_team_test_data):
     """
-    3.5.3.3: Talde huts baten Onenak orria probatzeko.
+    5.2.5.3.3: Talde huts baten Onenak orria probatzeko.
     """
     taldeIzena = "EMPTY_TEST_TEAM"
 
@@ -296,7 +296,7 @@ def test_get_onenak_talde_hutsa(logged_in_client, onenak_empty_team_test_data):
 
 def test_home_botoia_from_chatbot_onenak(logged_in_client, onenak_empty_team_test_data):
     """
-    3.5.3.3.1: Home botoia -> menu nagusira bueltatu (onenak orritik)
+    5.2.5.3.3.1: Home botoia -> menu nagusira bueltatu (onenak orritik)
     """
     taldeIzena = "EMPTY_TEST_TEAM"
 
@@ -325,7 +325,7 @@ def test_home_botoia_from_chatbot_onenak(logged_in_client, onenak_empty_team_tes
 
 def test_get_onenak_talde_normala(logged_in_client, onenak_test_data):
     """
-    3.5.3.4: Talde normal baten Onenak orri probatzeko.
+    5.2.5.3.4: Talde normal baten Onenak orri probatzeko.
     """
     taldeIzena = "MY_TEST_TEAM"
 
@@ -355,7 +355,7 @@ def test_get_onenak_talde_normala(logged_in_client, onenak_test_data):
 
 def test_home_botoia_from_pokedex_indarrak(logged_in_client):
     """
-    3.5.4.1: Home botoia -> menu nagusira bueltatu (pokedex indarrak orritik)
+    5.2.5.4.1: Home botoia -> menu nagusira bueltatu (pokedex indarrak orritik)
     """
     orria = '/pokedex?mode=indarrak'
 
@@ -382,7 +382,7 @@ def test_home_botoia_from_pokedex_indarrak(logged_in_client):
 
 def test_indarrak_mota_bakarrekoa(logged_in_client):
     """
-    3.5.4.2: Mota bakarreko pokemon baten indarrak eta ahuleziak
+    5.2.5.4.2: Mota bakarreko pokemon baten indarrak eta ahuleziak
     """
     pokemon_id = 25
     izena = 'pikachu'
@@ -432,7 +432,7 @@ def test_indarrak_mota_bakarrekoa(logged_in_client):
 
 def test_indarrak_bi_motakoa(logged_in_client):
     """
-    3.5.4.3: Bi motako pokemon baten indarrak eta ahuleziak
+    5.2.5.4.3: Bi motako pokemon baten indarrak eta ahuleziak
     """
     pokemon_id = 1
     izena = 'bulbasaur'
@@ -481,7 +481,7 @@ def test_indarrak_bi_motakoa(logged_in_client):
 
 def test_home_botoia_from_indarrak(logged_in_client):
     """
-    3.5.4.2.1: Home botoia -> menu nagusira bueltatu (indarrak orritik)
+    5.2.5.4.2.1: Home botoia -> menu nagusira bueltatu (indarrak orritik)
     """
     orria = '/chatbot/indarrak/25'
 
@@ -508,7 +508,7 @@ def test_home_botoia_from_indarrak(logged_in_client):
 
 def test_home_botoia_from_pokedex_eboluzioa(logged_in_client):
     """
-    3.5.5.1: Home botoia -> menu nagusira bueltatu (pokedex eboluzioa orritik)
+    5.2.5.5.1: Home botoia -> menu nagusira bueltatu (pokedex eboluzioa orritik)
     """
     orria = '/pokedex?mode=eboluzioa'
 
@@ -535,7 +535,7 @@ def test_home_botoia_from_pokedex_eboluzioa(logged_in_client):
 
 def test_eboluzioa_daukana(logged_in_client):
     """
-    3.5.5.2: Eboluzio kateak dituen Pokemon-ak (44: gloom)
+    5.2.5.5.2: Eboluzio kateak dituen Pokemon-ak (44: gloom)
     """
     pokemon_id = 44
     izena = 'gloom'
@@ -573,7 +573,7 @@ def test_eboluzioa_daukana(logged_in_client):
 
 def test_home_botoia_from_eboluzioa(logged_in_client):
     """
-    3.5.5.2.1: Home botoia -> menu nagusira bueltatu (eboluzioa orritik)
+    5.2.5.5.2.1: Home botoia -> menu nagusira bueltatu (eboluzioa orritik)
     """
     orria = '/chatbot/eboluzioa/25'
 
@@ -600,7 +600,7 @@ def test_home_botoia_from_eboluzioa(logged_in_client):
 
 def test_eboluzioa_gabeko_pokemona(logged_in_client):
     """
-    3.5.5.3: Eboluzio kateak ez dituen Pokemon-ak (781: dhelmise)
+    5.2.5.5.3: Eboluzio kateak ez dituen Pokemon-ak (781: dhelmise)
     """
     pokemon_id = 781
     izena = 'dhelmise'
