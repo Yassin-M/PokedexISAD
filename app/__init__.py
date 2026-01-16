@@ -54,10 +54,18 @@ def create_app():
 
     @app.route('/menu')
     def menu():
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        if session.get('role', '').lower() == 'admin':
+            return redirect(url_for('menu_admin'))
         return render_template('menu.html')
     
     @app.route('/menu_admin')
     def menu_admin():
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        if session.get('role', '').lower() != 'admin':
+            return redirect(url_for('menu'))
         return render_template('menu_admin.html')
 
     @app.route('/kudeatu', methods=['GET', 'POST'])
