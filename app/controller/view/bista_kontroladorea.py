@@ -105,15 +105,29 @@ class BistaKontroladorea:
             pasahitza = request.form['pasahitza'].strip() if request.form['pasahitza'].strip() else None
             pasahitza2 = request.form['pasahitza2'].strip() if request.form['pasahitza2'].strip() else None
             
+            # Validar que al menos el nombre esté presente
+            if not izena:
+                flash('Mesedez, bete eremu guztiak', 'error')
+                if user_id:
+                    return redirect(url_for('editatu_user', user_id=user_id))
+                else:
+                    return redirect(url_for('editatu'))
+            
             if pasahitza or pasahitza2:
                 if pasahitza != pasahitza2:
                     flash('Pasahitzak ez datoz bat', 'error')
-                    return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
+                    if user_id:
+                        return redirect(url_for('editatu_user', user_id=user_id))
+                    else:
+                        return redirect(url_for('editatu'))
                 
                 baliozko, mezua = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
                 if not baliozko:
                     flash(mezua, 'error')
-                    return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
+                    if user_id:
+                        return redirect(url_for('editatu_user', user_id=user_id))
+                    else:
+                        return redirect(url_for('editatu'))
           
             eguneratu_json = self.eredu_kontroladorea.eguneratu_erabiltzailea(
                 erabiltzaile_izena, izena, email, jaiotze_data, pasahitza
@@ -126,12 +140,20 @@ class BistaKontroladorea:
                 if izena and not user_id:
                     session['user'] = izena
                 flash(mezua, 'success')
+                # Permanecer en la página de edición (admin o usuario)
                 if user_id:
-                    return redirect(url_for('kudeatu'))
+                    return redirect(url_for('editatu_user', user_id=user_id))
                 return redirect(url_for('editatu'))
             else:
-                flash(mezua, 'error')
-                return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
+                # Si el error es por nombre duplicado, mostrar mensaje personalizado
+                if 'UNIQUE constraint failed' in mezua and 'izena' in mezua:
+                    flash('Izen hori hartuta dago', 'error')
+                else:
+                    flash(mezua, 'error')
+                if user_id:
+                    return redirect(url_for('editatu_user', user_id=user_id))
+                else:
+                    return redirect(url_for('editatu'))
       
         return render_template('editatu.html', home_endpoint=home_endpoint, erabiltzailea=emaitza)
     
