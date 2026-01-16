@@ -1,12 +1,12 @@
 import pytest
 
 # =================================================================
-# POKEDEX PROBA PLANA (3.4.1 - 3.4.16)
+# POKEDEX PROBA PLANA 
 # =================================================================
 
 # 3.4.1: Erabiltzaileak Pokemon baten argazkian sakatzen du.
 def test_3_4_1_xehetasunak_kargatu(client):
-    """Egiaztatu gaitasunak eta sarrera kargatzen direla (adib. Bulbasaur)"""
+    """Egiaztatu abileziak eta deskripzioa kargatzen direla (adib. Bulbasaur)"""
     resp = client.get('/pokedex/pokemon/1')
     assert resp.status_code == 200
     html = resp.data.decode('utf-8')
@@ -19,11 +19,15 @@ def test_3_4_2_izen_osoa_existitzen_da(client):
     resp = client.post('/pokedex/bilatu', data={'izena': 'Charmander'}, follow_redirects=True)
     assert resp.status_code == 200
     assert b"Charmander" in resp.data
+    assert b"Bulbasaur" not in resp.data
 
 # 3.4.3: Bilatzailean existitzen ez den izena.
 def test_3_4_3_izena_ez_da_existitzen(client):
-    resp = client.post('/pokedex/bilatu', data={'izena': 'Agumon'}, follow_redirects=True)
+    resp = client.post('/pokedex/bilatu', data={'izena': 'Digimon'}, follow_redirects=True)
     assert b"Ez da pokemonik aurkitu." in resp.data
+    assert b"Digimon" in resp.data
+    # Bilatzailean "Digimon" egongo da, baina ez da emaitzarik egon behar
+    assert b"class=\"pokemon-card\"" not in resp.data
 
 # 3.4.4: Bilatzailea hutsik utzi (Enter sakatu).
 def test_3_4_4_bilatzailea_hutsik(client):
@@ -43,6 +47,8 @@ def test_3_4_6_hitz_partziala(client):
     resp = client.post('/pokedex/bilatu', data={'izena': 'Char'}, follow_redirects=True)
     assert b"Charmander" in resp.data
     assert b"Charmeleon" in resp.data
+    assert b"Chimchar" in resp.data
+    assert b"Squirtle" not in resp.data
 
 # 3.4.7: Letra larriz edo xehez idatzi (CHARMANDER).
 def test_3_4_7_letra_larri_xehe_berdin(client):
@@ -59,17 +65,21 @@ def test_3_4_8_iragazki_botoia_existentzia(client):
 def test_3_4_9_mota_iragazkia(client):
     resp = client.post('/pokedex/bilatu', data={'motak': ['Fire']}, follow_redirects=True)
     assert b"Charmander" in resp.data
+    assert b"Infernape" in resp.data
+    assert b"Squirtle" not in resp.data
 
 # 3.4.10: Generazioaren arabera iragazi (Adibidez: 1).
 def test_3_4_10_generazio_iragazkia(client):
     resp = client.post('/pokedex/bilatu', data={'generazioak': ['1']}, follow_redirects=True)
     assert b"Bulbasaur" in resp.data
+    assert b"Chikorita" not in resp.data
 
 # 3.4.11: Generazioa ETA Mota aldi berean.
 def test_3_4_11_generazioa_eta_mota(client):
     data = {'motak': ['Water'], 'generazioak': ['1']}
     resp = client.post('/pokedex/bilatu', data=data, follow_redirects=True)
     assert b"Squirtle" in resp.data
+    assert b"Cyndaquil" not in resp.data
 
 # 3.4.12: Iragazkia eta Pokemon izena (Existitzen bada).
 def test_3_4_12_iragazkia_eta_izena_existitzen_da(client):
