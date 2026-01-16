@@ -79,12 +79,13 @@ class APIKontroladorea:
    def pokemon_eskatu(self, izena): # Pokemon izen bat emanda bere JSON-a bueltatzen du.
     try:
         res_data = requests.get(f"{self.base_url}pokemon/{izena}", timeout=10)
-        res_species = requests.get(f"{self.base_url}pokemon-species/{izena}", timeout=10) 
         
-        if res_data.status_code == 200 and res_species.status_code == 200: # PokeAPI-aren JSON-ak
+        if res_data.status_code == 200: # PokeAPI-aren JSON-ak
             uneko_pokemon = res_data.json()
-            espeziea = res_species.json()
-            
+            res_species = requests.get(f"{self.base_url}pokemon-species/{uneko_pokemon['species']['name']}", timeout=10) 
+
+            if res_species.status_code == 200:
+                espeziea = res_species.json()
             #Pokemon-aren eboluzioak
             pre_eboluzioa = 0
             if espeziea.get("evolves_from_species") and espeziea.get("id", 0) < 10000:
