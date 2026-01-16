@@ -121,9 +121,10 @@ class BistaKontroladorea:
                     else:
                         return redirect(url_for('editatu'))
                 
-                baliozko, mezua = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
-                if not baliozko:
-                    flash(mezua, 'error')
+                baliozkotze_json = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
+                baliozkotze = json.loads(baliozkotze_json or '{}')
+                if not baliozkotze.get('ondo'):
+                    flash(baliozkotze.get('mezua', 'Pasahitza ez da baliozkoa'), 'error')
                     if user_id:
                         return redirect(url_for('editatu_user', user_id=user_id))
                     else:
