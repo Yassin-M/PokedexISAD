@@ -41,42 +41,42 @@ def test_3_2_3_talde_muga_errorea(client):
     resp = client.post('/taldea_berria', follow_redirects=True)
     assert b"gehienez 10 talde" in resp.data.lower() or resp.status_code == 200 # Zure errore mezuaren arabera
 
-#def test_3_2_4_pokemon_aldatu_ezabatu_menua(client):
- #   with client.session_transaction() as sess:
-  #      sess["user"] = "test_user"
-   #     sess["editatzen_ari_den_taldea"] = "Taldea 1"
-    #    sess["akzioa"] = "aldatu_pokemon"
+def test_3_2_4_pokemon_aldatu_ezabatu_menua(client):
+    with client.session_transaction() as sess:
+        sess["user"] = "test_user"
+        sess["editatzen_ari_den_taldea"] = "Taldea 1"
+        sess["akzioa"] = "aldatu_pokemon"
 
- #   conn = Connection()
-#    conn.delete("DELETE FROM Taldea WHERE erabiltzaileIzena = ?", ("test_user",))
-  #  conn.delete("DELETE FROM PokemonPokedex")
-   # conn.delete("DELETE FROM PokemonTaldean WHERE erabiltzaileIzena = ?", ("test_user",))
-    #conn.insert("INSERT INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (1, "Bulbasaur", 7.0, 69.0, "Ar/Eme", "A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", 1, 1))
-    #conn.insert("INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena) VALUES (?, ?, ?)", ("Taldea 1", 1, "test_user"))
-    #conn.insert("INSERT INTO PokemonTalde (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, ErabiltzaileIzena) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", ("Bulbasaur", 5, 0, "Ar", 45, 49, 49, 49, 49, 45, 1, "test_user"))
+    conn = Connection()
+    conn.delete("DELETE FROM Taldea WHERE erabiltzaileIzena = ?", ("test_user",))
+    conn.delete("DELETE FROM PokemonPokedex")
+    conn.delete("DELETE FROM PokemonTaldean WHERE erabiltzaileIzena = ?", ("test_user",))
+    conn.insert("INSERT INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (1, "Bulbasaur", 7.0, 69.0, "Ar/Eme", "A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", 1, 1))
+    conn.insert("INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena) VALUES (?, ?, ?)", ("Taldea 1", 1, "test_user"))
+    conn.insert("INSERT INTO PokemonTalde (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, ErabiltzaileIzena) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", ("Bulbasaur", 5, 0, "Ar", 45, 49, 49, 49, 49, 45, 1, "test_user"))
 
     # ID 1 (Bulbasaur) aldatu_pokemon simulatuz
-#    resp = client.get('/pokedex/pokemon/1', follow_redirects=True)
+    resp = client.get('/pokedex/pokemon/1', follow_redirects=True)
 
-#    assert resp.status_code == 200
- #   assert b"Zer egin nahi duzu?" in resp.data
-  #  assert b"ALDATU POKEMONA" in resp.data
-   # assert b"EZABATU POKEMONA" in resp.data
+    assert resp.status_code == 200
+    assert b"Zer egin nahi duzu?" in resp.data
+    assert b"ALDATU POKEMONA" in resp.data
+    assert b"EZABATU POKEMONA" in resp.data
 
 # 3.2.5: Pokemon gehitu botoia "+" sakatu
-#def test_3_2_5_add_pokemon_button(client):
+def test_3_2_5_add_pokemon_button(client):
 
-   # with client.session_transaction() as sess:
-  #          sess["user"] = "test_user"
- #           sess["editatzen_ari_den_taldea"] = "TaldeTest"
-#
-  #      # Petición POST
- #   resp = client.post('/pokedex', data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
-#
-  #      # Verificaciones
- #   assert resp.status_code == 200
-#    assert b"Bulbasaur" in resp.data
-#    assert b"BILATZAILEA" in resp.data
+    with client.session_transaction() as sess:
+            sess["user"] = "test_user"
+            sess["editatzen_ari_den_taldea"] = "TaldeTest"
+
+        # Petición POST
+    resp = client.post('/pokedex/bilatu', data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
+
+        # Verificaciones
+    assert resp.status_code == 200
+    assert b"Bulbasaur" in resp.data
+    assert b"BILATZAILEA" in resp.data
 
 # 3.2.7: Taldea ezabatu
 def test_3_2_7_talde_ezabatu(client):
@@ -130,7 +130,7 @@ def test_3_2_10_pokemon_aldatu_pokedexera(client):
         sess["user"] = "test_user"
 
     # Pokemon baten xehetasunetatik 'aldatu' sakatzean
-    resp = client.get('/pokemon_taldea/ezabatu', data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
+    resp = client.get('/pokedex/bilatu' , data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
     html = resp.data.decode('utf-8')
     assert "BILATZAILEA:" in html
 
