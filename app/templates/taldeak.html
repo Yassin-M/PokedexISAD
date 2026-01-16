@@ -12,8 +12,9 @@
     <div class="form-container">
         <!-- Atzera eta etxeko ikonoak -->
         <div class="nav-bar">
-            <i class="fas fa-reply nav-icon" onclick="window.history.back()" title="Atzera"></i>
-            
+            <a href="{{ url_for(menu_endpoint) }}" class="icon-btn">
+                <i class="fas fa-home nav-icon" title="Atzera"></i>
+            </a>
             <a href="{{ url_for(menu_endpoint) }}" class="icon-btn">
                 <i class="fas fa-home nav-icon" title="Hasiera"></i>
             </a>

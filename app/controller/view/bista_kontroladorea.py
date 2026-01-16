@@ -308,6 +308,10 @@ def taldeak_blueprint(db):
 
     @taldeak_bp.route('/taldeak', methods=['GET', 'POST'])
     def taldeak_kargatu():
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        
         # Aurretik talde bat bazegoen editatzen, atera. 
         session.pop('editatzen_ari_den_taldea', None)
         
@@ -326,6 +330,10 @@ def taldeak_blueprint(db):
     
     @taldeak_bp.route('/taldea', methods=['GET', 'POST'])
     def taldea_dago():
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        
         # Talde izena hartu form-etik edo saioatik
         talde_izena = request.form.get('talde_izena') or session.get('editatzen_ari_den_taldea')
 
@@ -338,6 +346,10 @@ def taldeak_blueprint(db):
 
     @taldeak_bp.route('/taldea/<string:izena>', methods=['GET', 'POST'])
     def taldea(izena=None):
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        
         # Talde izena hartu form-etik, parametroetatik edo saioatik
         talde_izena = izena or request.form.get('talde_izena') or session.get('editatzen_ari_den_taldea')
 
@@ -364,6 +376,10 @@ def taldeak_blueprint(db):
 
     @taldeak_bp.route('/taldea_berria', methods=['POST'])
     def sortu_taldea():
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
+
         try:
             # Erabiltzailea hartu saiotik
             erabiltzailea = session.get('user')
@@ -385,6 +401,9 @@ def taldeak_blueprint(db):
     
     @taldeak_bp.route('/pokemon_taldea', methods=['POST'])
     def sartu_taldera():
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
         # Talde izena eta pokemon ID hartu saiotik
         talde_izena = session.get('editatzen_ari_den_taldea')
         pokemon_id = session.get('pokemon_datuak')
@@ -407,6 +426,10 @@ def taldeak_blueprint(db):
     
     @taldeak_bp.route('/pokemon_taldea/ezabatu', methods=['GET', 'POST'])
     def ezabatu_taldetik():
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        
         # Erabiltzailea, talde izena eta pokemon ID hartu saiotik
         erabiltzailea = session.get('user')
         talde_izena = session.get('editatzen_ari_den_taldea')
@@ -430,6 +453,10 @@ def taldeak_blueprint(db):
 
     @taldeak_bp.route('/taldea/ezabatu_guztia', methods=['GET', 'POST'])
     def taldea_ezabatu():
+        # Saioa egiaztatu
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        
         # Erabiltzailea eta talde izena hartu saiotik
         erabiltzailea = session.get('user')
         talde_izena = session.get('editatzen_ari_den_taldea')
@@ -472,6 +499,8 @@ def pokedex_blueprint(db):
             session['akzioa'] = request.form.get('akzioa')
         elif session.get('akzioa') == 'aldatu':
             session['akzioa'] = 'hauta_pokemon'
+        elif request.method == 'POST': # Egoera POST bada ez ikutu ezer, horrela aurretik kargatuta zegoena mantenduko da
+            pass
         else:
             session.pop('akzioa', None)
 
@@ -496,6 +525,7 @@ def pokedex_blueprint(db):
         session['pokemon_datuak'] = id
         return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
     return pokedex_bp
+
 # =====================================================
 # ITEMDEX
 # =====================================================
