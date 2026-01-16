@@ -64,14 +64,6 @@ CREATE TABLE IF NOT EXISTS DaMotaPokemon (
     FOREIGN KEY (pokemonID) REFERENCES PokemonPokedex(pokeId)
 );
 
-CREATE TABLE IF NOT EXISTS Eboluzioa (
-    pokemonPokedexID INT,
-    eboluzioaPokeId INT,
-    PRIMARY KEY (pokemonPokedexID, eboluzioaPokeId),
-    FOREIGN KEY (pokemonPokedexID) REFERENCES PokemonPokedex(pokeId),
-    FOREIGN KEY (eboluzioaPokeId) REFERENCES PokemonPokedex(pokeId)
-);
-
 CREATE TABLE IF NOT EXISTS PokemonTalde (
     harrapatuId INTEGER PRIMARY KEY AUTOINCREMENT,
     izena VARCHAR(25),
