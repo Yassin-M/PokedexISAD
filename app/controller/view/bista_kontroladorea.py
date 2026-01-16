@@ -535,62 +535,93 @@ def bista_blueprint(db):
     return bista_bp
 
 def chatbot_blueprint(db):
+    # Chatbot-erako Blueprint-a sortu
     chatbot_bp = Blueprint('chatbot', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
 
     @chatbot_bp.context_processor
     def inject_menu_endpoint():
+        # Saioan gordetako erabiltzailearen rola hartu
         user_role = session.get('role', 'usuario')
+
+        # Admin bada, admin menua; bestela, menu normala
         menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+
+        # Template-etan erabiltzeko aldagaia bueltatu
         return dict(menu_endpoint=menu_endpoint)
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
+
+        # Chatbot-aren orri nagusia erakutsi
         return render_template('chatbot.html')
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
     def getMugimenduIkasgarriak(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
 
+        # Pokemon baten ikas daitezkeen mugimenduak lortu
         pokemonMugimenduak = service.getMugimenduIkasgarriak(id)
+
+        # Mugimenduen orria erakutsi
         return render_template('mugimenduak.html', pokemon=pokemonMugimenduak)
 
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
     def getEboluzioa(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
 
+        # Pokemon baten eboluzioa lortu
         pokemonEboluzioa = service.getEboluzioa(id)
+
+        # Eboluzioaren orria erakutsi
         return render_template('eboluzioa.html', pokemon=pokemonEboluzioa)
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
     def getIndarrak(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
 
+        # Pokemon baten indarrak eta ahuleziak lortu
         pokemonIndarrak = service.getIndarrak(id)
+
+        # Indarren orria erakutsi
         return render_template("indarrak.html", pokemon=pokemonIndarrak)
 
     @chatbot_bp.route('/chatbot/taldeZerrenda')
     def taldeZerrenda():
+        # Saioa egiaztatu, eta erabiltzailea lortu
         if 'user' not in session:
             return redirect(url_for('login'))
         user = session.get('user')
+
+        # Erabiltzailearen talde guztiak kargatu
         talde_zerrenda = service.taldeak_kargatu(user)
+
+        # Taldeen zerrenda erakutsi
         return render_template('taldeZerrenda.html', taldeak=talde_zerrenda)
 
     @chatbot_bp.route('/chatbot/onenak/<taldeIzena>')
     def getOnenak(taldeIzena):
+        # Saioa egiaztatu, eta erabiltzailea lortu
         if 'user' not in session:
             return redirect(url_for('login'))
         user = session.get('user')
+
+        # Talde bateko pokemon onena kalkulatu
         pokemonOnenak = service.getOnenak({
             "taldeIzena": taldeIzena,
             "erabiltzaileIzena": user
         })
+
+        # Taldeko pokemon onenen orria erakutsi
         return render_template('onenak.html', pokemon=pokemonOnenak)
 
     return chatbot_bp
