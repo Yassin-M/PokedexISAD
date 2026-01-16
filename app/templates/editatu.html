@@ -16,13 +16,17 @@
                 <a class="btn" href="{{ url_for(home_endpoint) }}" style="text-decoration: none; padding: 5px 15px;">⌂</a>
             </div>
 
-            {% if success %}
-                <div class="edit-success" style="background: #c6f6d5; padding: 10px; border: 2px solid #2f855a; margin-bottom: 10px;">{{ success }}</div>
-            {% endif %}
-            
-            {% if error %}
-                <div class="edit-error" style="background: #fed7d7; padding: 10px; border: 2px solid #c53030; margin-bottom: 10px;">{{ error }}</div>
-            {% endif %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            <div class="edit-success" style="background: #c6f6d5; padding: 10px; border: 2px solid #2f855a; margin-bottom: 10px;">{{ message }}</div>
+                        {% else %}
+                            <div class="edit-error" style="background: #fed7d7; padding: 10px; border: 2px solid #c53030; margin-bottom: 10px;">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
             <form action="" method="POST">
                 <p>

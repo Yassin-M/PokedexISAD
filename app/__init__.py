@@ -60,7 +60,7 @@ def create_app():
     def menu_admin():
         return render_template('menu_admin.html')
 
-    @app.route('/kudeatu')
+    @app.route('/kudeatu', methods=['GET', 'POST'])
     def kudeatu():
         return vista_controller.erabiltzaileakKargatu()
     

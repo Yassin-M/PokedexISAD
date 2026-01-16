@@ -50,6 +50,18 @@ class BistaKontroladorea:
             if not all([erabiltzailea, email, jaiotze_data, pasahitza, pasahitza2]):
                 error = 'Mesedez, bete eremu guztiak'
             
+            # Validar estructura de email
+            if not error and '@' not in email:
+                error = 'Posta elektronikoa baliogabea da'
+            
+            # Validar estructura de fecha (YYYY-MM-DD)
+            if not error:
+                try:
+                    from datetime import datetime
+                    datetime.strptime(jaiotze_data, '%Y-%m-%d')
+                except ValueError:
+                    error = 'Jaiotze-data baliogabea da'
+            
             if error:
                 flash(error, 'error')
                 return redirect(url_for('register'))
@@ -93,15 +105,29 @@ class BistaKontroladorea:
             pasahitza = request.form['pasahitza'].strip() if request.form['pasahitza'].strip() else None
             pasahitza2 = request.form['pasahitza2'].strip() if request.form['pasahitza2'].strip() else None
             
+            # Validar que al menos el nombre esté presente
+            if not izena:
+                flash('Mesedez, bete eremu guztiak', 'error')
+                if user_id:
+                    return redirect(url_for('editatu_user', user_id=user_id))
+                else:
+                    return redirect(url_for('editatu'))
+            
             if pasahitza or pasahitza2:
                 if pasahitza != pasahitza2:
                     flash('Pasahitzak ez datoz bat', 'error')
-                    return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
+                    if user_id:
+                        return redirect(url_for('editatu_user', user_id=user_id))
+                    else:
+                        return redirect(url_for('editatu'))
                 
                 baliozko, mezua = self.eredu_kontroladorea.balioztatu_pasahitza(pasahitza, pasahitza2)
                 if not baliozko:
                     flash(mezua, 'error')
-                    return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
+                    if user_id:
+                        return redirect(url_for('editatu_user', user_id=user_id))
+                    else:
+                        return redirect(url_for('editatu'))
           
             eguneratu_json = self.eredu_kontroladorea.eguneratu_erabiltzailea(
                 erabiltzaile_izena, izena, email, jaiotze_data, pasahitza
@@ -114,12 +140,20 @@ class BistaKontroladorea:
                 if izena and not user_id:
                     session['user'] = izena
                 flash(mezua, 'success')
+                # Permanecer en la página de edición (admin o usuario)
                 if user_id:
-                    return redirect(url_for('kudeatu'))
+                    return redirect(url_for('editatu_user', user_id=user_id))
                 return redirect(url_for('editatu'))
             else:
-                flash(mezua, 'error')
-                return redirect(url_for('editatu', user_id=user_id) if user_id else url_for('editatu'))
+                # Si el error es por nombre duplicado, mostrar mensaje personalizado
+                if 'UNIQUE constraint failed' in mezua and 'izena' in mezua:
+                    flash('Izen hori hartuta dago', 'error')
+                else:
+                    flash(mezua, 'error')
+                if user_id:
+                    return redirect(url_for('editatu_user', user_id=user_id))
+                else:
+                    return redirect(url_for('editatu'))
       
         return render_template('editatu.html', home_endpoint=home_endpoint, erabiltzailea=emaitza)
     
@@ -423,9 +457,9 @@ def pokedex_blueprint(db):
     @pokedex_bp.route('/pokedex', methods=['GET', 'POST'])
     @pokedex_bp.route('/pokedex/bilatu', methods=['GET', 'POST'])
     def pokedex():
-        iragazkiak = {'izena': None, 'generazioak': [], 'motak': []}
+        iragazkiak = {'izena': None, 'generazioak': [], 'motak': []} # Hasierako JSON-a pokemon guztiak agertzeko
         mode = request.args.get('mode', 'info')
-        if request.method == 'POST':
+        if request.method == 'POST': # Erabiltzaileak sartzen dituen datuak hartzeko
             mode = request.form.get('mode', mode)
             izena = request.form.get('izena')
             if izena: iragazkiak['izena'] = izena
@@ -434,14 +468,14 @@ def pokedex_blueprint(db):
             motak = request.form.getlist('motak')
             if motak: iragazkiak['motak'] = motak
 
-        if request.form.get('akzioa') is not None:
+        if request.form.get('akzioa') is not None: # Jakiteko erabiltzaileak pokedex-etik sartzen den edo talde batera gehitzerakoan
             session['akzioa'] = request.form.get('akzioa')
         elif session.get('akzioa') == 'aldatu':
             session['akzioa'] = 'hauta_pokemon'
         else:
             session.pop('akzioa', None)
 
-        pokemon_zerrenda = service.pokedex_kargatu(iragazkiak)
+        pokemon_zerrenda = service.pokedex_kargatu(iragazkiak) # Pokemon-en JSON-a bueltatzen du
         return render_template('pokedex.html', pokemons=pokemon_zerrenda, mode=mode)
 
     @pokedex_bp.route('/pokedex/pokemon/<int:id>', methods=['GET'])
@@ -462,35 +496,56 @@ def pokedex_blueprint(db):
         session['pokemon_datuak'] = id
         return render_template('pokemon.html', pokemon=datuak, taldea=taldea, akzioa=akzioa)
     return pokedex_bp
+# =====================================================
+# ITEMDEX
+# =====================================================
 
+# Itemdex-erako blueprint-a sortu
 def itemdex_blueprint(db):
     bp = Blueprint("itemdex", __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
 
+    # Menu egokia automatikoki injektatu rolaren arabera
     @bp.context_processor
     def inject_menu_endpoint():
         user_role = session.get('role', 'usuario')
         menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
         return dict(menu_endpoint=menu_endpoint)
 
+    # Itemdex orria kargatu eta iragazkiak aplikatu
     @bp.route("/itemdex", methods=["GET", "POST"])
     def itemdex():
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
+
+        # Iragazki lehenetsiak
         iragazkiak = {"izena": "", "motak": [], "alfabetikokiAlderantziz": False}
+
+        # Form-eko iragazkiak jaso
         if request.method == "POST":
             iragazkiak["izena"] = request.form.get("izena", "")
             iragazkiak["motak"] = request.form.getlist("motak")
             iragazkiak["alfabetikokiAlderantziz"] = (request.form.get("orden") == "desc")
+
+        # Itemak eta motak kargatu
         items = list(service.itemdex_kargatu(iragazkiak))
         motak = service.lortu_motak()
+
+        # Itemdex orria erakutsi
         return render_template("itemdex.html", items=items, motak=motak, service=service)
 
+    # Item baten xehetasunak erakutsi
     @bp.route("/itemdex/item/<int:id>")
     def item(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
+
+        # Itemaren informazioa lortu
         item = service.bistaratu_item(id)
+
+        # Item orria erakutsi
         return render_template("item.html", item=item)
     return bp
 
@@ -514,62 +569,93 @@ def bista_blueprint(db):
     return bista_bp
 
 def chatbot_blueprint(db):
+    # Chatbot-erako Blueprint-a sortu
     chatbot_bp = Blueprint('chatbot', __name__, template_folder="../../templates")
     service = EreduKontroladorea(db)
 
     @chatbot_bp.context_processor
     def inject_menu_endpoint():
+        # Saioan gordetako erabiltzailearen rola hartu
         user_role = session.get('role', 'usuario')
+
+        # Admin bada, admin menua; bestela, menu normala
         menu_endpoint = 'menu_admin' if user_role.lower() == 'admin' else 'menu'
+
+        # Template-etan erabiltzeko aldagaia bueltatu
         return dict(menu_endpoint=menu_endpoint)
 
     @chatbot_bp.route('/chatbot')
     def chatbot_menu():
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
+
+        # Chatbot-aren orri nagusia erakutsi
         return render_template('chatbot.html')
 
     @chatbot_bp.route('/chatbot/mugimenduak/<int:id>')
     def getMugimenduIkasgarriak(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
 
+        # Pokemon baten ikas daitezkeen mugimenduak lortu
         pokemonMugimenduak = service.getMugimenduIkasgarriak(id)
+
+        # Mugimenduen orria erakutsi
         return render_template('mugimenduak.html', pokemon=pokemonMugimenduak)
 
     @chatbot_bp.route('/chatbot/eboluzioa/<int:id>')
     def getEboluzioa(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
 
+        # Pokemon baten eboluzioa lortu
         pokemonEboluzioa = service.getEboluzioa(id)
+
+        # Eboluzioaren orria erakutsi
         return render_template('eboluzioa.html', pokemon=pokemonEboluzioa)
 
     @chatbot_bp.route('/chatbot/indarrak/<int:id>')
     def getIndarrak(id):
+        # Saioa egiaztatu
         if 'user' not in session:
             return redirect(url_for('login'))
 
+        # Pokemon baten indarrak eta ahuleziak lortu
         pokemonIndarrak = service.getIndarrak(id)
+
+        # Indarren orria erakutsi
         return render_template("indarrak.html", pokemon=pokemonIndarrak)
 
     @chatbot_bp.route('/chatbot/taldeZerrenda')
     def taldeZerrenda():
+        # Saioa egiaztatu, eta erabiltzailea lortu
         if 'user' not in session:
             return redirect(url_for('login'))
         user = session.get('user')
+
+        # Erabiltzailearen talde guztiak kargatu
         talde_zerrenda = service.taldeak_kargatu(user)
+
+        # Taldeen zerrenda erakutsi
         return render_template('taldeZerrenda.html', taldeak=talde_zerrenda)
 
     @chatbot_bp.route('/chatbot/onenak/<taldeIzena>')
     def getOnenak(taldeIzena):
+        # Saioa egiaztatu, eta erabiltzailea lortu
         if 'user' not in session:
             return redirect(url_for('login'))
         user = session.get('user')
+
+        # Talde bateko pokemon onena kalkulatu
         pokemonOnenak = service.getOnenak({
             "taldeIzena": taldeIzena,
             "erabiltzaileIzena": user
         })
+
+        # Taldeko pokemon onenen orria erakutsi
         return render_template('onenak.html', pokemon=pokemonOnenak)
 
     return chatbot_bp

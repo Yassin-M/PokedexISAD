@@ -3,6 +3,7 @@ import pytest
 
 @pytest.fixture()
 def app():
+    # Flask aplikazioa test moduan sortu
     from app import create_app
     app = create_app()
     app.config["TESTING"] = True
@@ -10,13 +11,15 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    # Testetarako bezeroa sortu
     return app.test_client()
 
 
 @pytest.fixture()
 def logged_in_client(client):
-    """Saioa hasita dagoen bezeroa"""
-    # Erabiltzailea erregistratu
+    # Saioa hasita duen bezeroa prestatu
+
+    # Erabiltzailearen datuak
     username = "test_user"
     test_data = {
         'erabiltzailea': username,
@@ -26,6 +29,7 @@ def logged_in_client(client):
         'pasahitza_berretsi': 'TestPass123!'
     }
 
+    # Erabiltzailea erregistratu
     client.post('/register', data=test_data, follow_redirects=True)
 
     # Saioa hasi
@@ -35,3 +39,145 @@ def logged_in_client(client):
     }, follow_redirects=True)
 
     return client
+
+@pytest.fixture()
+def onenak_test_data(app):
+    """
+    Probako erabiltzailea, taldea eta Pokemon datuak sortzen ditu
+    /chatbot/onenak probetarako.
+    Proba amaitu ondoren, datuak automatikoki garbitzen dira.
+    """
+    from app.database.database import Connection
+
+    conn = Connection()
+    erabiltzaileIzena = "test_user"
+    taldeIzena = "MY_TEST_TEAM"
+
+    # --- 1. Erabiltzailea sortu  ---
+    conn.insert(
+        "INSERT OR IGNORE INTO Erabiltzailea (izena) VALUES (?)",
+        (erabiltzaileIzena,)
+    )
+
+    # --- 2. Taldea sortu ---
+    conn.insert(
+        "INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)",
+        (taldeIzena, erabiltzaileIzena)
+    )
+
+    # --- 3. 4 Pokemon Pokedex aukeratu ---
+    pokemons = conn.select(
+        "SELECT pokeId, izena FROM PokemonPokedex ORDER BY pokeId LIMIT 5",
+        ()
+    )
+
+    # --- 5. Pokemon estatistikak ---
+    stat_sets = [
+        (50, 50, 50, 50, 50, 50),
+        (60, 60, 60, 60, 60, 60),
+        (70, 70, 70, 70, 70, 70),
+        (80, 80, 80, 80, 80, 80),
+        (100, 100, 100, 100, 100, 100)
+    ]
+
+    inserted_harrapatuIds = []
+
+    for i, pokemon in enumerate(pokemons):
+        hp, atk, spatk, defense, spdef, spe = stat_sets[i]
+        izena = f"{pokemon['izena']}_test_{i+1}"
+
+        # --- 6. Pokemon taldean sartu ---
+        conn.insert(
+            """
+            INSERT INTO PokemonTalde
+            (izena, maila, adiskidetasun_maila, generoa,
+             HP, ATK, SPATK, DEF, SPDEF, SPE,
+             PokemonPokedexID, ErabiltzaileIzena)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                izena,
+                50,
+                70,
+                ['Ar', 'Eme', 'Neutroa'][i % 3],
+                hp, atk, spatk, defense, spdef, spe,
+                pokemon['pokeId'],
+                erabiltzaileIzena
+            )
+        )
+        # --- 7. harrapatuId lortu ---
+        harrapatu = conn.select(
+            """
+            SELECT harrapatuId
+            FROM PokemonTalde
+            WHERE izena = ? AND ErabiltzaileIzena = ?
+            ORDER BY harrapatuId DESC
+            LIMIT 1
+            """,
+            (izena, erabiltzaileIzena)
+        )[0]["harrapatuId"]
+
+        inserted_harrapatuIds.append(harrapatu)
+        # --- 8. PokemonTaldean sartu ---
+        conn.insert(
+            """
+            INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena)
+            VALUES (?, ?, ?)
+            """,
+            (taldeIzena, harrapatu, erabiltzaileIzena)
+        )
+
+    # ----------------- Proba exekutatu -----------------
+    yield True
+
+    # ----------------- Proba amaitu, datuak garbitu -----------------
+    # 1. PokemonTaldean ezabatu
+    for harrapatu in inserted_harrapatuIds:
+        conn.delete(
+            "DELETE FROM PokemonTaldean WHERE taldeIzena = ? AND harrapatuId = ? AND erabiltzaileIzena = ?",
+            (taldeIzena, harrapatu, erabiltzaileIzena)
+        )
+    # 2. PokemonTalde ezabatu
+    conn.delete(
+        "DELETE FROM PokemonTalde WHERE ErabiltzaileIzena = ?",
+        (erabiltzaileIzena,)
+    )
+    # 3. Taldea ezabatu
+    conn.delete(
+        "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?",
+        (taldeIzena, erabiltzaileIzena)
+    )
+
+@pytest.fixture()
+def onenak_empty_team_test_data(app):
+    """
+    Talde huts bat sortzen du /chatbot/onenak probetarako.
+    Talde honek ez du Pokemon-ik.
+    """
+    from app.database.database import Connection
+
+    conn = Connection()
+    erabiltzaileIzena = "test_user"
+    taldeIzena = "EMPTY_TEST_TEAM"
+
+    # --- 1. Erabiltzailea sortu ---
+    conn.insert(
+        "INSERT OR IGNORE INTO Erabiltzailea (izena) VALUES (?)",
+        (erabiltzaileIzena,)
+    )
+
+    # --- 2. Talde hutsa sortu (Pokemon-ik gabe) ---
+    conn.insert(
+        "INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)",
+        (taldeIzena, erabiltzaileIzena)
+    )
+
+    # ----------------- Proba exekutatu -----------------
+    yield True
+
+    # ----------------- Proba amaitu, datuak garbitu -----------------
+    # 1. Taldea ezabatu
+    conn.delete(
+        "DELETE FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?",
+        (taldeIzena, erabiltzaileIzena)
+    )
