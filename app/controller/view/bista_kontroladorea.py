@@ -423,9 +423,9 @@ def pokedex_blueprint(db):
     @pokedex_bp.route('/pokedex', methods=['GET', 'POST'])
     @pokedex_bp.route('/pokedex/bilatu', methods=['GET', 'POST'])
     def pokedex():
-        iragazkiak = {'izena': None, 'generazioak': [], 'motak': []}
+        iragazkiak = {'izena': None, 'generazioak': [], 'motak': []} # Hasierako JSON-a pokemon guztiak agertzeko
         mode = request.args.get('mode', 'info')
-        if request.method == 'POST':
+        if request.method == 'POST': # Erabiltzaileak sartzen dituen datuak hartzeko
             mode = request.form.get('mode', mode)
             izena = request.form.get('izena')
             if izena: iragazkiak['izena'] = izena
@@ -434,14 +434,14 @@ def pokedex_blueprint(db):
             motak = request.form.getlist('motak')
             if motak: iragazkiak['motak'] = motak
 
-        if request.form.get('akzioa') is not None:
+        if request.form.get('akzioa') is not None: # Jakiteko erabiltzaileak pokedex-etik sartzen den edo talde batera gehitzerakoan
             session['akzioa'] = request.form.get('akzioa')
         elif session.get('akzioa') == 'aldatu':
             session['akzioa'] = 'hauta_pokemon'
         else:
             session.pop('akzioa', None)
 
-        pokemon_zerrenda = service.pokedex_kargatu(iragazkiak)
+        pokemon_zerrenda = service.pokedex_kargatu(iragazkiak) # Pokemon-en JSON-a bueltatzen du
         return render_template('pokedex.html', pokemons=pokemon_zerrenda, mode=mode)
 
     @pokedex_bp.route('/pokedex/pokemon/<int:id>', methods=['GET'])
