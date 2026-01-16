@@ -514,6 +514,9 @@ class EreduKontroladorea:
     sql_pokeinfo = "SELECT P.harrapatuId, P.izena, P.HP, P.ATK, P.SPATK, P.DEF, P.SPDEF, P.SPE, PP.irudia, PP.pokeId, PP.pisua, PP.altuera FROM PokemonTalde P, PokemonPokedex PP WHERE P.harrapatuId = ? AND P.PokemonPokedexID = PP.pokeId"
     pokemon = self.db.select(sql_pokeinfo, (pokeId,))
       
+    stats = {}
+    json_pokeinfo = {}
+
     # Informazioa JSON formatuan prestatu
     for pokemons in pokemon:
       json_pokeinfo = {
@@ -521,26 +524,28 @@ class EreduKontroladorea:
           'izena': pokemons['izena'],         
           'argazkia': pokemons['irudia'],
           'id': pokemons['pokeId'],
-          'pisua': pokemons['altuera'],
-          'altuera': pokemons['pisua']
+          'pisua': pokemons['pisua'],
+          'altuera': pokemons['altuera']
       }
 
-    # Pokemon-aren estatistikak prestatu
-    stats = {
-      'hp': pokemons['HP'],
-      'atk': pokemons['ATK'],
-      'spatk': pokemons['SPATK'],
-      'def': pokemons['DEF'],
-      'spdef': pokemons['SPDEF'],
-      'spe': pokemons['SPE'],
-    }
+      # Pokemon-aren estatistikak prestatu
+      stats = {
+        'hp': pokemons['HP'],
+        'atk': pokemons['ATK'],
+        'spatk': pokemons['SPATK'],
+        'def': pokemons['DEF'],
+        'spdef': pokemons['SPDEF'],
+        'spe': pokemons['SPE'],
+      }
 
+    print(json_pokeinfo.get('harrapatuId'))
     # Abileziak eta mugimenduak lortu
     json_pokeinfo['stats'] = stats
-    abilezia = self.db.select("SELECT abileziIzena FROM Dauka WHERE harrapatuId = ?", [json_pokeinfo['harrapatuId']])
+    id = json_pokeinfo.get('harrapatuId')
+    abilezia = self.db.select("SELECT abileziIzena FROM Dauka WHERE harrapatuId = ?", [id])
     abIzena = [abi['abileziIzena'] for abi in abilezia]
     json_pokeinfo['abileziak'] = abIzena
-    mugimenduak = self.db.select("SELECT mugimenduIzena FROM MugimenduIzanTalde WHERE harrapatuId = ?", [json_pokeinfo['harrapatuId']])
+    mugimenduak = self.db.select("SELECT mugimenduIzena FROM MugimenduIzanTalde WHERE harrapatuId = ?", [id])
     mugiIzenak = [mugi['mugimenduIzena'] for mugi in mugimenduak]
     json_pokeinfo['mugimenduak'] = mugiIzenak
     return json_pokeinfo 
