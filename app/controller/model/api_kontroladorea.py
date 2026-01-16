@@ -322,8 +322,9 @@ class APIKontroladorea:
 
    def hartu_stats(self, id):
         # APIra deia egin
-        response = requests.get(f"{self.base_url}{id}", timeout=5)
-        
+        response = requests.get(f"{self.base_url}/pokemon/{id}", timeout=5)
+        print("codigo")
+        print(response.status_code)
         # Erantzuna ondo badago (200 OK)
         if response.status_code == 200:
             data = response.json()

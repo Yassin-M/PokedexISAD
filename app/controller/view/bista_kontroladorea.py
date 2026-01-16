@@ -400,7 +400,7 @@ def taldeak_blueprint(db):
             flash(str(e), "error")
             return redirect(url_for('taldeak.taldeak_kargatu'))
     
-    @taldeak_bp.route('/pokemon_taldea', methods=['POST'])
+    @taldeak_bp.route('/pokemon_taldea', methods=['GET', 'POST'])
     def sartu_taldera():
         # Saioa egiaztatu
         if 'user' not in session:
