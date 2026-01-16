@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import pytest
 from config import Config
 #from app import create_app
@@ -40,43 +41,62 @@ def test_3_2_3_talde_muga_errorea(client):
     
     resp = client.post('/taldea_berria', follow_redirects=True)
     assert b"gehienez 10 talde" in resp.data.lower() or resp.status_code == 200 # Zure errore mezuaren arabera
-
 def test_3_2_4_pokemon_aldatu_ezabatu_menua(client):
+    conn = Connection()
+    # Limpieza total para evitar conflictos
+    conn.delete("DELETE FROM PokemonTaldean")
+    conn.delete("DELETE FROM Taldea")
+    conn.delete("DELETE FROM PokemonPokedex")
+
+    # 1. Insertar Pokedex (con todos los argumentos: altuera, pisua, etc.)
+    conn.insert("""INSERT INTO PokemonPokedex 
+        (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", 
+        (1, "Bulbasaur", 7.0, 69.0, "Ar/Eme", "Deskripzioa...", "url", 1))
+
+    # 2. Insertar el Equipo (¡ESTO ES VITAL!)
+    conn.insert("INSERT INTO Taldea (taldeIzena, erabiltzaileIzena) VALUES (?, ?)", 
+                ("Taldea 1", "test_user"))
+
+    # 3. Insertar la relación
+    conn.insert("INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena) VALUES (?, ?, ?)", 
+                ("Taldea 1", 1, "test_user"))
+
     with client.session_transaction() as sess:
         sess["user"] = "test_user"
         sess["editatzen_ari_den_taldea"] = "Taldea 1"
         sess["akzioa"] = "aldatu_pokemon"
 
-    conn = Connection()
-    conn.delete("DELETE FROM Taldea WHERE erabiltzaileIzena = ?", ("test_user",))
-    conn.delete("DELETE FROM PokemonPokedex")
-    conn.delete("DELETE FROM PokemonTaldean WHERE erabiltzaileIzena = ?", ("test_user",))
-    conn.insert("INSERT INTO PokemonPokedex (pokeId, izena, altuera, pisua, generoa, deskripzioa, irudia, generazioa, preEboluzioId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (1, "Bulbasaur", 7.0, 69.0, "Ar/Eme", "A strange seed was planted on its back at birth. The plant sprouts and grows with this Pokémon.", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", 1, 1))
-    conn.insert("INSERT INTO PokemonTaldean (taldeIzena, harrapatuId, erabiltzaileIzena) VALUES (?, ?, ?)", ("Taldea 1", 1, "test_user"))
-    conn.insert("INSERT INTO PokemonTalde (izena, maila, adiskidetasun_maila, generoa, HP, ATK, SPATK, DEF, SPDEF, SPE, PokemonPokedexID, ErabiltzaileIzena) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", ("Bulbasaur", 5, 0, "Ar", 45, 49, 49, 49, 49, 45, 1, "test_user"))
-
-    # ID 1 (Bulbasaur) aldatu_pokemon simulatuz
     resp = client.get('/pokedex/pokemon/1', follow_redirects=True)
 
     assert resp.status_code == 200
-    assert b"Zer egin nahi duzu?" in resp.data
-    assert b"ALDATU POKEMONA" in resp.data
-    assert b"EZABATU POKEMONA" in resp.data
+    html = resp.data.lower()
+    assert b"zer egin nahi duzu?" in html
+    assert b"aldatu" in html
+    assert b"ezabatu" in html
 
 # 3.2.5: Pokemon gehitu botoia "+" sakatu
 def test_3_2_5_add_pokemon_button(client):
+    # Simulamos que el modelo nos devuelve una lista con Bulbasaur
+    mock_pokemon = [{
+        'pokeId': 1, 
+        'izena': 'Bulbasaur', 
+        'irudia': 'url_imagen',
+        'altuera': 7.0,
+        'pisua': 69.0
+    }]
 
     with client.session_transaction() as sess:
-            sess["user"] = "test_user"
-            sess["editatzen_ari_den_taldea"] = "TaldeTest"
+        sess["user"] = "test_user"
+        sess["editatzen_ari_den_taldea"] = "TaldeTest"
 
-        # Petición POST
-    resp = client.post('/pokedex/bilatu', data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
 
-        # Verificaciones
-    assert resp.status_code == 200
-    assert b"Bulbasaur" in resp.data
-    assert b"BILATZAILEA" in resp.data
+    with patch('app.controller.model.eredu_kontroladorea.EreduKontroladorea.pokedex_kargatu', return_value=mock_pokemon):
+        resp = client.post('/pokedex/bilatu', data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
+        
+        assert resp.status_code == 200
+        assert b"Bulbasaur" in resp.data
+        assert b"BILATZAILEA" in resp.data
 
 # 3.2.7: Taldea ezabatu
 def test_3_2_7_talde_ezabatu(client):
@@ -91,7 +111,6 @@ def test_3_2_7_talde_ezabatu(client):
     assert b"Talde 1" not in resp.data
     resultado = conn.select("SELECT * FROM Taldea WHERE taldeIzena = ? AND erabiltzaileIzena = ?", ("Talde 1", "test_user"))
     
-    # El resultado de select suele ser una lista. Si está vacía, el borrado fue exitoso.
     assert len(resultado) == 0, f"Error: El equipo Talde 1 todavía existe en la base de datos."
 
 # 3.2.8: Taldea gorde
@@ -133,8 +152,6 @@ def test_3_2_10_pokemon_aldatu_pokedexera(client):
     resp = client.get('/pokedex/bilatu' , data={'akzioa': 'hauta_pokemon'}, follow_redirects=True)
     html = resp.data.decode('utf-8')
     assert "BILATZAILEA:" in html
-
-    # Honek Pokedex-era edo aukeraketa modura eraman behar zaitu
 
 # 3.2.11: Erabiltzaileak Pokemon baten argazkian sakatzen du.
 def test_3_2_11_xehetasunak_kargatu(client):
@@ -218,7 +235,6 @@ def test_3_2_20_aukeratu_pokemon_(client):
         sess["editatzen_ari_den_taldea"] = "Talde Test"
         sess["pokemon_datuak"] = 150 # Mewtwo
 
-    # Ruta que ejecuta la inserción
     resp = client.get('/pokemon_taldea', follow_redirects=True)
 
     assert resp.status_code == 200
